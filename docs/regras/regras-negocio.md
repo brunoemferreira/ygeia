@@ -111,3 +111,36 @@ Para proteger os dados de saúde e cumprir o sigilo ético-profissional, o siste
      - `created_at`: Data e hora exatas com timezone UTC.
 3. **Direito de Acesso e Exportação**:
    - O paciente tem o direito de receber cópia integral de seu prontuário e de suas prescrições em formato legível e interoperável (PDF / JSON estruturado).
+
+---
+
+## 5. Regra de Governança de Menus & Licenciamento Modular SaaS
+
+A navegação e a disponibilidade de recursos no painel administrativo do profissional obedecem rigorosamente à regra de **licenciamento modular por assinatura**:
+
+### 5.1 Regra dos Módulos Universais (Sempre Habilitados)
+1. **Módulo `Cadastros`**:
+   - **Status**: **SEMPRE HABILITADO** para qualquer tenant ou plano.
+   - **Escopo**: É a base unificada de dados do SaaS. Contém Pacientes/Alunos (CRM), Agenda & Agendamentos, Avaliação Física / Antropometria e Cofre de Exames & Laudos.
+   - **Regra**: Todo paciente é cadastrado aqui uma única vez, alimentando tanto a Nutrição quanto o Treinamento.
+2. **Módulo `Configurações`**:
+   - **Status**: **SEMPRE HABILITADO** para qualquer tenant ou plano.
+   - **Escopo**: Governança da clínica. Contém White Label Studio, Dados Cadastrais/Fiscais da Empresa, Registros Profissionais (CRN e/ou CREF), Equipe & RBAC e Gestão de Licenças/Planos.
+
+### 5.2 Regra dos Módulos Especializados (Condicionados à Licença)
+1. **Módulo `Nutrição`**:
+   - **Status**: Habilitado **somente** se o plano do tenant contiver a licença `MODULE_NUTRITION` (ou pacote integrado `FULL_PERFORMANCE`).
+   - **Escopo Exclusivo**: Prescritor Nutricional, Tabela TACO / Banco de Alimentos, Metas Calóricas & VET, Biblioteca de Receitas e Suplementação/Fitoterapia.
+2. **Módulo `Treinamento`**:
+   - **Status**: Habilitado **somente** se o plano do tenant contiver a licença `MODULE_TRAINING` (ou pacote integrado `FULL_PERFORMANCE`).
+   - **Escopo Exclusivo**: Prescritor de Treinos (musculação/funcional), Banco de Exercícios em Vídeo, Periodização de Carga / 1RM e Cardio/Zonas de FC.
+
+### 5.3 Matriz de Visibilidade de Licenças
+| Módulos Ativos na Licença | Cadastros | Configurações | Nutrição | Treinamento |
+| :--- | :---: | :---: | :---: | :---: |
+| **Apenas Nutrição** (`MODULE_NUTRITION`) | ✅ Ativo | ✅ Ativo | ✅ Totalmente Desbloqueado | 🔒 Oculto ou Badge "Upgrade" |
+| **Apenas Treino** (`MODULE_TRAINING`) | ✅ Ativo | ✅ Ativo | 🔒 Oculto ou Badge "Upgrade" | ✅ Totalmente Desbloqueado |
+| **Combo Completo** (`FULL_PERFORMANCE`) | ✅ Ativo | ✅ Ativo | ✅ Totalmente Desbloqueado | ✅ Totalmente Desbloqueado |
+
+> [!IMPORTANT]
+> **Vigilância Estrita de Escopo**: Sob nenhuma hipótese funcionalidades de prescrição de treino devem ser inseridas no menu de Nutrição, nem tabelas de alimentos no menu de Treinamento. O que for transversal a ambos (como peso, altura, percentual de gordura e bioimpedância) reside obrigatoriamente no **Módulo Cadastros**.

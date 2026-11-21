@@ -87,6 +87,13 @@ graph TD
 
 ### 4.1. Hierarquia de Navegação da Sidebar Modular (Nutricionista / Treinador)
 
+> [!IMPORTANT]
+> **Regra de Licenciamento & Governança Estrita de Menus**:
+> - **Módulos `Cadastros` e `Configurações`**: **SEMPRE HABILITADOS** para todos os clientes, pois formam a fundação do sistema.
+> - **Módulo `Nutrição`**: Liberado apenas se a licença incluir nutrição.
+> - **Módulo `Treinamento`**: Liberado apenas se a licença incluir treinamento.
+> - **Escopo Imutável**: Nunca misturar atribuições entre os menus. Dados biométricos compartilhados (peso, dobras, bioimpedância, exames) pertencem exclusivamente a **Cadastros**. Prescrição alimentar pertence a **Nutrição**. Fichas de treino e periodização pertencem a **Treinamento**.
+
 ```
 [TOP: Identidade da Clínica & Seletor de Tenant]
 ├── [🏢 Logo White Label da Clínica / Studio]
