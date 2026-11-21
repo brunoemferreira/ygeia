@@ -11,7 +11,6 @@ import { UserRoleMode } from './Sidebar';
 
 interface HeaderProps {
   mode: UserRoleMode;
-  onChangeMode: (mode: UserRoleMode) => void;
   activeModules: {
     nutrition: boolean;
     training: boolean;
@@ -25,7 +24,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   mode,
-  onChangeMode,
   activeModules,
   onToggleModule,
   onLogout,
@@ -102,52 +100,22 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Center: Interactive Mode Switcher (Nutricionista vs Paciente) */}
+      {/* Center: Context Badge (Indica o ambiente conforme login do usuário) */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          background: '#f1f5f9',
+          gap: '0.375rem',
+          background: mode === 'professional' ? '#f8fafc' : '#ecfdf5',
           borderRadius: '9999px',
-          padding: '0.25rem',
-          border: '1px solid #e2e8f0',
+          padding: '0.3rem 0.875rem',
+          border: `1px solid ${mode === 'professional' ? '#e2e8f0' : '#a7f3d0'}`,
+          fontSize: '0.75rem',
+          fontWeight: 700,
+          color: mode === 'professional' ? '#334155' : '#065f46',
         }}
       >
-        <button
-          type="button"
-          onClick={() => onChangeMode('professional')}
-          style={{
-            padding: '0.375rem 0.875rem',
-            borderRadius: '9999px',
-            border: 'none',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            background: mode === 'professional' ? '#0f172a' : 'transparent',
-            color: mode === 'professional' ? '#ffffff' : '#64748b',
-          }}
-        >
-          🩺 Nutricionista / Admin
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onChangeMode('patient')}
-          style={{
-            padding: '0.375rem 0.875rem',
-            borderRadius: '9999px',
-            border: 'none',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            background: mode === 'patient' ? '#059669' : 'transparent',
-            color: mode === 'patient' ? '#ffffff' : '#64748b',
-          }}
-        >
-          🍎 Área do Paciente
-        </button>
+        <span>{mode === 'professional' ? '🩺 Painel do Nutricionista' : '🍎 Portal do Paciente'}</span>
       </div>
 
       {/* Right Actions & Module Licenses Simulator */}

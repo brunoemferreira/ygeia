@@ -127,10 +127,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflowY: 'auto' }}>
         <Header
           mode={mode}
-          onChangeMode={(newMode) => {
-            setMode(newMode);
-            setActiveItem(newMode === 'professional' ? 'config_perfil' : 'patient_diet');
-          }}
           activeModules={activeModules}
           onToggleModule={handleToggleModule}
           onLogout={onLogout}
