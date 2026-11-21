@@ -9,7 +9,7 @@ import { MobileAppMockup } from './components/MobileAppMockup';
 import { ComparisonTable } from './components/ComparisonTable';
 import { FAQSection } from './components/FAQSection';
 import { Footer } from './components/Footer';
-import { AuthModal } from './components/auth/AuthModal';
+import { LoginPage, LoginRoleMode } from './components/auth/LoginPage';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AppLayout } from './components/layout/AppLayout';
 import { PatientPortal } from './components/patient/PatientPortal';
@@ -17,8 +17,8 @@ import { UserRoleMode } from './components/layout/Sidebar';
 
 const MainAppContent: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authInitialRole, setAuthInitialRole] = useState<'professional' | 'patient'>('professional');
+  const [currentView, setCurrentView] = useState<'landing' | 'login'>('landing');
+  const [loginRole, setLoginRole] = useState<LoginRoleMode>('professional');
   const [appMode, setAppMode] = useState<UserRoleMode>('professional');
 
   // Ao carregar usuário autenticado, direciona para o modo correto conforme o perfil
@@ -30,37 +30,24 @@ const MainAppContent: React.FC = () => {
     }
   }, [isAuthenticated, user?.role]);
 
-  const handleOpenAdmin = () => {
-    if (!isAuthenticated) {
-      setAuthInitialRole('professional');
-      setAuthModalOpen(true);
-      return;
-    }
-    setAppMode('professional');
+  const handleNavigateToLogin = (role?: LoginRoleMode) => {
+    setLoginRole(role || 'professional');
+    setCurrentView('login');
   };
 
-  const handleOpenPatient = () => {
-    if (!isAuthenticated) {
-      setAuthInitialRole('patient');
-      setAuthModalOpen(true);
-      return;
-    }
-    setAppMode('patient');
-  };
-
-  const handleOpenAuth = (role?: 'professional' | 'patient') => {
-    setAuthInitialRole(role || 'professional');
-    setAuthModalOpen(true);
+  const handleBackToLanding = () => {
+    setCurrentView('landing');
   };
 
   const handleAuthSuccess = (targetRole?: 'professional' | 'patient') => {
-    setAuthModalOpen(false);
     const effectiveRole = targetRole || (user?.role === 'PATIENT' ? 'patient' : 'professional');
     setAppMode(effectiveRole);
+    setCurrentView('landing');
   };
 
   const handleLogout = () => {
     logout();
+    setCurrentView('landing');
   };
 
   // Identidade do Nutricionista / Consultório para o Workspace
@@ -96,12 +83,16 @@ const MainAppContent: React.FC = () => {
             );
           }}
         </AppLayout>
+      ) : currentView === 'login' ? (
+        <LoginPage
+          initialRole={loginRole}
+          onBackToLanding={handleBackToLanding}
+          onSuccess={handleAuthSuccess}
+        />
       ) : (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Navbar
-            onOpenAuth={handleOpenAuth}
-            onOpenAdmin={handleOpenAdmin}
-            onOpenPatient={handleOpenPatient}
+            onNavigateToLogin={handleNavigateToLogin}
             onLogout={handleLogout}
           />
           <main style={{ flexGrow: 1 }}>
@@ -116,13 +107,6 @@ const MainAppContent: React.FC = () => {
           <Footer />
         </div>
       )}
-
-      <AuthModal
-        isOpen={authModalOpen}
-        initialRole={authInitialRole}
-        onClose={() => setAuthModalOpen(false)}
-        onSuccess={handleAuthSuccess}
-      />
     </>
   );
 };
