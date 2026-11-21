@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 🎨 Nova Tela de Login Split-Screen com Branding White Label Dinâmico
+- **Frontend Web (`apps/web`)**:
+  - **Redesenho Completo de `LoginPage.tsx` (Layout 50/50 em 2 Colunas)**:
+    - **Coluna Esquerda (Hero Institucional)**: Fundo em gradiente imersivo que consome dinamicamente a paleta de cores (primária, secundária e destaque) configurada no painel de Configurações, badge translúcida *"🛡️ Acesso Seguro"*, headline de controle metabólico de precisão, card de destaque translúcido *"Curva histórica do Peso Inicial até o Peso Atual"* e identificação de software seguro.
+    - **Coluna Direita (Formulário Limpo)**: Fundo branco, link de retorno à landing page, campos de entrada com ícones (`Mail` e `Key`), alternador de visibilidade de senha (olho), link *"Esqueci minha senha"* e botão *"Continuar para o Portal"* estilizados com a cor primária configurada.
+  - **Módulo de Sincronização de Branding (`branding.ts`)**:
+    - Centralização e sincronização reativa entre `SettingsModule`, `AppLayout`, `Sidebar` e `LoginPage` via storage e eventos globais (`ygeia_branding_updated`).
+    - Substituição da cor azul estática por renderização adaptativa que respeita as preferências White Label selecionadas pelo nutricionista.
+
 ### 🔔 Sistema de Notificações Toast & Tratamento Padronizado de Erros da API
 - **Frontend Web (`apps/web`)**:
   - **Motor de Tratamento e Normalização de Erros (`api-error-handler.ts`)**:

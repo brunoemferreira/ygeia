@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
-  Lock,
   Mail,
-  ShieldCheck,
-  AlertCircle,
+  Key,
   Eye,
   EyeOff,
+  ShieldCheck,
   CheckCircle2,
-  Stethoscope,
+  Lock,
   Heart,
+  LogIn,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import {
+  getStoredBranding,
+  buildLoginHeroGradient,
+  ClinicBranding,
+} from '../../utils/branding';
 
 export type LoginRoleMode = 'professional' | 'patient';
 
@@ -23,17 +28,22 @@ interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
-  initialRole = 'professional',
   onBackToLanding,
   onSuccess,
 }) => {
   const { login } = useAuth();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<LoginRoleMode>(initialRole);
+
+  // Branding sincronizado dinamicamente com as Configurações
+  const [branding, setBranding] = useState<ClinicBranding>(() => getStoredBranding());
 
   useEffect(() => {
-    setActiveTab(initialRole);
-  }, [initialRole]);
+    const handleBrandingChange = () => {
+      setBranding(getStoredBranding());
+    };
+    window.addEventListener('ygeia_branding_updated', handleBrandingChange);
+    return () => window.removeEventListener('ygeia_branding_updated', handleBrandingChange);
+  }, []);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -41,485 +51,449 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [loginSlug, setLoginSlug] = useState('');
   const [showAdvancedSlug, setShowAdvancedSlug] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
-
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
     try {
       await login(email.trim(), password, loginSlug.trim() || undefined);
-      toast.success(
-        activeTab === 'professional'
-          ? 'Autenticado com sucesso! Acessando Workspace...'
-          : 'Autenticado com sucesso! Acessando Portal do Paciente...',
-      );
-      onSuccess(activeTab);
+      toast.success('Autenticado com sucesso! Acessando o seu portal...');
+      onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro na autenticação. Verifique suas credenciais.');
       toast.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  const heroGradient = buildLoginHeroGradient(branding.primaryColor, branding.secondaryColor);
+
   return (
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: '#090d16',
-        backgroundImage: 'radial-gradient(ellipse at top, #132338 0%, #090d16 70%)',
-        color: '#f8fafc',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        backgroundColor: '#ffffff',
+        fontFamily: `'${branding.fontFamily}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`,
       }}
     >
-      {/* Top Bar */}
-      <header
+      {/* ========================================================
+          COLUNA ESQUERDA: HERO INSTITUCIONAL DINÂMICO
+          (Utiliza a cor configurada em Configurações no lugar do azul)
+         ======================================================== */}
+      <aside
         style={{
-          padding: '1.25rem 2rem',
+          background: heroGradient,
+          color: '#ffffff',
+          padding: '3.5rem 3rem',
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          backgroundColor: 'rgba(9, 13, 22, 0.75)',
-          backdropFilter: 'blur(12px)',
+          position: 'relative',
+          overflow: 'hidden',
+          minHeight: '480px',
         }}
       >
-        {/* Back to landing button */}
-        <button
-          onClick={onBackToLanding}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            background: 'transparent',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '9999px',
-            padding: '0.45rem 1rem',
-            color: '#cbd5e1',
-            fontSize: '0.8125rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-          }}
-          onMouseOver={(e) => {
-            (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-            (e.currentTarget as HTMLElement).style.color = '#ffffff';
-          }}
-          onMouseOut={(e) => {
-            (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-            (e.currentTarget as HTMLElement).style.color = '#cbd5e1';
-          }}
-        >
-          <ArrowLeft size={15} />
-          <span>Voltar ao site</span>
-        </button>
-
-        {/* Center Logo */}
+        {/* Efeito sutil de brilho no fundo */}
         <div
-          onClick={onBackToLanding}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.625rem',
-            cursor: 'pointer',
-            userSelect: 'none',
+            position: 'absolute',
+            top: '-20%',
+            right: '-20%',
+            width: '420px',
+            height: '420px',
+            background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)',
+            pointerEvents: 'none',
           }}
-        >
+        />
+
+        {/* Top Header: Logo + Nome da Clínica */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', position: 'relative', zIndex: 2 }}>
           <div
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-              color: 'white',
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.16)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '1.125rem',
-              boxShadow: '0 0 15px rgba(5, 150, 105, 0.4)',
+              backdropFilter: 'blur(8px)',
+              flexShrink: 0,
             }}
           >
-            Υ
+            {branding.logoUrl ? (
+              <img
+                src={branding.logoUrl}
+                alt={branding.clinicName}
+                style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+              />
+            ) : (
+              <Heart size={20} color="#ffffff" fill="rgba(255,255,255,0.2)" />
+            )}
           </div>
-          <span
+          <div>
+            <div style={{ fontSize: '1.1875rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              {branding.clinicName || 'Better Health'}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.75)', fontWeight: 500 }}>
+              {branding.slogan || 'Precision Nutrition & Clinical Care'}
+            </div>
+          </div>
+        </div>
+
+        {/* Middle Content Block */}
+        <div style={{ maxWidth: '520px', position: 'relative', zIndex: 2, margin: '2.5rem 0' }}>
+          {/* Badge: Acesso Seguro */}
+          <div
             style={{
-              fontSize: '1.125rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '9999px',
+              padding: '0.3rem 0.85rem',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              color: '#ffffff',
+              marginBottom: '1.5rem',
+              backdropFilter: 'blur(6px)',
+            }}
+          >
+            <ShieldCheck size={14} color="#ffffff" />
+            <span>Acesso Seguro</span>
+          </div>
+
+          {/* Headline Principal */}
+          <h1
+            style={{
+              fontSize: '2.15rem',
               fontWeight: 800,
-              letterSpacing: '0.08em',
+              lineHeight: 1.25,
+              letterSpacing: '-0.03em',
+              margin: '0 0 1.25rem 0',
               color: '#ffffff',
             }}
           >
-            YGEÍA
-          </span>
+            Controle metabólico diário e governança clínica em alta precisão.
+          </h1>
+
+          {/* Descrição orientativa de perfis */}
+          <p
+            style={{
+              fontSize: '0.9375rem',
+              lineHeight: 1.6,
+              color: 'rgba(255, 255, 255, 0.85)',
+              margin: '0 0 2rem 0',
+            }}
+          >
+            Ao autenticar como <strong>Usuário</strong>, você é direcionado ao seu Dashboard de
+            Calorias, Macronutrientes, Peso e Água. Ao autenticar como <strong>Administrador</strong>,
+            você acessa o console de gestão de contas.
+          </p>
+
+          {/* Card Transtranslúcido: Curva histórica */}
+          <div
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
+              borderRadius: '0.875rem',
+              padding: '0.875rem 1.25rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <CheckCircle2 size={18} color="#34d399" />
+            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#ffffff' }}>
+              Curva histórica do Peso Inicial até o Peso Atual
+            </span>
+          </div>
         </div>
 
-        {/* Security badge pill */}
+        {/* Bottom Footer: Software Seguro */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.375rem',
+            gap: '0.45rem',
             fontSize: '0.75rem',
-            fontWeight: 600,
-            color: '#34d399',
-            backgroundColor: 'rgba(5, 150, 105, 0.12)',
-            border: '1px solid rgba(5, 150, 105, 0.25)',
-            padding: '0.35rem 0.75rem',
-            borderRadius: '9999px',
+            color: 'rgba(255, 255, 255, 0.65)',
+            position: 'relative',
+            zIndex: 2,
           }}
         >
-          <ShieldCheck size={14} />
-          <span style={{ fontSize: '0.75rem' }}>AES-256 GCM • RLS</span>
+          <Lock size={13} color="rgba(255, 255, 255, 0.75)" />
+          <span>Software Seguro</span>
         </div>
-      </header>
+      </aside>
 
-      {/* Main Login Workspace */}
+      {/* ========================================================
+          COLUNA DIREITA: FORMULÁRIO DE LOGIN
+          (Fundo branco limpo, foco e botões usando branding.primaryColor)
+         ======================================================== */}
       <main
         style={{
-          flex: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '2.5rem 1rem',
+          padding: '3rem 2rem',
+          backgroundColor: '#ffffff',
         }}
       >
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '440px',
-            backgroundColor: '#ffffff',
-            borderRadius: '1.25rem',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 40px rgba(5, 150, 105, 0.08)',
-            overflow: 'hidden',
-            color: '#0f172a',
-          }}
-        >
-          {/* Segmented Top Tabs */}
-          <div
+        <div style={{ width: '100%', maxWidth: '420px' }}>
+          {/* Voltar para a Página Inicial */}
+          <button
+            type="button"
+            onClick={onBackToLanding}
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              background: '#f8fafc',
-              borderBottom: '1px solid #e2e8f0',
-              padding: '0.375rem',
-              gap: '0.25rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              color: '#64748b',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              marginBottom: '2rem',
+              transition: 'color 0.15s ease',
             }}
+            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = '#0f172a')}
+            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#64748b')}
           >
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('professional');
-                setError(null);
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                padding: '0.625rem 0.5rem',
-                borderRadius: '0.5rem',
-                fontSize: '0.8125rem',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: activeTab === 'professional' ? '#ffffff' : 'transparent',
-                color: activeTab === 'professional' ? '#065f46' : '#64748b',
-                boxShadow:
-                  activeTab === 'professional'
-                    ? '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)'
-                    : 'none',
-              }}
-            >
-              <Stethoscope size={15} color={activeTab === 'professional' ? '#059669' : '#94a3b8'} />
-              <span>Área do Nutricionista</span>
-            </button>
+            <ArrowLeft size={16} />
+            <span>Voltar para a Página Inicial</span>
+          </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('patient');
-                setError(null);
-              }}
+          {/* Título & Instrução */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h2
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                padding: '0.625rem 0.5rem',
-                borderRadius: '0.5rem',
-                fontSize: '0.8125rem',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: activeTab === 'patient' ? '#ffffff' : 'transparent',
-                color: activeTab === 'patient' ? '#065f46' : '#64748b',
-                boxShadow:
-                  activeTab === 'patient'
-                    ? '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)'
-                    : 'none',
+                fontSize: '1.75rem',
+                fontWeight: 800,
+                color: '#0f172a',
+                letterSpacing: '-0.03em',
+                margin: '0 0 0.5rem 0',
               }}
             >
-              <Heart size={15} color={activeTab === 'patient' ? '#059669' : '#94a3b8'} />
-              <span>Portal do Paciente</span>
-            </button>
+              Entrar na sua conta
+            </h2>
+            <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
+              Insira suas credenciais para acessar seu ambiente exclusivo.
+            </p>
           </div>
 
-          {/* Form Body */}
-          <div style={{ padding: '2rem 1.75rem' }}>
-            {/* Header info */}
-            <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-              <h1
+          {/* Formulário */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* E-mail de acesso */}
+            <div>
+              <label
                 style={{
-                  fontSize: '1.375rem',
-                  fontWeight: 800,
-                  margin: '0 0 0.35rem 0',
-                  color: '#0f172a',
-                }}
-              >
-                {activeTab === 'professional' ? 'Área do Nutricionista' : 'Portal do Paciente'}
-              </h1>
-              <p style={{ margin: 0, fontSize: '0.8125rem', color: '#64748b' }}>
-                {activeTab === 'professional'
-                  ? 'Acesse seu consultório digital, prescrições e prontuários.'
-                  : 'Consulte seu plano alimentar, evolução e exames criptografados.'}
-              </p>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div
-                style={{
-                  backgroundColor: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  color: '#991b1b',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '0.625rem',
+                  display: 'block',
                   fontSize: '0.8125rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '1.25rem',
+                  fontWeight: 600,
+                  color: '#334155',
+                  marginBottom: '0.375rem',
                 }}
               >
-                <AlertCircle size={16} color="#dc2626" style={{ flexShrink: 0 }} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {/* Main Form */}
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {/* Email */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                  E-mail
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <Mail size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                  <input
-                    type="email"
-                    required
-                    placeholder={
-                      activeTab === 'patient'
-                        ? 'paciente@email.com'
-                        : 'nutricionista@consultorio.com'
-                    }
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.75rem 0.65rem 2.25rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      boxSizing: 'border-box',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.375rem' }}>
-                  <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>
-                    Senha
-                  </label>
-                  <a
-                    href="#esqueceu-senha"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toast.info('Para redefinir sua senha, entre em contato com a administração do consultório.');
-                    }}
-                    style={{ fontSize: '0.75rem', color: '#059669', textDecoration: 'none', fontWeight: 600 }}
-                  >
-                    Esqueceu a senha?
-                  </a>
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <Lock size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 2.5rem 0.65rem 2.25rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      boxSizing: 'border-box',
-                      outline: 'none',
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: 'absolute',
-                      right: '0.75rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      color: '#94a3b8',
-                      cursor: 'pointer',
-                      padding: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Remember Me checkbox */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                <input
-                  type="checkbox"
-                  id="rememberMe"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                E-mail de acesso
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Mail
+                  size={16}
                   style={{
-                    width: '16px',
-                    height: '16px',
-                    borderRadius: '4px',
-                    accentColor: '#059669',
-                    cursor: 'pointer',
+                    position: 'absolute',
+                    left: '0.875rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#94a3b8',
                   }}
                 />
-                <label htmlFor="rememberMe" style={{ fontSize: '0.8125rem', color: '#64748b', cursor: 'pointer' }}>
-                  Lembrar deste dispositivo por 30 dias
-                </label>
-              </div>
-
-              {/* Advanced optional slug */}
-              <div style={{ marginTop: '0.25rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowAdvancedSlug(!showAdvancedSlug)}
+                <input
+                  type="email"
+                  required
+                  placeholder="admin@betterhealth.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#64748b',
-                    fontSize: '0.75rem',
-                    cursor: 'pointer',
-                    padding: 0,
-                    textDecoration: 'underline',
+                    width: '100%',
+                    padding: '0.75rem 0.875rem 0.75rem 2.6rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '0.875rem',
+                    color: '#0f172a',
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    transition: 'border-color 0.15s ease',
                   }}
-                >
-                  {showAdvancedSlug ? '▾ Ocultar identificador da clínica' : '▸ Informar identificador da clínica (opcional)'}
-                </button>
-                {showAdvancedSlug && (
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <input
-                      type="text"
-                      placeholder="Ex: seu-consultorio ou deixe em branco"
-                      value={loginSlug}
-                      onChange={(e) => setLoginSlug(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.8125rem',
-                        boxSizing: 'border-box',
-                        outline: 'none',
-                      }}
-                    />
-                    <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.25rem' }}>
-                      Necessário apenas se você possuir conta em mais de uma clínica com o mesmo e-mail.
-                    </div>
-                  </div>
-                )}
+                  onFocus={(e) => (e.target.style.borderColor = branding.primaryColor)}
+                  onBlur={(e) => (e.target.style.borderColor = '#e2e8f0')}
+                />
               </div>
+            </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
+            {/* Senha */}
+            <div>
+              <div
                 style={{
-                  marginTop: '0.75rem',
-                  width: '100%',
-                  padding: '0.8125rem',
-                  borderRadius: '0.5rem',
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                  color: 'white',
-                  fontWeight: 700,
-                  fontSize: '0.9375rem',
-                  border: 'none',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 4px 6px -1px rgba(5, 150, 105, 0.25)',
-                  transition: 'all 0.15s ease',
                   display: 'flex',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
+                  marginBottom: '0.375rem',
                 }}
               >
-                {loading ? (
-                  <span>Processando...</span>
-                ) : (
-                  <span>
-                    {activeTab === 'professional' ? 'Entrar no Consultório' : 'Acessar Portal do Paciente'}
-                  </span>
-                )}
-              </button>
-            </form>
-          </div>
+                <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>
+                  Senha
+                </label>
+                <a
+                  href="#esqueceu-senha"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toast.info('Para redefinir sua senha, solicite ao administrador do consultório.');
+                  }}
+                  style={{
+                    fontSize: '0.75rem',
+                    color: branding.primaryColor,
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                  }}
+                >
+                  Esqueci minha senha
+                </a>
+              </div>
+              <div style={{ position: 'relative' }}>
+                <Key
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    left: '0.875rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#94a3b8',
+                  }}
+                />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 2.6rem 0.75rem 2.6rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '0.875rem',
+                    color: '#0f172a',
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    transition: 'border-color 0.15s ease',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = branding.primaryColor)}
+                  onBlur={(e) => (e.target.style.borderColor = '#e2e8f0')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+                  style={{
+                    position: 'absolute',
+                    right: '0.875rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
-          {/* Footer security trust banner */}
-          <div
-            style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#f8fafc',
-              borderTop: '1px solid #f1f5f9',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              fontSize: '0.6875rem',
-              color: '#64748b',
-              fontWeight: 500,
-            }}
-          >
-            <CheckCircle2 size={13} color="#059669" />
-            <span>Em conformidade com a LGPD e resoluções do CFN / CRN</span>
-          </div>
+            {/* Identificador opcional da clínica */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowAdvancedSlug(!showAdvancedSlug)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  padding: 0,
+                  textDecoration: 'underline',
+                }}
+              >
+                {showAdvancedSlug
+                  ? '▾ Ocultar identificador da clínica'
+                  : '▸ Informar identificador da clínica (opcional)'}
+              </button>
+              {showAdvancedSlug && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Ex: seu-consultorio ou deixe em branco"
+                    value={loginSlug}
+                    onChange={(e) => setLoginSlug(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.55rem 0.75rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid #e2e8f0',
+                      fontSize: '0.8125rem',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
+                  />
+                  <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                    Necessário apenas se possuir conta em múltiplos consultórios com o mesmo e-mail.
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Botão de Acesso Dinâmico (Usa branding.primaryColor) */}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '0.875rem 1.5rem',
+                borderRadius: '0.5rem',
+                backgroundColor: branding.primaryColor,
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.9375rem',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                transition: 'opacity 0.15s ease, transform 0.1s ease',
+                boxShadow: `0 4px 14px ${branding.primaryColor}40`,
+                opacity: loading ? 0.75 : 1,
+              }}
+            >
+              <LogIn size={16} />
+              <span>{loading ? 'Acessando...' : 'Continuar para o Portal'}</span>
+            </button>
+          </form>
         </div>
       </main>
     </div>

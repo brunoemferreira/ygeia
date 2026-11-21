@@ -6,6 +6,10 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-21
 
 ### Adicionado
+- **Nova Tela de Login Split-Screen (`LoginPage.tsx`)**:
+  - Layout dividido em 2 colunas com Hero institucional no painel esquerdo e formulário limpo no painel direito.
+  - Consumo dinâmico da paleta de cores primária e secundária configuradas nas Configurações (White Label).
+  - Componente de sincronização reativa de branding (`branding.ts`).
 - **Sistema de Notificações Toast Reativo (`ToastProvider`, `useToast`, `ToastContainer`, `ToastItem`)**:
   - Hook unificado para disparo de alertas (`toast.success`, `toast.error`, `toast.warning`, `toast.info`).
   - Barra de progresso visual com auto-dismiss (4s/6.5s), suporte a subdetalhes expansíveis de erros e pausa no hover.

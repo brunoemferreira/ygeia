@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { getStoredBranding, saveStoredBranding } from '../../utils/branding';
 
 interface SettingsModuleProps {
   initialSubTab?: string;
@@ -52,15 +53,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
     fotoUrl: '/bruno-profile.jpg',
   });
 
-  // 2. White Label (Personalização) State
-  const [branding, setBranding] = useState({
-    clinicName: user?.clinicName || 'Consultório Bruno Ferreira',
-    primaryColor: '#059669',
-    secondaryColor: '#064e3b',
-    accentColor: '#8b5cf6',
-    logoUrl: '',
-    fontFamily: 'Plus Jakarta Sans',
-  });
+  // 2. White Label (Personalização) State sincronizado com o gerenciador de branding
+  const [branding, setBranding] = useState(() => getStoredBranding());
 
   // 3. Team / Secretárias
   const [teamMembers, setTeamMembers] = useState([
@@ -81,6 +75,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
 
   const handleSaveBranding = (e: React.FormEvent) => {
     e.preventDefault();
+    saveStoredBranding(branding);
     triggerSuccess('Identidade visual e marca atualizadas com sucesso!');
   };
 

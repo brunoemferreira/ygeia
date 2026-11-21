@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { getStoredBranding, ClinicBranding } from './utils/branding';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { WhiteLabelStudioInteractive } from './components/WhiteLabelStudioInteractive';
@@ -52,10 +53,20 @@ const MainAppContent: React.FC = () => {
   };
 
   // Identidade do Nutricionista / Consultório para o Workspace
+  const [storedBranding, setStoredBranding] = useState<ClinicBranding>(() => getStoredBranding());
+
+  useEffect(() => {
+    const handleBrandingUpdate = (e: any) => {
+      setStoredBranding(e.detail || getStoredBranding());
+    };
+    window.addEventListener('ygeia_branding_updated', handleBrandingUpdate);
+    return () => window.removeEventListener('ygeia_branding_updated', handleBrandingUpdate);
+  }, []);
+
   const clinicBranding = {
-    clinicName: user?.clinicName || 'Consultório de Nutrição',
-    primaryColor: '#059669',
-    secondaryColor: '#064e3b',
+    clinicName: user?.clinicName || storedBranding.clinicName,
+    primaryColor: storedBranding.primaryColor,
+    secondaryColor: storedBranding.secondaryColor,
   };
 
   return (
