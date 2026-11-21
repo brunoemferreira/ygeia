@@ -320,9 +320,10 @@ export const Hero: React.FC = () => {
                 border: '1px solid #fecaca',
                 borderRadius: '14px',
                 padding: '1.25rem',
-                background: '#fffbfb'
+                background: '#fffbfb',
+                overflow: 'hidden'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Lock size={18} color="#dc2626" />
                     <span style={{ fontWeight: 800, color: '#991b1b', fontSize: '0.95rem' }}>
@@ -343,14 +344,24 @@ export const Hero: React.FC = () => {
                 </div>
 
                 <div style={{ background: 'white', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fed7d7', marginBottom: '0.75rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-                      Hemograma_Completo_Perfil_Lipidico.pdf
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <span
+                      title="Hemograma_Completo_Perfil_Lipidico.pdf"
+                      style={{
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      Hemograma_Completo.pdf
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>2.4 MB</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', flexShrink: 0 }}>2.4 MB</span>
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <ShieldCheck size={14} /> URL assinada temporária (expira em 14:32m)
+                    <ShieldCheck size={14} /> URL assinada (expira em 14:32m)
                   </div>
                 </div>
 
@@ -360,9 +371,11 @@ export const Hero: React.FC = () => {
                   background: '#f8fafc',
                   padding: '0.6rem',
                   borderRadius: '6px',
-                  lineHeight: '1.4'
+                  lineHeight: '1.4',
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-word'
                 }}>
-                  🔒 <strong>Auditoria LGPD Ativa:</strong> Acesso registrado com sucesso pelo usuário <code>{activeClinic.doctor}</code> (IP 189.34.12.9) às 17:34:12 UTC.
+                  🔒 <strong>Auditoria LGPD:</strong> Acesso registrado por <code>{activeClinic.doctor}</code> (IP 189.34.12.9) às 17:34 UTC.
                 </div>
               </div>
             </div>
