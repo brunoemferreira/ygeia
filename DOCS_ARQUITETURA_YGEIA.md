@@ -504,18 +504,18 @@ flowchart TD
     Fase6 --> Fase7["Fase 7: Segurança, Escalabilidade, Billing & Go-Live"]
 ```
 
-### Fase 0: Setup do Monorepo, Documentação e Governança
-- [ ] Inicialização do Monorepo com **Turborepo** e **pnpm workspaces**:
+### Fase 0: Setup do Monorepo, Documentação e Governança (✅ Concluída em 21/11/2026)
+- [x] Inicialização do Monorepo com **Turborepo** e **pnpm workspaces**:
   - `apps/api`: Backend NestJS com Fastify.
-  - `apps/web`: Frontend React (Mobile-First, Vite/Next.js + Tailwind CSS + Shadcn/ui).
+  - `apps/web`: Frontend React (Mobile-First, Vite + Tailwind CSS + Shadcn/ui).
   - `apps/mobile`: Aplicativo React Native (Expo CNG + TypeScript).
-  - `packages/domain-core`: Entidades e cálculos puros compartilhados.
+  - `packages/domain-core`: Entidades e cálculos puros compartilhados (6/6 testes unitários passando).
   - `packages/validation-schemas`: Esquemas Zod compartilhados entre Back, Web e Mobile.
-  - `packages/api-client`: Cliente HTTP tipado com suporte a offline e interceptors.
-- [ ] Criação dos arquivos `README.md` e `CHANGELOG.md` na raiz e dentro de cada aplicação (`api`, `web`, `mobile`).
-- [ ] Configuração do script de versionamento sincronizado via `package.json`.
-- [ ] Configuração de Husky + Commitlint + Lint-Staged + Prettier + ESLint.
-- [ ] Setup do Docker Compose local (PostgreSQL 16 com extensão UUID, Redis, LocalStack/MinIO para S3).
+  - `packages/typescript-config`: Configurações base de TypeScript compartilhadas.
+- [x] Criação dos arquivos `README.md` e `CHANGELOG.md` na raiz e dentro de cada aplicação (`api`, `web`, `mobile`).
+- [x] Configuração do script de versionamento sincronizado via `package.json` (`scripts/sync-versions.ts`).
+- [x] Configuração de Husky + Commitlint + Lint-Staged + Prettier (Conventional Commits v1.0.0).
+- [x] Setup do Docker Compose local (PostgreSQL 16 com extensão UUID, Redis 7 com persistência).
 
 ### Fase 1: Multi-Tenancy, Autenticação e Segurança (IAM)
 - [ ] Modelagem das tabelas `Tenants`, `TenantDomains`, `TenantBranding` e `Users`.
