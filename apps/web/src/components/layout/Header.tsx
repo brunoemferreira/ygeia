@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ExternalLink,
   ShieldCheck,
   PanelLeftClose,
   PanelLeftOpen,
@@ -18,7 +17,6 @@ interface HeaderProps {
     training: boolean;
   };
   onToggleModule: (module: 'nutrition' | 'training') => void;
-  onBackToLanding: () => void;
   onLogout: () => void;
   breadcrumbs: string;
   sidebarCollapsed: boolean;
@@ -30,7 +28,6 @@ export const Header: React.FC<HeaderProps> = ({
   onChangeMode,
   activeModules,
   onToggleModule,
-  onBackToLanding,
   onLogout,
   breadcrumbs,
   sidebarCollapsed,
@@ -218,28 +215,6 @@ export const Header: React.FC<HeaderProps> = ({
             <span>{user.fullName || user.email}</span>
           </div>
         )}
-
-        {/* Back to Home CTA */}
-        <button
-          onClick={onBackToLanding}
-          title="Visualizar a Landing Page pública"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.375rem',
-            background: 'transparent',
-            border: '1px solid #cbd5e1',
-            borderRadius: '0.5rem',
-            padding: '0.375rem 0.75rem',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            color: '#475569',
-            cursor: 'pointer',
-          }}
-        >
-          <ExternalLink size={14} />
-          <span>Landing Page</span>
-        </button>
 
         {/* Logout Button */}
         <button

@@ -17,7 +17,7 @@ import { useAuth } from '../../context/AuthContext';
 const API_BASE = 'http://localhost:3333/api/v1';
 
 export interface AdminDashboardProps {
-  onBackToHome: () => void;
+  onBackToHome?: () => void;
   activeItem?: string;
   hideHeader?: boolean;
 }

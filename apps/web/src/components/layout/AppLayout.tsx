@@ -8,7 +8,6 @@ interface AppLayoutProps {
     activeItem: string;
     activeModules: { nutrition: boolean; training: boolean };
   }) => React.ReactNode;
-  onBackToLanding: () => void;
   onLogout: () => void;
   clinicBranding: {
     clinicName: string;
@@ -20,7 +19,6 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({
   children,
-  onBackToLanding,
   onLogout,
   clinicBranding,
   initialMode = 'professional',
@@ -135,7 +133,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           }}
           activeModules={activeModules}
           onToggleModule={handleToggleModule}
-          onBackToLanding={onBackToLanding}
           onLogout={onLogout}
           breadcrumbs={getBreadcrumbs()}
           sidebarCollapsed={sidebarCollapsed}

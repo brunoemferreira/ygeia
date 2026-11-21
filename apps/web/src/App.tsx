@@ -17,19 +17,18 @@ import { UserRoleMode } from './components/layout/Sidebar';
 
 const MainAppContent: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
-  const [currentView, setCurrentView] = useState<'landing' | 'app'>('landing');
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authInitialRole, setAuthInitialRole] = useState<'professional' | 'patient'>('professional');
   const [appMode, setAppMode] = useState<UserRoleMode>('professional');
 
-  // SEGURANÇA E REGRA DE NEGÓCIO: Área Admin e Paciente SÓ PODEM SER ACESSADAS POR LOGIN!
-  // Se tentar acessar 'app' sem autenticação, bloqueia imediatamente e abre o modal de login
+  // Ao carregar usuário autenticado, direciona para o modo correto conforme o perfil
   useEffect(() => {
-    if (currentView === 'app' && !isAuthenticated) {
-      setCurrentView('landing');
-      setAuthModalOpen(true);
+    if (isAuthenticated && user?.role === 'PATIENT') {
+      setAppMode('patient');
+    } else if (isAuthenticated) {
+      setAppMode('professional');
     }
-  }, [currentView, isAuthenticated]);
+  }, [isAuthenticated, user?.role]);
 
   const handleOpenAdmin = () => {
     if (!isAuthenticated) {
@@ -38,7 +37,6 @@ const MainAppContent: React.FC = () => {
       return;
     }
     setAppMode('professional');
-    setCurrentView('app');
   };
 
   const handleOpenPatient = () => {
@@ -48,7 +46,6 @@ const MainAppContent: React.FC = () => {
       return;
     }
     setAppMode('patient');
-    setCurrentView('app');
   };
 
   const handleOpenAuth = (role?: 'professional' | 'patient') => {
@@ -60,27 +57,30 @@ const MainAppContent: React.FC = () => {
     setAuthModalOpen(false);
     const effectiveRole = targetRole || (user?.role === 'PATIENT' ? 'patient' : 'professional');
     setAppMode(effectiveRole);
-    setCurrentView('app');
   };
 
   const handleLogout = () => {
     logout();
-    setCurrentView('landing');
   };
 
-  // Clinic branding state for layout (uses authenticated clinic info if present)
+  // Identidade do Nutricionista / Consultório para o Workspace
   const clinicBranding = {
-    clinicName: user?.clinicName || 'Instituto Vitalis & Ygeía',
+    clinicName: user?.clinicName || 'Consultório de Nutrição',
     primaryColor: '#059669',
     secondaryColor: '#064e3b',
   };
 
   return (
     <>
-      {currentView === 'app' && isAuthenticated ? (
+      {/* 
+        ISOLAMENTO ESTRITO DE AMBIENTES:
+        - Se o usuário estiver autenticado: opera EXCLUSIVAMENTE dentro do App (Nutricionista ou Paciente).
+          Não há atalhos ou botões para voltar à Landing Page institucional. Para sair, clica em "Sair" (Logout).
+        - Se não estiver autenticado: permanece na Landing Page pública até efetuar login.
+      */}
+      {isAuthenticated ? (
         <AppLayout
           initialMode={appMode}
-          onBackToLanding={() => setCurrentView('landing')}
           onLogout={handleLogout}
           clinicBranding={clinicBranding}
         >
@@ -90,7 +90,6 @@ const MainAppContent: React.FC = () => {
             }
             return (
               <AdminDashboard
-                onBackToHome={() => setCurrentView('landing')}
                 activeItem={activeItem}
                 hideHeader={true}
               />
