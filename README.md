@@ -13,11 +13,17 @@
 
 ---
 
-## 📖 Documentação de Arquitetura & Engenharia
+## 📖 Central de Documentação & Regras
 
-O estudo completo de arquitetura, modelagem de domínio (DDD), padrões de projeto, segurança e roadmap está detalhado no documento oficial:
+A documentação completa, estudo de arquitetura, padrões e governança do projeto foram organizados no diretório oficial [`docs/`](./docs/README.md):
 
-📄 **[DOCS_ARQUITETURA_YGEIA.md](./DOCS_ARQUITETURA_YGEIA.md)**
+- 📐 **[Estudo de Arquitetura & Engenharia](./docs/arquitetura/DOCS_ARQUITETURA_YGEIA.md)**: Estudo aprofundado, DDD, Hexagonal, Roadmap e especificações de banco de dados e APIs.
+- 📋 **[Guia Central de Regras](./docs/regras/README.md)**:
+  - 🔄 **[Fluxo de Desenvolvimento](./docs/regras/fluxo-desenvolvimento.md)**: Regra obrigatória `Plano > Autorização > Desenvolvimento > Testes > Versionamento > Publicação (Dev)`.
+  - 🏢 **[Regras de Negócio & Compliance](./docs/regras/regras-negocio.md)**: Modelo SaaS White Label, Prontuário, CFN e LGPD para dados sensíveis.
+  - 🛡️ **[Segurança das APIs & Criptografia](./docs/regras/seguranca-apis.md)**: OWASP API Top 10, PostgreSQL RLS, Argon2id, JWT Rotation e Cookies HttpOnly.
+  - 📱 **[Padrões Mobile-First Web & React Native](./docs/regras/padroes-mobile-web.md)**: Touch targets 48px, Mobile-First no React e Offline-First com biometria no mobile.
+  - 🏷️ **[Versionamento Centralizado & Governança](./docs/regras/versionamento-governanca.md)**: Fonte única de versão no `package.json` raiz e SemVer.
 
 ---
 
@@ -28,9 +34,20 @@ O ecossistema é organizado como um **Monólito Modular** baseado em **Clean Arc
 ```plaintext
 ygeia/
 ├── README.md                         # Documentação Raiz do Ecossistema
-├── DOCS_ARQUITETURA_YGEIA.md         # Estudo Completo de Arquitetura & Especificação
 ├── CHANGELOG.md                      # Histórico Global de Mudanças (SemVer)
 ├── package.json                      # Versão Única Central ("version": "x.y.z")
+│
+├── docs/                             # Central de Documentação & Regras
+│   ├── README.md                     # Índice Geral da Documentação
+│   ├── arquitetura/                  # Estudo de Arquitetura, DDD, Roadmap
+│   │   └── DOCS_ARQUITETURA_YGEIA.md
+│   └── regras/                       # Regras de Negócio, Desenvolvimento, Segurança
+│       ├── README.md
+│       ├── fluxo-desenvolvimento.md
+│       ├── regras-negocio.md
+│       ├── seguranca-apis.md
+│       ├── padroes-mobile-web.md
+│       └── versionamento-governanca.md
 │
 ├── apps/
 │   ├── api/                          # Backend NestJS (Fastify + TypeScript)
