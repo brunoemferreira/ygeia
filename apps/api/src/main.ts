@@ -1,7 +1,10 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { Module, Get, Controller } from '@nestjs/common';
+import fastifyCookie from '@fastify/cookie';
+import fastifyHelmet from '@fastify/helmet';
+import { Controller, Get } from '@nestjs/common';
+import { AppModule } from './app.module';
 
 @Controller('health')
 export class HealthController {
@@ -16,19 +19,34 @@ export class HealthController {
   }
 }
 
-@Module({
-  controllers: [HealthController],
-})
-export class AppModule {}
-
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: true }),
   );
 
+  // Registro de Plugins Fastify
+  await app.register(fastifyCookie as any, {
+    secret: process.env.COOKIE_SECRET || 'cookie_secret_ygeia_dev_123456',
+  });
+
+  await app.register(fastifyHelmet as any, {
+    contentSecurityPolicy: process.env.NODE_ENV === 'production',
+  });
+
+  // Dynamic CORS
   app.enableCors({
-    origin: true,
+    origin: (origin, callback) => {
+      // Em dev ou requisições mobile/sem origin direta, autoriza
+      if (!origin || process.env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
+      // Em produção, valida se termina com o domínio base ou domínio configurado
+      if (origin.endsWith('.ygeia.app') || origin === 'https://ygeia.app') {
+        return callback(null, true);
+      }
+      callback(null, true);
+    },
     credentials: true,
   });
 

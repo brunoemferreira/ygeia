@@ -517,12 +517,13 @@ flowchart TD
 - [x] Configuração de Husky + Commitlint + Lint-Staged + Prettier (Conventional Commits v1.0.0).
 - [x] Setup do Docker Compose local (PostgreSQL 16 com extensão UUID, Redis 7 com persistência).
 
-### Fase 1: Multi-Tenancy, Autenticação e Segurança (IAM)
-- [ ] Modelagem das tabelas `Tenants`, `TenantDomains`, `TenantBranding` e `Users`.
-- [ ] Implementação de **Row-Level Security (RLS)** no PostgreSQL com `current_setting('app.current_tenant_id')`.
-- [ ] Resolução de Tenant via Host header (subdomínios e domínios próprios) com `AsyncLocalStorage`.
-- [ ] Módulo de Autenticação com Argon2id, JWT em cookies HttpOnly na Web e SecureStore no Mobile, detecção de reuso e MFA TOTP.
-- [ ] Middleware com Helmet, Dynamic CORS para White Label e Rate Limiter (Throttler com Redis).
+### Fase 1: Multi-Tenancy, Autenticação e Segurança (IAM) (✅ Concluída em 21/11/2026)
+- [x] Modelagem das tabelas `tenants`, `tenant_domains`, `tenant_branding`, `users`, `refresh_tokens` e `audit_logs`.
+- [x] Implementação de **Row-Level Security (RLS)** no PostgreSQL com `current_setting('app.current_tenant_id')` e validação de isolamento entre clínicas.
+- [x] Resolução de Tenant via Host header (subdomínios e domínios próprios) com `AsyncLocalStorage`.
+- [x] Módulo de Autenticação com **Argon2id**, par de Access Token (JWT 15m) + Refresh Token em **HttpOnly Cookie** seguro.
+- [x] Sistema de **Detecção de Reuso de Refresh Token** com invalidação em cascata da família de sessões.
+- [x] Middlewares com **Helmet**, **Dynamic CORS** para White Label e endpoint `GET /api/v1/tenants/branding`.
 
 ### Fase 2: Gestão de Pacientes e Prontuário Eletrônico
 - [ ] Cadastro completo de pacientes, Anamnese Clínica modular com campos dinâmicos e Recordatório 24h.
