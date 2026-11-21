@@ -43,6 +43,10 @@ cp .env.example .env
 Consulte o histórico detalhado em [CHANGELOG.md](./CHANGELOG.md).
 
 ### Versão Atual: `v0.1.0` (2026-11-21)
+- **Landing Page Institucional Mobile-First**:
+  - Apresentação completa das vantagens para clínicas e nutricionistas: Exames Laboratoriais Criptografados (AES-256 e URLs pré-assinadas), White Label completo com domínio próprio, Prontuário CFN/LGPD, Motor Antropométrico, Tabela TACO e App Mobile Offline-First.
+  - Simulador interativo consumindo fórmulas puras de TMB e Macronutrientes de `@ygeia/domain-core`.
+  - Seções de segurança, ergonomia touch (48px) e conformidade jurídica.
 - Setup inicial da aplicação em **React 19** com **Vite** e TypeScript estrito.
 - Diretrizes de interface **Mobile-First Responsive Design** (touch targets 48px, thumb zone).
 - Injeção dinâmica de CSS variables no `:root` via endpoint de branding do tenant.

@@ -28,6 +28,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - Bateria de testes unitários de segurança passando (Argon2id e JWT Token Service).
 
 ### 💻 Frontend Web (`apps/web`)
+- **Landing Page Institucional Completa & Mobile-First**:
+  - Destaque comercial e técnico das vantagens para clínicas e consultórios:
+    - **Exames Laboratoriais Criptografados**: Criptografia de ponta a ponta (AES-256) e URLs pré-assinadas temporárias (15 min).
+    - **SaaS 100% White Label**: Domínio próprio (`app.suaclinica.com.br`), cores, logo e PDFs personalizados.
+    - **Prontuário CFN & LGPD**: Conformidade com resoluções CFN 306/2003 e 600/2018 com auditoria indelével.
+    - **Motor Antropométrico & TMB**: Strategy Pattern ao vivo com Mifflin-St Jeor e Harris-Benedict.
+    - **Tabela TACO Oficial & Cardápios**: Integração com TACO (Unicamp) e cálculo em tempo real.
+    - **App Mobile React Native Offline-First**: Diário fotográfico, água e biometria nativa.
+    - **Segurança de Nível Bancário**: PostgreSQL RLS, Argon2id e Cookies HttpOnly.
+  - **Simulador Científico Interativo** embutido, executando cálculos ao vivo no navegador com `@ygeia/domain-core`.
+  - Preview interativo do aplicativo móvel do paciente.
 - Setup inicial da aplicação em **React 19** com **Vite** e TypeScript 5.x.
 - Diretrizes estritas de **Mobile-First Responsive Design** e consumo dos design tokens White Label.
 - Arquivo de configuração `.env.example`, `index.html`, `src/main.tsx` e `README.md` com instruções completas e changelog embutido.
