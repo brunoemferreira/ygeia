@@ -60,8 +60,18 @@ export class TenantsController {
       return await this.tenantsService.getBranding(tenantId);
     }
 
-    // Se nenhum tenant foi especificado, retorna o tenant de demonstração padrão
-    return await this.tenantsService.getBrandingBySlug('demo-clinica');
+    // Se nenhum tenant foi especificado, retorna a identidade padrão do sistema
+    return {
+      tenantId: 'system-default',
+      slug: 'default',
+      clinicName: 'Ygeía SaaS',
+      primaryColor: '#059669',
+      secondaryColor: '#064e3b',
+      accentColor: '#8b5cf6',
+      logoUrl: null,
+      faviconUrl: null,
+      fontFamily: 'Plus Jakarta Sans',
+    };
   }
 
   @Put('branding')

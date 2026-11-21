@@ -5,6 +5,15 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-21
 
+### Removido
+- **Modo Demo & Entulhos de Simulação**:
+  - Removidos todos os botões e handlers de login rápido com credenciais de demonstração na `LoginPage.tsx`.
+  - Removido o seletor simulador de licenças ("Licenças: Nutri ✓ Treino ✓") no cabeçalho interno (`Header.tsx`).
+  - Removidas referências a `demo-clinica` nos placeholders e textos de ajuda.
+- **Recursos de Degustação / Experimentar**:
+  - Removidos todos os formulários e CTAs de 14 dias de teste grátis / "Experimentar" na Navbar, Footer e tela de login.
+  - Removido `AuthModal.tsx` legado.
+
 ### Adicionado
 - **Módulo de Configurações (`SettingsModule`)**:
   - Layout em 2 colunas com busca de configurações e submenus (`CONTA`, `ATENDIMENTO`, `DOCUMENTOS E ASSINATURA`, `APARÊNCIA`).

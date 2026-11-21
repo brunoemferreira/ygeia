@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 🧹 Limpeza Profunda: Eliminação Completa do Modo Demo & Refatorações de UX
+- **Backend API (`apps/api`) & Banco de Dados**:
+  - Remoção definitiva do seeder automático de dados de demonstração (`seedDefaultData`) que gerava a clínica fictícia `demo-clinica` e os usuários `admin@ygeia.com` e `paciente@ygeia.com`.
+  - Remoção do fallback hardcoded para `demo-clinica` no endpoint `GET /api/v1/tenants/branding`, passando a retornar objeto de identidade padrão do sistema com tipagem estrita.
+  - Expurgados do banco de dados PostgreSQL (`ygeia_db`) todos os registros da clínica demo e seus usuários atrelados.
+- **Frontend Web (`apps/web`)**:
+  - **Eliminação de Atalhos e Botões Demo**: Remoção total dos botões de login rápido em 1-clique com credenciais de teste (`handleQuickBrunoDemo`, `handleQuickAdminDemo`, `handleQuickPatientDemo`), divisores visuais e rótulos de demonstração em `LoginPage.tsx`.
+  - **Limpeza do Cabeçalho (`Header.tsx`)**: Remoção dos controles de simulação de licenças ativas ("Licenças: Nutri ✓ Treino ✓"), deixando a barra superior limpa e focada exclusivamente no contexto de sessão e perfil do profissional.
+  - **Ajuste de Parâmetros**: Atualização de placeholders e textos para consultório real sem referências à clínica demo.
+
 ### 🛠️ Configurações, Reformulação de Autenticação & Limpeza de UX
 - **Frontend Web (`apps/web`)**:
   - **Módulo Unificado de Configurações (`SettingsModule`)**:

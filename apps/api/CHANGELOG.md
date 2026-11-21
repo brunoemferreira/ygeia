@@ -3,6 +3,14 @@
 Todas as alterações notáveis da API serão registradas aqui.
 Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/).
 
+## [Unreleased] - 2026-11-21
+
+### Removido
+- **Seeder de Demonstração & Fallback Demo**:
+  - Removido o método `seedDefaultData()` de `DatabaseService`, prevenindo a injeção automática de `demo-clinica`, `admin@ygeia.com` e `paciente@ygeia.com`.
+  - Removida a dependência da slug `demo-clinica` no endpoint `GET /tenants/branding`, retornando agora branding padrão do sistema.
+  - Limpeza dos registros fictícios de demonstração da base de dados PostgreSQL.
+
 ## [0.1.0] - 2026-11-21
 
 ### Adicionado

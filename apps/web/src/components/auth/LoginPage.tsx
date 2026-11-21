@@ -4,13 +4,12 @@ import {
   Lock,
   Mail,
   ShieldCheck,
-  Sparkles,
   AlertCircle,
-  Stethoscope,
-  Heart,
   Eye,
   EyeOff,
   CheckCircle2,
+  Stethoscope,
+  Heart,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -44,48 +43,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // 1-Click Demo Login: Bruno Ferreira (Instituto BR)
-  const handleQuickBrunoDemo = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await login('brunoemf@gmail.com', 'senha123456');
-      onSuccess('professional');
-    } catch (err: any) {
-      setError(err.message || 'Falha ao logar com o usuário Bruno Ferreira.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 1-Click Demo Login: Nutricionista / Admin (Dra. Camila Alencar)
-  const handleQuickAdminDemo = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await login('admin@ygeia.com', 'senha123456', 'demo-clinica');
-      onSuccess('professional');
-    } catch (err: any) {
-      setError(err.message || 'Falha ao logar como demonstração de nutricionista.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 1-Click Demo Login: Paciente (Gabriel Rodrigues)
-  const handleQuickPatientDemo = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await login('paciente@ygeia.com', 'senha123456', 'demo-clinica');
-      onSuccess('patient');
-    } catch (err: any) {
-      setError(err.message || 'Falha ao logar como demonstração de paciente.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -352,141 +309,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             )}
 
-            {/* 1-Click Fast Access Buttons */}
-            {activeTab === 'professional' && (
-              <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={handleQuickBrunoDemo}
-                  disabled={loading}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    background: '#f0fdf4',
-                    border: '1.5px dashed #86efac',
-                    borderRadius: '0.625rem',
-                    padding: '0.75rem 1rem',
-                    color: '#166534',
-                    fontWeight: 700,
-                    fontSize: '0.8125rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseOver={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#dcfce7';
-                    (e.currentTarget as HTMLElement).style.borderColor = '#4ade80';
-                  }}
-                  onMouseOut={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f0fdf4';
-                    (e.currentTarget as HTMLElement).style.borderColor = '#86efac';
-                  }}
-                >
-                  <Sparkles size={16} color="#059669" />
-                  <span>Entrar como Bruno Ferreira (Instituto BR)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleQuickAdminDemo}
-                  disabled={loading}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '0.625rem',
-                    padding: '0.625rem 1rem',
-                    color: '#334155',
-                    fontWeight: 600,
-                    fontSize: '0.8125rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseOver={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9';
-                  }}
-                  onMouseOut={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                  }}
-                >
-                  <Stethoscope size={15} color="#059669" />
-                  <span>Entrar como Dra. Camila (Demo Modelo)</span>
-                </button>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    margin: '0.75rem 0 0 0',
-                  }}
-                >
-                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-                  <span style={{ fontSize: '0.6875rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>
-                    ou acesse com e-mail
-                  </span>
-                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'patient' && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <button
-                  type="button"
-                  onClick={handleQuickPatientDemo}
-                  disabled={loading}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    background: '#f0fdf4',
-                    border: '1.5px dashed #86efac',
-                    borderRadius: '0.625rem',
-                    padding: '0.75rem 1rem',
-                    color: '#166534',
-                    fontWeight: 700,
-                    fontSize: '0.8125rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseOver={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#dcfce7';
-                    (e.currentTarget as HTMLElement).style.borderColor = '#4ade80';
-                  }}
-                  onMouseOut={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f0fdf4';
-                    (e.currentTarget as HTMLElement).style.borderColor = '#86efac';
-                  }}
-                >
-                  <Sparkles size={16} color="#059669" />
-                  <span>Entrar como Gabriel Rodrigues (Paciente)</span>
-                </button>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    margin: '1.25rem 0 0.25rem 0',
-                  }}
-                >
-                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-                  <span style={{ fontSize: '0.6875rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>
-                    ou acesse com e-mail
-                  </span>
-                  <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-                </div>
-              </div>
-            )}
-
             {/* Main Form */}
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {/* Email */}
@@ -618,7 +440,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <div style={{ marginTop: '0.5rem' }}>
                     <input
                       type="text"
-                      placeholder="Ex: instituto-br ou demo-clinica"
+                      placeholder="Ex: seu-consultorio ou deixe em branco"
                       value={loginSlug}
                       onChange={(e) => setLoginSlug(e.target.value)}
                       style={{

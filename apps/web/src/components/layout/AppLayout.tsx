@@ -37,18 +37,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     }
   }, [initialMode]);
 
-  // Modular SaaS Licenses simulation
-  const [activeModules, setActiveModules] = useState({
+  // Active licensed modules for workspace
+  const [activeModules] = useState({
     nutrition: true,
     training: true,
   });
-
-  const handleToggleModule = (mod: 'nutrition' | 'training') => {
-    setActiveModules((prev) => ({
-      ...prev,
-      [mod]: !prev[mod],
-    }));
-  };
 
   // Breadcrumbs text mapper
   const getBreadcrumbs = () => {
@@ -126,8 +119,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflowY: 'auto' }}>
         <Header
           mode={mode}
-          activeModules={activeModules}
-          onToggleModule={handleToggleModule}
           onLogout={onLogout}
           breadcrumbs={getBreadcrumbs()}
           sidebarCollapsed={sidebarCollapsed}
