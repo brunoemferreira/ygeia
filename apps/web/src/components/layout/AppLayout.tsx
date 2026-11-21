@@ -26,14 +26,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const [mode, setMode] = useState<UserRoleMode>(initialMode);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState(
-    initialMode === 'patient' ? 'patient_diet' : 'config_perfil',
+    initialMode === 'patient' ? 'patient_diet' : 'configuracoes',
   );
 
   // Sync mode if initialMode changes
   React.useEffect(() => {
     if (initialMode) {
       setMode(initialMode);
-      setActiveItem(initialMode === 'patient' ? 'patient_diet' : 'config_perfil');
+      setActiveItem(initialMode === 'patient' ? 'patient_diet' : 'configuracoes');
     }
   }, [initialMode]);
 
@@ -99,12 +99,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         return 'Treinamento / Periodização & Cargas';
       case 'treino_cardio':
         return 'Treinamento / Cardio & Frequência Cardíaca';
+      case 'configuracoes':
       case 'config_perfil':
-        return 'Configurações / Perfil do Nutricionista';
       case 'config_whitelabel':
-        return 'Configurações / White Label Studio';
       case 'config_equipe':
-        return 'Configurações / Equipe & Permissões';
+        return 'Configurações';
       default:
         return 'Painel Administrativo';
     }

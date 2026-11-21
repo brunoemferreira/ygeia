@@ -13,9 +13,6 @@ import {
   Video,
   Activity,
   HeartPulse,
-  Palette,
-  Stethoscope,
-  Shield,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -25,6 +22,7 @@ import {
   TrendingUp,
   MessageCircleHeart,
   CalendarCheck,
+  Settings,
 } from 'lucide-react';
 
 export type UserRoleMode = 'professional' | 'patient';
@@ -124,9 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       title: 'Configurações',
       badge: 'Sempre Ativo',
       items: [
-        { id: 'config_perfil', label: 'Perfil do Nutricionista (CRN/CREF)', icon: Stethoscope },
-        { id: 'config_whitelabel', label: 'White Label & Marca', icon: Palette },
-        { id: 'config_equipe', label: 'Equipe & Permissões RBAC', icon: Shield },
+        { id: 'configuracoes', label: 'Configurações', icon: Settings },
       ],
     },
   ];
