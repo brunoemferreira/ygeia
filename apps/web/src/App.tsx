@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { WhiteLabelStudioInteractive } from './components/WhiteLabelStudioInteractive';
@@ -113,8 +114,10 @@ const MainAppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <MainAppContent />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <MainAppContent />
+      </AuthProvider>
+    </ToastProvider>
   );
 };

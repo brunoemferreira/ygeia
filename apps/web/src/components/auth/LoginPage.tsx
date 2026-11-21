@@ -12,6 +12,7 @@ import {
   Heart,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 export type LoginRoleMode = 'professional' | 'patient';
 
@@ -27,6 +28,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   onSuccess,
 }) => {
   const { login } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<LoginRoleMode>(initialRole);
 
   useEffect(() => {
@@ -51,9 +53,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     try {
       await login(email.trim(), password, loginSlug.trim() || undefined);
+      toast.success(
+        activeTab === 'professional'
+          ? 'Autenticado com sucesso! Acessando Workspace...'
+          : 'Autenticado com sucesso! Acessando Portal do Paciente...',
+      );
       onSuccess(activeTab);
     } catch (err: any) {
       setError(err.message || 'Ocorreu um erro na autenticação. Verifique suas credenciais.');
+      toast.error(err);
     } finally {
       setLoading(false);
     }
@@ -351,7 +359,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     href="#esqueceu-senha"
                     onClick={(e) => {
                       e.preventDefault();
-                      alert('Para redefinir sua senha, entre em contato com o suporte institucional.');
+                      toast.info('Para redefinir sua senha, entre em contato com a administração do consultório.');
                     }}
                     style={{ fontSize: '0.75rem', color: '#059669', textDecoration: 'none', fontWeight: 600 }}
                   >

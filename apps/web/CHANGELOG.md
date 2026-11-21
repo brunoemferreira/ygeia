@@ -5,6 +5,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-21
 
+### Adicionado
+- **Sistema de Notificações Toast Reativo (`ToastProvider`, `useToast`, `ToastContainer`, `ToastItem`)**:
+  - Hook unificado para disparo de alertas (`toast.success`, `toast.error`, `toast.warning`, `toast.info`).
+  - Barra de progresso visual com auto-dismiss (4s/6.5s), suporte a subdetalhes expansíveis de erros e pausa no hover.
+- **Utilitário de Normalização de Erros da API (`api-error-handler.ts`)**:
+  - Parser centralizado para mapear respostas NestJS/Fastify, status HTTP e exceções de rede em mensagens amigáveis em português.
+
 ### Removido
 - **Modo Demo & Entulhos de Simulação**:
   - Removidos todos os botões e handlers de login rápido com credenciais de demonstração na `LoginPage.tsx`.

@@ -9,6 +9,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 🔔 Sistema de Notificações Toast & Tratamento Padronizado de Erros da API
+- **Frontend Web (`apps/web`)**:
+  - **Motor de Tratamento e Normalização de Erros (`api-error-handler.ts`)**:
+    - Parser universal capaz de processar `Response`, `Error`, payloads NestJS `{ statusCode, message, error }` e strings simples.
+    - Dicionário semântico com mapeamento completo de status HTTP (400, 401, 403, 404, 409, 422, 429, 500, 502, 503) e tradução de mensagens técnicas para linguagem amigável em português.
+    - Suporte a extração de listas detalhadas de validação Zod e detecção de falhas de conexão/rede (`Failed to fetch`).
+  - **Sistema de Notificações Toast Reativo (`ToastContext`, `ToastContainer`, `ToastItem`)**:
+    - Hook `useToast()` com métodos utilitários `toast.success()`, `toast.error()`, `toast.warning()` e `toast.info()`.
+    - Barra de progresso animada com auto-dismiss configurável, pausa ao passar o cursor (`pauseOnHover`), fechamento manual e suporte a subdetalhes expansíveis para múltiplos erros de validação.
+    - Contêiner fixo com empilhamento máximo de 4 notificações simultâneas.
+    - Integração no `LoginPage` e `SettingsModule`, eliminando `alert()` nativo e banners estáticos fragmentados.
+
 ### 🧹 Limpeza Profunda: Eliminação Completa do Modo Demo & Refatorações de UX
 - **Backend API (`apps/api`) & Banco de Dados**:
   - Remoção definitiva do seeder automático de dados de demonstração (`seedDefaultData`) que gerava a clínica fictícia `demo-clinica` e os usuários `admin@ygeia.com` e `paciente@ygeia.com`.

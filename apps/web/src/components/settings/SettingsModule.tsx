@@ -17,11 +17,11 @@ import {
   Palette,
   Smartphone,
   LayoutGrid,
-  Check,
   Save,
   Plus,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 interface SettingsModuleProps {
   initialSubTab?: string;
@@ -29,6 +29,7 @@ interface SettingsModuleProps {
 
 export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 'personal' }) => {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   // Active sub-tab state
   const [activeTab, setActiveTab] = useState<string>(initialSubTab);
@@ -36,7 +37,6 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
 
   // Editing state for "Dados pessoais"
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 
   // 1. Personal Identification State (Defaults matching user screenshot)
   const [personalData, setPersonalData] = useState({
@@ -68,10 +68,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
   ]);
   const [newMemberEmail, setNewMemberEmail] = useState('');
 
-  // Flash message
+  // Notification handler via Toast
   const triggerSuccess = (msg: string) => {
-    setSaveSuccess(msg);
-    setTimeout(() => setSaveSuccess(null), 3500);
+    toast.success(msg);
   };
 
   const handleSavePersonal = (e: React.FormEvent) => {
@@ -150,28 +149,6 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
           Gerencie suas preferências, dados pessoais e configurações do sistema.
         </p>
       </div>
-
-      {/* Success Notification Alert */}
-      {saveSuccess && (
-        <div
-          style={{
-            background: '#ecfdf5',
-            border: '1px solid #6ee7b7',
-            color: '#065f46',
-            padding: '0.875rem 1.25rem',
-            borderRadius: '0.75rem',
-            marginBottom: '1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: 600,
-            fontSize: '0.875rem',
-          }}
-        >
-          <Check size={18} color="#059669" />
-          <span>{saveSuccess}</span>
-        </div>
-      )}
 
       {/* Two-Column Card Container */}
       <div
