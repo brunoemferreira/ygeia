@@ -19,7 +19,54 @@ Este documento consolida as regras de negócio centrais da plataforma **YGEÍA**
 
 ---
 
-## 2. Gestão de Pacientes e Prontuário Eletrônico
+## 2. Onboarding da Empresa, Perfil do Nutricionista (CRN), White Label Studio & Equipe (RBAC)
+
+No modelo de negócio SaaS do YGEÍA, **é pré-requisito mandatório que a empresa/clínica e seus profissionais estejam devidamente configurados antes do cadastro de pacientes e do início dos atendimentos clínicos**:
+
+### 2.1 Dados Cadastrais da Empresa / Clínica (`tenant_settings`)
+- **Dados Jurídicos/Fiscais**: Razão Social, Nome Fantasia, CNPJ (ou CPF para consultórios uniprofissionais autônomos).
+- **Contatos Oficiais**: E-mail comercial, telefone fixo e WhatsApp de atendimento (usado para confirmações automáticas de consultas).
+- **Endereço Completo**: Logradouro, número, complemento, bairro, cidade, UF e CEP. Estes dados são obrigatoriamente estampados no rodapé de laudos, prescrições e recibos.
+- **Políticas e Termos**: Termos de Uso e Política de Privacidade padrão da clínica, vinculados ao aceite do paciente.
+
+### 2.2 Perfil Profissional do Nutricionista & Validação CFN (`nutritionist_profiles`)
+- **Obrigatoriedade Legal (Resolução CFN nº 600/2018)**:
+  - Todo profissional que prescreve dietas ou assina laudos deve possuir registro ativo no Conselho Regional de Nutricionistas (**CRN** com sigla da região, ex: `CRN-3 45678/P`).
+  - O número de CRN é impresso compulsoriamente em todos os planos alimentares e atestados gerados.
+- **Especialidades e Mini-bio**:
+  - Especialidades reconhecidas (ex: Nutrição Clínica, Esportiva, Funcional, Materno-Infantil).
+  - Mini-currículo visível para os pacientes no aplicativo móvel.
+- **Assinatura Digital & Carimbo**:
+  - Upload seguro de imagem da assinatura/carimbo para aposição automática nos documentos emitidos em PDF.
+
+### 2.3 White Label Studio (Identidade Visual da Clínica)
+- **Logotipos Oficiais**:
+  - Versão Principal Clara (para fundos escuros) e Versão Escura (para fundos claros) em formato SVG ou PNG com transparência.
+  - Ícone / Favicon (quadrado mínimo 512x512) para PWA e ícone do app mobile.
+- **Paleta de Cores e Acessibilidade**:
+  - Cor Primária (`--primary`): Botões de ação, cabeçalhos e elementos focais.
+  - Cor Secundária (`--secondary`): Sub-menus, tags e cartões secundários.
+  - Cor de Destaque (`--accent`): Badges e notificações.
+  - **Validação WCAG 2.2 AA**: O sistema valida automaticamente a taxa de contraste (mínimo de 4.5:1 contra o fundo branco) para garantir acessibilidade e legibilidade.
+- **Papel Timbrado**:
+  - Configuração do cabeçalho e rodapé oficial para renderização dos planos alimentares em PDF.
+
+### 2.4 Gestão de Equipe & Controle de Acesso Baseado em Papéis (RBAC)
+Para proteger os dados de saúde e cumprir o sigilo ético-profissional, o sistema adota 4 papéis com permissões granulares:
+
+| Papel (`Role`) | Descrição | Acesso Cadastral / Agenda | Acesso a Prontuário, Anamnese e Dietas | Configurações & Faturamento |
+| :--- | :--- | :---: | :---: | :---: |
+| **`OWNER`** | Proprietário da clínica | Total | Total (todos os pacientes) | Total |
+| **`ADMIN`** | Gerente operacional | Total | Somente leitura de relatórios gerais | Gerencia equipe e branding |
+| **`NUTRITIONIST`** | Nutricionista clínico | Total | Total (apenas seus pacientes) | Apenas seu perfil e agenda |
+| **`SECRETARY`** | Recepção / Secretária | Total (cadastros e horários) | **❌ BLOQUEADO ABSOLUTO (Sigilo CFN / LGPD)** | Bloqueado |
+
+> [!IMPORTANT]
+> **Sigilo Profissional e LGPD**: Secretárias e recepcionistas **não têm acesso** a dados clínicos, queixas, diagnósticos, anamneses, fotos corporais ou planos alimentares. Seu escopo restringe-se estritamente à gestão de agendamentos e cadastro básico de contato.
+
+---
+
+## 3. Gestão de Pacientes e Prontuário Eletrônico
 
 ### 2.1 Cadastro de Pacientes
 - O paciente é cadastrado por um profissional de saúde autorizado (`nutritionist_id`).
@@ -42,13 +89,13 @@ Este documento consolida as regras de negócio centrais da plataforma **YGEÍA**
   - Alimentos consumidos, medidas caseiras e porções estimadas.
   - Estimativa calórica e de macronutrientes da ingestão real comparada à prescrição.
 
-### 2.4 Exames e Laudos Laboratoriais
+### 3.4 Exames e Laudos Laboratoriais
 - Upload seguro de exames em formato PDF ou imagens (PNG/JPEG) com limite de tamanho (15 MB por arquivo).
 - Armazenamento em bucket seguro com URLs pré-assinadas temporárias (validade de 15 minutos).
 
 ---
 
-## 3. Conformidade LGPD (Lei 13.709/2018) para Dados de Saúde
+## 4. Conformidade LGPD (Lei 13.709/2018) para Dados de Saúde
 
 1. **Dados Sensíveis (Art. 5º, II da LGPD)**:
    - Dados de saúde, biométricos e nutricionais são classificados como **dados sensíveis**.

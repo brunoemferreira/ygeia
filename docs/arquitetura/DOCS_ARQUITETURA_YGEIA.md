@@ -496,12 +496,13 @@ Cada aplicação possui obrigatoriamente:
 ```mermaid
 flowchart TD
     Fase0["Fase 0: Monorepo Turborepo, CI/CD, READMEs & Governança"] --> Fase1["Fase 1: Multi-Tenancy, IAM, RLS & Auth"]
-    Fase1 --> Fase2["Fase 2: Gestão de Pacientes, Prontuário & LGPD"]
-    Fase2 --> Fase3["Fase 3: Antropometria & Motor Energético (Strategy)"]
-    Fase3 --> Fase4["Fase 4: Base Nutricional TACO & Prescrição Dietética"]
-    Fase4 --> Fase5["Fase 5: Frontend Web React Mobile-First & Agenda"]
-    Fase5 --> Fase6["Fase 6: App Mobile React Native & Offline Sync"]
-    Fase6 --> Fase7["Fase 7: Segurança, Escalabilidade, Billing & Go-Live"]
+    Fase1 --> Fase2["Fase 2: Perfil da Clínica, Nutricionista (CRN), White Label Studio & Equipe (RBAC)"]
+    Fase2 --> Fase3["Fase 3: Gestão de Pacientes, Prontuário & LGPD"]
+    Fase3 --> Fase4["Fase 4: Antropometria & Motor Energético (Strategy)"]
+    Fase4 --> Fase5["Fase 5: Base Nutricional TACO & Prescrição Dietética"]
+    Fase5 --> Fase6["Fase 6: Frontend Web React Mobile-First & Agenda"]
+    Fase6 --> Fase7["Fase 7: App Mobile React Native & Offline Sync"]
+    Fase7 --> Fase8["Fase 8: Segurança, Escalabilidade, Billing & Go-Live"]
 ```
 
 ### Fase 0: Setup do Monorepo, Documentação e Governança (✅ Concluída em 21/11/2026)
@@ -525,36 +526,56 @@ flowchart TD
 - [x] Sistema de **Detecção de Reuso de Refresh Token** com invalidação em cascata da família de sessões.
 - [x] Middlewares com **Helmet**, **Dynamic CORS** para White Label e endpoint `GET /api/v1/tenants/branding`.
 
-### Fase 2: Gestão de Pacientes e Prontuário Eletrônico
+### Fase 2: Configuração da Clínica, Perfil do Nutricionista (CRN), White Label Studio & Equipe (RBAC)
+- [ ] **Perfil Corporativo & Cadastral da Clínica**:
+  - Razão Social, Nome Fantasia, CNPJ/CPF, Telefone/WhatsApp de Atendimento, E-mail oficial.
+  - Endereço comercial completo (logradouro, bairro, cidade, UF, CEP) para cabeçalhos de receitas.
+  - Termos de Consentimento e Política de Privacidade padrão da clínica.
+- [ ] **Perfil Profissional do Nutricionista Responsável**:
+  - Nome completo, Nome social/profissional e Registro Profissional (**CRN e Região**, ex: CRN-3 45678) obrigatório pelo CFN.
+  - Especialidades clínicas, mini-biografia e foto/avatar profissional.
+  - Upload seguro de Assinatura Digital / Carimbo profissional digitalizado para aposição em laudos e prescrições.
+- [ ] **White Label Studio & Gestão Visual**:
+  - Upload de Logotipo Principal (versões clara e escura em SVG/PNG transparente) e Favicon/Ícone do App.
+  - Paleta de Cores: Cor Primária (`--primary`), Cor Secundária (`--secondary`) e Cor de Destaque (`--accent`) com validação de contraste de acessibilidade (WCAG 2.2 AA).
+  - Tipografia (Inter, Roboto, Montserrat) e modelo de Papel Timbrado oficial para exportações em PDF.
+- [ ] **Gestão de Domínios Próprios**:
+  - Configuração de subdomínio (`slug.ygeia.app`) e domínio personalizado (`app.clinica.com.br`) com checagem de DNS CNAME.
+- [ ] **Gestão de Equipe & Controle de Acesso Baseado em Papéis (RBAC)**:
+  - Perfis: `OWNER` (proprietário), `ADMIN` (gerente), `NUTRITIONIST` (profissional de saúde) e `SECRETARY` (recepção).
+  - **Blindagem LGPD & Sigilo CFN**: Secretárias têm acesso exclusivo a agendamentos e cadastro básico de contato, sendo **estritamente bloqueadas de acessar prontuários, dados clínicos ou dietas**.
+  - Convite de membros por e-mail com token temporário e definição de perfil.
+
+### Fase 3: Gestão de Pacientes e Prontuário Eletrônico
 - [ ] Cadastro completo de pacientes, Anamnese Clínica modular com campos dinâmicos e Recordatório 24h.
-- [ ] Anexos de exames laboratoriais criptografados em bucket S3/R2.
+- [ ] Anexos de exames laboratoriais criptografados em bucket S3/R2 com links temporários pré-assinados (15 min).
 - [ ] Trilha de Auditoria imutável (`AuditLog`) registrando acessos e mutações de prontuário com particionamento temporal.
 
-### Fase 3: Avaliação Antropométrica e Cálculos Energéticos
+### Fase 4: Avaliação Antropométrica e Cálculos Energéticos
 - [ ] Protocolos de dobras cutâneas: Jackson & Pollock (3 e 7), Petroski (4), Durnin & Womersley, Slaughter.
 - [ ] Perímetros corporais, circunferências e dados de Bioimpedância.
 - [ ] Implementação do **Strategy Pattern** para cálculo da Taxa Metabólica Basal (TMB):
   - Harris-Benedict (1919 e 1984), Mifflin-St Jeor, FAO/OMS, Tinsley, Cunningham.
 - [ ] Gráficos comparativos de evolução corporal responsivos para Web e Mobile.
 
-### Fase 4: Banco de Dados de Alimentos e Prescrição Dietética
+### Fase 5: Banco de Dados de Alimentos e Prescrição Dietética
 - [ ] Carga e indexação da tabela **TACO** (Unicamp) com cache L2 em Redis.
 - [ ] Módulo de Criação de Planos Alimentares (Meal Plan Builder) com cálculo de VET e macronutrientes em tempo real.
 - [ ] Exportação assíncrona do plano em PDF estilizado automaticamente via fila BullMQ com branding do tenant.
 
-### Fase 5: Frontend Web React (Mobile-First) e Agenda
+### Fase 6: Frontend Web React (Mobile-First) e Agenda
 - [ ] Design System Web baseado em Tailwind CSS e Shadcn/UI aplicando princípios **Mobile-First** (touch targets 48px, bottom sheets, split-view).
 - [ ] Injeção dinâmica de CSS variables no `:root` com base no tenant ativo.
 - [ ] Agenda do profissional com bloqueios de horários e autoagendamento público.
 
-### Fase 6: Aplicativo Mobile em React Native
+### Fase 7: Aplicativo Mobile em React Native
 - [ ] Setup do app móvel com Expo Bare Workflow e TypeScript.
 - [ ] Descoberta de Tenant via link/QR Code e persistência do tema em MMKV.
 - [ ] Módulo de Dieta e Adesão do Paciente com **Suporte Offline** (SQLite/MMKV).
 - [ ] Diário alimentar com captura fotográfica via câmera nativa e controle de água com haptics.
 - [ ] Segurança Mobile: `expo-secure-store`, autenticação biométrica (Face ID/Fingerprint), Privacy Screen e SSL Pinning.
 
-### Fase 7: Segurança, Escalabilidade, Billing & Go-Live
+### Fase 8: Segurança, Escalabilidade, Billing & Go-Live
 - [ ] Testes de carga e estresse (k6 / Artillery) para validação de escalabilidade da API e do PgBouncer.
 - [ ] Módulo Financeiro SaaS (Billing dos Nutricionistas com Stripe / Asaas / Pagar.me).
 - [ ] Pipeline CI/CD no GitHub Actions com builds automatizados Android/iOS via EAS Build.
