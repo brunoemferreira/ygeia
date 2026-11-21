@@ -65,36 +65,69 @@ Ambas as áreas utilizam um **Menu Lateral Esquerdo (Collapsible Left Sidebar)**
 
 ---
 
-## 4. Estrutura Detalhada: Área do Nutricionista (Admin Geral)
+## 4. Estrutura Detalhada: Área do Nutricionista & Treinador (Admin SaaS Modular)
 
-### 4.1. Hierarquia de Navegação da Sidebar (Nutricionista)
+Como muitos profissionais atuam tanto na Nutrição quanto na Educação Física (ou clínicas contam com equipe multidisciplinar), a plataforma adota uma **Arquitetura Modular em 4 Grandes Blocos**, permitindo que cada módulo seja ativado/vendido de forma independente ou em pacote integrado:
+
+```mermaid
+graph TD
+    subgraph SaaS_Modular [Ygeía SaaS Modular]
+        CAD[1. Módulo Cadastros Gerais - Base Compartilhada]
+        NUT[2. Módulo Nutrição - Add-on Clínico]
+        TRE[3. Módulo Treinamento - Add-on Educação Física/Personal]
+        CFG[4. Módulo Configurações & White Label]
+    end
+    
+    CAD --> NUT
+    CAD --> TRE
+    CFG --> CAD
+    CFG --> NUT
+    CFG --> TRE
+```
+
+### 4.1. Hierarquia de Navegação da Sidebar Modular (Nutricionista / Treinador)
+
 ```
 [TOP: Identidade da Clínica & Seletor de Tenant]
-├── [🏢 Logo da Clínica / Instituto]
-└── [Badge: "Plano Enterprise • RLS Ativo"]
+├── [🏢 Logo White Label da Clínica / Studio]
+└── [Badge: "Módulos Ativos: Nutrição + Treinamento"]
 
-[BLOCO 1: CLÍNICA & ATENDIMENTO DIÁRIO]
-├── 📊 Visão Geral (Dashboard do Dia, Consultas Pendentes, Alertas de Adesão)
-├── 📅 Agenda & Telemedicina (Consultas presenciais e online, confirmação automática)
-├── 👥 Pacientes & CRM (Prontuários, anamneses ativas, filtros por patologia/objetivo)
-│    └── Atalho: [Novo Paciente (N)]
-├── 🥗 Prescritor Nutricional (Planos alimentares, cálculo de VET, Tabela TACO/IBGE)
-└── 🔒 Cofre de Exames (Laudos recebidos, integração laboratorial, assinaturas AES-256)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. MÓDULO CADASTROS GERAIS (Base Compartilhada Universal)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+├── 👥 Pacientes & Alunos (CRM unificado, prontuário, tags, status de adesão)
+├── 📅 Agenda & Sessões (Consultas nutricionais e treinos presenciais/online)
+├── 📐 Avaliação Física & Antropometria (Dobras cutâneas, bioimpedância, perímetros, fotos)
+└── 🔒 Cofre de Exames & Laudos (AES-256, exames bioquímicos, ergoespirometria, atestados)
 
-[BLOCO 2: INTELIGÊNCIA & PROTOCOLOS]
-├── 📐 Motor Antropométrico & Bioimpedância (Dobras cutâneas, curvas evolutivas)
-├── 📑 Biblioteca de Protocolos (Modelos de cardápios, suplementação, orientações)
-└── 📈 Relatórios Clínicos & Adesão (Métricas de engajamento dos pacientes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. MÓDULO NUTRIÇÃO (Especialidade Clínica & Diética)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+├── 🥗 Prescritor Nutricional (Planos alimentares, TMB/GET, divisão de macronutrientes)
+├── 🥦 Tabela TACO & Alimentos (Banco Unicamp, IBGE e alimentos personalizados da clínica)
+├── 📖 Biblioteca de Receitas & Orientações (Receitas saudáveis, e-books e substituições)
+└── 💊 Suplementação & Fitoterapia (Prescrições com fórmulas manipuladas e timbrado)
 
-[BLOCO 3: GESTÃO SAAS & CONFIGURAÇÕES]
-├── 🎨 White Label Studio (Cores primária/secundária, logotipo, domínio, timbrados)
-├── 🏢 Dados da Clínica & Faturamento (CNPJ, endereço, recibos para convênio)
-├── 🩺 Perfil Profissional & CRN (Registro no conselho regional, especialidades, bio)
-└── 👥 Equipe & Permissões RBAC (Nutricionistas associados, administradores, secretárias)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. MÓDULO TREINAMENTO (Educação Física & Performance)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+├── 🏋️ Prescritor de Treinos (Fichas de musculação A/B/C/D, séries, repetições, RIR, RPE)
+├── 🎬 Banco de Exercícios (Vídeos de execução, grupos musculares, equipamentos)
+├── 📈 Periodização & Volume (Controle de sobrecarga progressiva, volume semanal e 1RM)
+└── 🏃 Cardio & Treinamento Aeróbio (Zonas de frequência cardíaca, HIIT, testes de esteira)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. MÓDULO CONFIGURAÇÕES & SAAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+├── 🎨 White Label Studio (Identidade visual, logos, paleta de cores, tipografia e domínio)
+├── 🏢 Dados da Clínica / Consultório (CNPJ, razão social, endereço físico, WhatsApp)
+├── 🩺 Registros Profissionais (CRN do nutricionista e/ou CREF do educador físico)
+├── 👥 Equipe & Permissões RBAC (Nutricionistas, Treinadores, Administradores, Recepção)
+└── 📦 Planos & Módulos Ativos (Gerenciamento das licenças: Nutrição / Treino)
 
 [BOTTOM: Perfil do Profissional Logado]
-├── [Avatar + Dra. Sofia Alencar (CRN-3 48.912/P)]
-└── [Botão de Alternância de Tema & Logout]
+├── [Avatar + Nome do Profissional (CRN-3 / CREF-SP)]
+└── [Alternância de Tema Claro/Escuro & Logout]
 ```
 
 ---
