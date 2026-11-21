@@ -1,10 +1,12 @@
 import React from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { AdvantagesGrid } from './components/AdvantagesGrid';
-import { InteractiveCalculator } from './components/InteractiveCalculator';
-import { SecurityComplianceSection } from './components/SecurityComplianceSection';
-import { MobilePreviewSection } from './components/MobilePreviewSection';
+import { WhiteLabelStudioInteractive } from './components/WhiteLabelStudioInteractive';
+import { EncryptedVaultShowcase } from './components/EncryptedVaultShowcase';
+import { ScientificEngineInteractive } from './components/ScientificEngineInteractive';
+import { MobileAppMockup } from './components/MobileAppMockup';
+import { ComparisonTable } from './components/ComparisonTable';
+import { FAQSection } from './components/FAQSection';
 import { Footer } from './components/Footer';
 
 export const App: React.FC = () => {
@@ -13,10 +15,12 @@ export const App: React.FC = () => {
       <Navbar />
       <main style={{ flexGrow: 1 }}>
         <Hero />
-        <AdvantagesGrid />
-        <SecurityComplianceSection />
-        <InteractiveCalculator />
-        <MobilePreviewSection />
+        <WhiteLabelStudioInteractive />
+        <EncryptedVaultShowcase />
+        <ScientificEngineInteractive />
+        <MobileAppMockup />
+        <ComparisonTable />
+        <FAQSection />
       </main>
       <Footer />
     </div>
