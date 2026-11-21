@@ -1,0 +1,29 @@
+{
+  "name": "@ygeia/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend Web React Mobile-First da plataforma Ygeía",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@ygeia/domain-core": "workspace:*",
+    "@ygeia/validation-schemas": "workspace:*",
+    "lucide-react": "^0.475.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@ygeia/typescript-config": "workspace:*",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.1"
+  }
+}
