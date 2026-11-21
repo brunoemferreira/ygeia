@@ -7,6 +7,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [Unreleased] - 2026-11-21
+
+### 🛠️ Configurações, Reformulação de Autenticação & Limpeza de UX
+- **Frontend Web (`apps/web`)**:
+  - **Módulo Unificado de Configurações (`SettingsModule`)**:
+    - Layout em 2 colunas com navegação categorizada e busca em tempo real (`Procurar`).
+    - Categorias estruturadas: `CONTA` (Dados pessoais, Senha, 2FA, Idioma, Zona de perigo), `ATENDIMENTO` (Locais, Tratamentos/tags, Google Calendar, Meus links, Secretárias), `DOCUMENTOS E ASSINATURA` (Papel timbrado, Imagem da assinatura, ICP-Brasil, Cartão CNPJ) e `APARÊNCIA` (Personalização White Label, PDF, App do Paciente, Meu menu).
+    - Tela de Dados Pessoais com preview da foto do perfil, botão de edição/cancelamento e dados cadastrais do nutricionista (Nome, Email, Telefone, CRN, CPF/CNPJ, Especialidades e Endereço).
+  - **Página de Login Dedicada & Fim dos Modais (`LoginPage`)**:
+    - Substituição do modal de login flutuante por tela inteira exclusiva para autenticação profissional e de pacientes.
+    - Seletor de perfil em abas (`🩺 Área do Nutricionista` e `🍎 Portal do Paciente`) com botões de 1-clique para teste rápido de credenciais.
+    - Combo dropdown na Navbar para navegação direta ao login desejado.
+  - **Eliminação de Recursos de Teste ("Experimentar" / 14 dias grátis)**:
+    - Remoção de formulários de registro público de clínica (modelo privado SaaS B2B) e CTAs de teste gratuito na Navbar, Footer e telas de login.
+    - Isolamento de sessão: login obrigatório para acesso aos painéis de admin e paciente, eliminando navegação de retorno à landing page sem logout formal.
+  - **Aprimoramentos de Sidebar & Header**:
+    - Remoção do prefixo "Módulo" dos menus laterais.
+    - Controle retrátil da Sidebar (264px expandido / 72px recolhido) com preservação e restauração visual das descrições.
+    - Remoção do seletor manual de papel no Header, mantendo apenas indicador contextual da sessão ativa.
+
 ## [0.1.0] - 2026-11-21
 
 ### 🏥 Fase 2 (Configuração da Clínica, Perfil do Nutricionista CRN, White Label Studio & Equipe RBAC)

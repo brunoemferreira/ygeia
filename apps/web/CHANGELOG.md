@@ -3,6 +3,29 @@
 Todas as alterações da aplicação Web React serão registradas aqui.
 Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/).
 
+## [Unreleased] - 2026-11-21
+
+### Adicionado
+- **Módulo de Configurações (`SettingsModule`)**:
+  - Layout em 2 colunas com busca de configurações e submenus (`CONTA`, `ATENDIMENTO`, `DOCUMENTOS E ASSINATURA`, `APARÊNCIA`).
+  - Tela completa de Dados Pessoais com foto do profissional, edição inline de dados cadastrais e endereço.
+  - Subtelas para troca de senha Argon2id, integração Google Calendar, upload de papel timbrado e equipe/secretárias.
+- **Página de Login Dedicada (`LoginPage`)**:
+  - Nova tela inteira de login substituindo o modal suspenso.
+  - Abas segmentadas para Nutricionista e Portal do Paciente.
+  - Botões de acesso rápido em 1-clique com credenciais de demonstração.
+
+### Modificado
+- **Navbar & Header**:
+  - Inclusão de dropdown combo para seleção do perfil de login na Navbar.
+  - Remoção do seletor de perfil no Header interno, substituído por badge de contexto de sessão ativa.
+  - Remoção do termo "Módulo" dos menus da Sidebar e suporte a colapso/expansão suave com restauração de descrições.
+
+### Removido
+- **Recursos de Degustação / Experimentar**:
+  - Removidos todos os formulários e CTAs de 14 dias de teste grátis / "Experimentar" na Navbar, Footer e tela de login.
+  - Removido `AuthModal.tsx` legado.
+
 ## [0.1.0] - 2026-11-21
 
 ### Adicionado
