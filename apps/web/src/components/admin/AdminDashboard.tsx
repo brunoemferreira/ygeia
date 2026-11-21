@@ -90,6 +90,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   });
   const [newSpecialty, setNewSpecialty] = useState('');
 
+  // Sincroniza dados com o usuário autenticado caso sejam carregados após render inicial
+  useEffect(() => {
+    if (user) {
+      if (user.clinicName) {
+        setBranding((prev) => ({
+          ...prev,
+          clinicName: prev.clinicName === 'Ygeía Clínica Modelo' ? user.clinicName! : prev.clinicName,
+        }));
+        setSettings((prev) => ({
+          ...prev,
+          legalName: prev.legalName || user.clinicName!,
+          tradeName: prev.tradeName || user.clinicName!,
+        }));
+      }
+      if (user.fullName) {
+        setProfile((prev) => ({
+          ...prev,
+          fullName: prev.fullName || user.fullName,
+          professionalName: prev.professionalName || user.fullName,
+        }));
+      }
+      if (user.email) {
+        setSettings((prev) => ({
+          ...prev,
+          email: prev.email || user.email,
+        }));
+      }
+    }
+  }, [user]);
+
   // 4. Team State
   const [team, setTeam] = useState<any[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -146,29 +176,40 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const resBranding = await fetch(`${API_BASE}/tenants/branding`, { headers });
         if (resBranding.ok) {
           const bData = await resBranding.json();
-          setBranding((prev) => ({ ...prev, ...bData }));
+          setBranding((prev) => ({
+            ...prev,
+            ...bData,
+            clinicName: bData.clinicName || user?.clinicName || prev.clinicName,
+          }));
         }
 
         // Fetch Settings
         const resSettings = await fetch(`${API_BASE}/tenants/settings`, { headers });
         if (resSettings.ok) {
           const sData = await resSettings.json();
-          setSettings((prev) => ({ ...prev, ...sData }));
+          setSettings((prev) => ({
+            ...prev,
+            ...sData,
+            legalName: sData.legalName || user?.clinicName || prev.legalName,
+            tradeName: sData.tradeName || user?.clinicName || prev.tradeName,
+            email: sData.email || user?.email || prev.email,
+          }));
         }
 
         // Fetch Profile
         const resProfile = await fetch(`${API_BASE}/tenants/profile`, { headers });
         if (resProfile.ok) {
           const pData = await resProfile.json();
-          setProfile({
-            fullName: pData.fullName || '',
-            professionalName: pData.professionalName || '',
-            crnNumber: pData.crnNumber || '',
-            crnRegion: pData.crnRegion || 'CRN-3',
-            specialties: pData.specialties || [],
-            bio: pData.bio || '',
-            isTechnicalManager: pData.isTechnicalManager ?? true,
-          });
+          setProfile((prev) => ({
+            ...prev,
+            fullName: pData.fullName || user?.fullName || prev.fullName,
+            professionalName: pData.professionalName || user?.fullName || prev.professionalName,
+            crnNumber: pData.crnNumber || prev.crnNumber || '',
+            crnRegion: pData.crnRegion || prev.crnRegion || 'CRN-3',
+            specialties: pData.specialties || prev.specialties || [],
+            bio: pData.bio ?? prev.bio,
+            isTechnicalManager: pData.isTechnicalManager ?? prev.isTechnicalManager ?? true,
+          }));
         }
 
         // Fetch Team

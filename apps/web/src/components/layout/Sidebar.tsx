@@ -174,11 +174,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Brand Header */}
       <div
         style={{
-          padding: collapsed ? '1.25rem 0.75rem' : '1.25rem 1.25rem',
+          padding: collapsed ? '1rem 0.5rem' : '1.25rem 1.25rem',
           borderBottom: mode === 'professional' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #f1f5f9',
           display: 'flex',
+          flexDirection: collapsed ? 'column' : 'row',
           alignItems: 'center',
           justifyContent: collapsed ? 'center' : 'space-between',
+          gap: collapsed ? '0.75rem' : 0,
         }}
       >
         {!collapsed ? (
@@ -226,6 +228,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         ) : (
           <div
+            onClick={onToggleCollapse}
+            title="Clique para expandir o menu lateral"
             style={{
               width: '36px',
               height: '36px',
@@ -237,36 +241,52 @@ export const Sidebar: React.FC<SidebarProps> = ({
               justifyContent: 'center',
               fontWeight: 800,
               fontSize: '1.125rem',
+              cursor: 'pointer',
+              transition: 'transform 0.15s ease',
             }}
           >
             Υ
           </div>
         )}
 
-        {/* Collapse Button */}
+        {/* Expand / Collapse Button (ALWAYS VISIBLE AND ACCESSIBLE) */}
         <button
           onClick={onToggleCollapse}
-          title={collapsed ? 'Expandir Menu' : 'Recolher Menu'}
+          title={collapsed ? 'Expandir Menu (Ver Descrições)' : 'Recolher Menu'}
           style={{
-            background: 'transparent',
-            border: 'none',
-            color: mode === 'professional' ? '#94a3b8' : '#64748b',
+            background: collapsed
+              ? mode === 'professional'
+                ? 'rgba(255, 255, 255, 0.08)'
+                : '#f1f5f9'
+              : 'transparent',
+            border: collapsed
+              ? mode === 'professional'
+                ? '1px solid rgba(255, 255, 255, 0.12)'
+                : '1px solid #cbd5e1'
+              : 'none',
+            color: mode === 'professional' ? '#34d399' : '#059669',
             cursor: 'pointer',
             padding: '0.375rem',
             borderRadius: '0.375rem',
-            display: collapsed ? 'none' : 'flex',
+            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            width: collapsed ? '34px' : 'auto',
+            height: collapsed ? '34px' : 'auto',
           }}
           onMouseOver={(e) => {
             (e.currentTarget as HTMLElement).style.backgroundColor =
-              mode === 'professional' ? 'rgba(255,255,255,0.08)' : '#f1f5f9';
+              mode === 'professional' ? 'rgba(255,255,255,0.15)' : '#e2e8f0';
           }}
           onMouseOut={(e) => {
-            (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+            (e.currentTarget as HTMLElement).style.backgroundColor = collapsed
+              ? mode === 'professional'
+                ? 'rgba(255, 255, 255, 0.08)'
+                : '#f1f5f9'
+              : 'transparent';
           }}
         >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {collapsed ? <ChevronRight size={18} strokeWidth={2.5} /> : <ChevronLeft size={18} />}
         </button>
       </div>
 

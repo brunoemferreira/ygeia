@@ -2,6 +2,8 @@ import React from 'react';
 import {
   ExternalLink,
   ShieldCheck,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { UserRoleMode } from './Sidebar';
 
@@ -15,6 +17,8 @@ interface HeaderProps {
   onToggleModule: (module: 'nutrition' | 'training') => void;
   onBackToLanding: () => void;
   breadcrumbs: string;
+  sidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -24,6 +28,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleModule,
   onBackToLanding,
   breadcrumbs,
+  sidebarCollapsed,
+  onToggleSidebar,
 }) => {
   return (
     <header
@@ -40,8 +46,28 @@ export const Header: React.FC<HeaderProps> = ({
         zIndex: 40,
       }}
     >
-      {/* Left: Breadcrumbs & Status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      {/* Left: Sidebar Toggle + Breadcrumbs & Status */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+        {/* Quick Sidebar Toggle Button */}
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          title={sidebarCollapsed ? 'Expandir menu lateral (ver descrições)' : 'Recolher menu lateral'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: sidebarCollapsed ? '#ecfdf5' : '#f8fafc',
+            border: `1px solid ${sidebarCollapsed ? '#6ee7b7' : '#cbd5e1'}`,
+            color: sidebarCollapsed ? '#059669' : '#475569',
+            borderRadius: '0.375rem',
+            padding: '0.4rem',
+            cursor: 'pointer',
+          }}
+        >
+          {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+        </button>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }}>
             {mode === 'professional' ? 'Workspace' : 'Portal'}

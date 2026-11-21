@@ -161,10 +161,17 @@ export class TenantsService {
     );
 
     if (res.rows.length === 0) {
+      const tenantRow = await this.db.query(
+        'SELECT name FROM tenants WHERE id = $1 LIMIT 1',
+        [tenantId],
+        true,
+      );
+      const defaultName = tenantRow.rows[0]?.name || null;
+
       return {
         tenantId,
-        legalName: null,
-        tradeName: null,
+        legalName: defaultName,
+        tradeName: defaultName,
         taxId: null,
         phone: null,
         whatsapp: null,
@@ -243,7 +250,27 @@ export class TenantsService {
     );
 
     if (res.rows.length === 0) {
-      throw new NotFoundException('Perfil de nutricionista ainda não configurado para este usuário.');
+      const userRes = await this.db.query(
+        'SELECT full_name FROM users WHERE id = $1 LIMIT 1',
+        [userId],
+        true,
+      );
+      const defaultName = userRes.rows[0]?.full_name || '';
+
+      return {
+        id: '',
+        tenantId,
+        userId,
+        fullName: defaultName,
+        professionalName: defaultName,
+        crnNumber: '',
+        crnRegion: 'CRN-3',
+        specialties: [],
+        bio: null,
+        avatarUrl: null,
+        signatureStampUrl: null,
+        isTechnicalManager: true,
+      };
     }
 
     return res.rows[0];

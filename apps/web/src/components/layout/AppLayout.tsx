@@ -125,6 +125,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           onToggleModule={handleToggleModule}
           onBackToLanding={onBackToLanding}
           breadcrumbs={getBreadcrumbs()}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
 
         <main style={{ flex: 1 }}>
