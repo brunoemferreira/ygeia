@@ -26,14 +26,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const [mode, setMode] = useState<UserRoleMode>(initialMode);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState(
-    initialMode === 'patient' ? 'patient_diet' : 'configuracoes',
+    initialMode === 'patient' ? 'patient_diet' : 'dashboard_pacientes',
   );
 
   // Sync mode if initialMode changes
   React.useEffect(() => {
     if (initialMode) {
       setMode(initialMode);
-      setActiveItem(initialMode === 'patient' ? 'patient_diet' : 'configuracoes');
+      setActiveItem(initialMode === 'patient' ? 'patient_diet' : 'dashboard_pacientes');
     }
   }, [initialMode]);
 
@@ -68,42 +68,44 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
     // Professional breadcrumbs
     switch (activeItem) {
-      case 'cadastros_pacientes':
-        return 'Cadastros / Pacientes & Alunos';
-      case 'cadastros_agenda':
-        return 'Cadastros / Agenda & Sessões';
-      case 'cadastros_antropometria':
-        return 'Cadastros / Avaliação Física';
-      case 'cadastros_exames':
-        return 'Cadastros / Cofre de Exames AES-256';
-      case 'nutri_prescritor':
-        return 'Nutrição / Prescritor Nutricional';
-      case 'nutri_taco':
-        return 'Nutrição / Tabela TACO & Alimentos';
-      case 'nutri_receitas':
-        return 'Nutrição / Biblioteca de Receitas';
-      case 'nutri_suplementos':
-        return 'Nutrição / Suplementação & Fitoterapia';
-      case 'treino_prescritor':
-        return 'Treinamento / Prescritor de Treinos';
-      case 'treino_exercicios':
-        return 'Treinamento / Banco de Exercícios';
-      case 'treino_periodizacao':
-        return 'Treinamento / Periodização & Cargas';
-      case 'treino_cardio':
-        return 'Treinamento / Cardio & Frequência Cardíaca';
+      case 'dashboard_pacientes':
+        return 'Governança Clínica / Dashboard de Pacientes';
+      case 'rotina_agenda':
+        return 'Rotina / Agenda';
+      case 'rotina_pacientes':
+        return 'Rotina / Pacientes';
+      case 'rotina_daily':
+        return 'Rotina / Daily';
+      case 'rotina_acompanhamentos':
+        return 'Rotina / Acompanhamentos';
+      case 'rotina_chat':
+        return 'Rotina / Chat com pacientes';
+      case 'rotina_tarefas':
+        return 'Rotina / Tarefas';
+      case 'atendimento_pre':
+        return 'Atendimento / Formulário pré-consulta';
+      case 'atendimento_pos':
+        return 'Atendimento / Formulário pós-consulta';
+      case 'gestao_contas':
+        return 'Governança / Gestão de Contas';
+      case 'clube_vantagens':
+        return 'Benefícios / Clube de Vantagens';
+      case 'treino_modulo':
+        return 'Treinamento / Módulo de Treino';
       case 'configuracoes':
       case 'config_perfil':
       case 'config_whitelabel':
       case 'config_equipe':
-        return 'Configurações';
+        return 'Configurações / Preferências';
+      case 'minha_conta':
+        return 'Administração / Minha Conta Admin';
       default:
-        return 'Painel Administrativo';
+        return 'Governança Clínica / Dashboard de Pacientes';
     }
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f8f7' }}>
       {/* Retractable Left Sidebar */}
       <Sidebar
         mode={mode}

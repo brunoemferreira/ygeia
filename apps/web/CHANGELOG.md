@@ -6,6 +6,19 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-21
 
 ### Adicionado
+- **Novo Painel Administrativo Executivo (`AdminDashboard.tsx`)**:
+  - Layout dividido em 2 cards principais 50/50:
+    - **Card de Pacientes**: Busca instantânea, listagem de pacientes, status ativo e botão `+ Cadastrar paciente`.
+    - **Card de Agenda Semanal**: Régua de navegação de dias da semana interativa (`D 15` a `S 21`) com atalho de agendamento `+` e card de consulta agendada com horário e tipo.
+- **Menu Lateral Executivo com Colapso Bidirecional (`Sidebar.tsx`)**:
+  - Colapso/expansão horizontal (260px / 72px) com tooltips em modo compacto.
+  - Acordeão vertical para submenus de *Rotina* e *Atendimento*.
+  - Campo de busca rápida no menu (`Buscar no menu...`).
+  - Rodapé com selo de versão `v0.58.0`, avatar do usuário logado e botão de logout rápido.
+- **Cabeçalho Executivo com Breadcrumbs (`Header.tsx`)**:
+  - Trilha de navegação hierárquica, descrição dinâmica da tela ativa e selo de `Acesso Administrativo Exclusivo`.
+
+### Adicionado
 - **Nova Tela de Login Split-Screen (`LoginPage.tsx`)**:
   - Layout dividido em 2 colunas com Hero institucional no painel esquerdo e formulário limpo no painel direito.
   - Consumo dinâmico da paleta de cores primária e secundária configuradas nas Configurações (White Label).

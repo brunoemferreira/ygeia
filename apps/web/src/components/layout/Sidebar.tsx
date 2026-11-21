@@ -1,46 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
-  Users,
+  LayoutGrid,
   Calendar,
-  Scale,
-  ShieldCheck,
-  UtensilsCrossed,
-  BookOpen,
-  Apple,
-  Pill,
+  Users,
+  CheckSquare,
+  TrendingUp,
+  MessageSquare,
+  ListTodo,
+  FileText,
+  FileCheck,
+  CreditCard,
+  Sparkles,
   Dumbbell,
-  Video,
-  Activity,
-  HeartPulse,
-  ChevronLeft,
-  ChevronRight,
+  Settings,
+  UserCheck,
   ChevronDown,
-  Lock,
+  ChevronRight,
+  ChevronLeft,
+  LogOut,
+  Search,
+  Heart,
   Utensils,
   Droplets,
-  TrendingUp,
-  MessageCircleHeart,
+  Pill,
+  Lock,
   CalendarCheck,
-  Settings,
+  MessageCircleHeart,
 } from 'lucide-react';
 
 export type UserRoleMode = 'professional' | 'patient';
-
-interface NavItem {
-  id: string;
-  label: string;
-  icon: any;
-  badge?: string;
-}
-
-interface NavSection {
-  id: string;
-  title: string;
-  badge?: string;
-  isLicensed?: boolean;
-  items: NavItem[];
-}
 
 interface SidebarProps {
   mode: UserRoleMode;
@@ -53,10 +42,8 @@ interface SidebarProps {
     primaryColor: string;
     secondaryColor: string;
   };
-  activeModules: {
-    nutrition: boolean;
-    training: boolean;
-  };
+  activeModules?: Record<string, boolean>;
+  onLogout?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -66,97 +53,62 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeItem,
   onSelectItem,
   clinicBranding,
-  activeModules,
+  onLogout,
 }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Estado de recolhimento/expansão de cada seção do menu (Accordion)
-  const [collapsedSections, setCollapsedSections] = React.useState<Record<string, boolean>>({});
+  // Vertical accordion collapse states
+  const [expandedRotina, setExpandedRotina] = useState(true);
+  const [expandedAtendimento, setExpandedAtendimento] = useState(true);
 
-  const toggleSection = (sectionId: string) => {
-    setCollapsedSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
+  const primaryColor = clinicBranding.primaryColor || '#059669';
+
+  const handleLogoutAction = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      logout();
+    }
   };
 
-  // Estrutura de Navegação Profissional (sem o termo "Módulo")
-  const professionalSections: NavSection[] = [
-    {
-      id: 'cadastros',
-      title: 'Cadastros Gerais',
-      badge: 'Sempre Ativo',
-      items: [
-        { id: 'cadastros_pacientes', label: 'Pacientes & Alunos', icon: Users },
-        { id: 'cadastros_agenda', label: 'Agenda & Agendamentos', icon: Calendar },
-        { id: 'cadastros_antropometria', label: 'Avaliação Física & Antropometria', icon: Scale },
-        { id: 'cadastros_exames', label: 'Cofre de Exames & Laudos', icon: ShieldCheck, badge: 'AES-256' },
-      ],
-    },
-    {
-      id: 'nutricao',
-      title: 'Nutrição',
-      isLicensed: activeModules.nutrition,
-      badge: activeModules.nutrition ? 'Ativo' : 'Upgrade',
-      items: [
-        { id: 'nutri_prescritor', label: 'Prescritor Nutricional', icon: UtensilsCrossed },
-        { id: 'nutri_taco', label: 'Tabela TACO & Alimentos', icon: Apple },
-        { id: 'nutri_receitas', label: 'Biblioteca de Receitas', icon: BookOpen },
-        { id: 'nutri_suplementos', label: 'Suplementação & Fitoterapia', icon: Pill },
-      ],
-    },
-    {
-      id: 'treinamento',
-      title: 'Treinamento',
-      isLicensed: activeModules.training,
-      badge: activeModules.training ? 'Ativo' : 'Upgrade',
-      items: [
-        { id: 'treino_prescritor', label: 'Prescritor de Treinos', icon: Dumbbell },
-        { id: 'treino_exercicios', label: 'Banco de Exercícios', icon: Video },
-        { id: 'treino_periodizacao', label: 'Periodização & Volume', icon: Activity },
-        { id: 'treino_cardio', label: 'Cardio & Frequência Cardíaca', icon: HeartPulse },
-      ],
-    },
-    {
-      id: 'configuracoes',
-      title: 'Configurações',
-      badge: 'Sempre Ativo',
-      items: [
-        { id: 'configuracoes', label: 'Configurações', icon: Settings },
-      ],
-    },
+  const sidebarWidth = collapsed ? '72px' : '260px';
+
+  // Submenus de Rotina
+  const rotinaItems = [
+    { id: 'rotina_agenda', label: 'Agenda', icon: Calendar },
+    { id: 'rotina_pacientes', label: 'Pacientes', icon: Users },
+    { id: 'rotina_daily', label: 'Daily', icon: CheckSquare },
+    { id: 'rotina_acompanhamentos', label: 'Acompanhamentos', icon: TrendingUp },
+    { id: 'rotina_chat', label: 'Chat com pacientes', icon: MessageSquare },
+    { id: 'rotina_tarefas', label: 'Tarefas', icon: ListTodo },
   ];
 
-  // Patient Sidebar Structure
-  const patientSections = [
-    {
-      id: 'rotina',
-      title: 'Minha Rotina',
-      items: [
-        { id: 'patient_diet', label: 'Meu Plano de Hoje', icon: Utensils },
-        { id: 'patient_habits', label: 'Diário & Hidratação', icon: Droplets },
-        { id: 'patient_supplements', label: 'Suplementação', icon: Pill },
-      ],
-    },
-    {
-      id: 'saude',
-      title: 'Minha Saúde',
-      items: [
-        { id: 'patient_evolution', label: 'Minha Evolução', icon: TrendingUp },
-        { id: 'patient_exams', label: 'Meus Exames (AES-256)', icon: Lock, badge: 'Seguro' },
-      ],
-    },
-    {
-      id: 'atendimento',
-      title: 'Atendimento',
-      items: [
-        { id: 'patient_appointments', label: 'Minhas Consultas', icon: CalendarCheck },
-        { id: 'patient_chat', label: 'Falar com Nutricionista', icon: MessageCircleHeart },
-      ],
-    },
+  // Submenus de Atendimento
+  const atendimentoItems = [
+    { id: 'atendimento_pre', label: 'Formulário pré-consulta', icon: FileText },
+    { id: 'atendimento_pos', label: 'Formulário pós-consulta', icon: FileCheck },
   ];
 
-  const sidebarWidth = collapsed ? '72px' : '264px';
+  // Itens Diretos
+  const directItems = [
+    { id: 'gestao_contas', label: 'Gestão de Contas', icon: CreditCard },
+    { id: 'clube_vantagens', label: 'Clube de Vantagens', icon: Sparkles },
+    { id: 'treino_modulo', label: 'Módulo de Treino', icon: Dumbbell },
+    { id: 'configuracoes', label: 'Configurações', icon: Settings },
+    { id: 'minha_conta', label: 'Minha Conta Admin', icon: UserCheck },
+  ];
+
+  // Itens do Paciente
+  const patientItems = [
+    { id: 'patient_diet', label: 'Meu Plano de Hoje', icon: Utensils },
+    { id: 'patient_habits', label: 'Diário & Hidratação', icon: Droplets },
+    { id: 'patient_supplements', label: 'Suplementação', icon: Pill },
+    { id: 'patient_evolution', label: 'Minha Evolução', icon: TrendingUp },
+    { id: 'patient_exams', label: 'Meus Exames (AES-256)', icon: Lock },
+    { id: 'patient_appointments', label: 'Minhas Consultas', icon: CalendarCheck },
+    { id: 'patient_chat', label: 'Falar com Nutricionista', icon: MessageCircleHeart },
+  ];
 
   return (
     <aside
@@ -166,525 +118,554 @@ export const Sidebar: React.FC<SidebarProps> = ({
         height: '100vh',
         position: 'sticky',
         top: 0,
-        backgroundColor: mode === 'professional' ? '#090d16' : '#ffffff',
-        borderRight: mode === 'professional' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
-        color: mode === 'professional' ? '#f1f5f9' : '#0f172a',
+        backgroundColor: '#ffffff',
+        borderRight: '1px solid #e2e8f0',
         display: 'flex',
         flexDirection: 'column',
         transition: 'width 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         zIndex: 50,
-        boxShadow: mode === 'patient' ? '2px 0 12px rgba(0,0,0,0.03)' : 'none',
         overflow: 'hidden',
+        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
       }}
     >
-      {/* Brand Header */}
+      {/* ========================================================
+          1. TOPO: LOGO DA MARCA & BOTÃO RETRÁTIL HORIZONTAL
+         ======================================================== */}
       <div
         style={{
-          padding: collapsed ? '1rem 0.5rem' : '1.25rem 1.25rem',
-          borderBottom: mode === 'professional' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #f1f5f9',
+          padding: collapsed ? '1.1rem 0.5rem' : '1.1rem 1rem',
+          borderBottom: '1px solid #f1f5f9',
           display: 'flex',
-          flexDirection: collapsed ? 'column' : 'row',
           alignItems: 'center',
           justifyContent: collapsed ? 'center' : 'space-between',
-          gap: collapsed ? '0.75rem' : 0,
         }}
       >
         {!collapsed ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', overflow: 'hidden' }}>
             <div
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '10px',
-                background: clinicBranding.primaryColor || '#059669',
-                color: 'white',
+                width: '34px',
+                height: '34px',
+                borderRadius: '9px',
+                background: primaryColor,
+                color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: '1.125rem',
                 flexShrink: 0,
               }}
             >
-              Υ
+              <Heart size={18} fill="#ffffff" color="#ffffff" />
             </div>
             <div style={{ overflow: 'hidden' }}>
               <div
                 style={{
                   fontSize: '0.9375rem',
                   fontWeight: 800,
+                  color: '#0f172a',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
                   overflow: 'hidden',
-                  color: mode === 'professional' ? '#ffffff' : '#0f172a',
+                  lineHeight: 1.2,
                 }}
               >
-                {clinicBranding.clinicName || 'Ygeía SaaS'}
+                {clinicBranding.clinicName || 'Better Health'}
               </div>
               <div
                 style={{
                   fontSize: '0.6875rem',
-                  color: mode === 'professional' ? '#94a3b8' : '#64748b',
-                  fontWeight: 600,
+                  color: primaryColor,
+                  fontWeight: 700,
                 }}
               >
-                {mode === 'professional' ? 'Workspace Clínico' : 'Portal do Paciente'}
+                {mode === 'professional' ? 'Admin Console' : 'Portal do Paciente'}
               </div>
             </div>
           </div>
         ) : (
           <div
             onClick={onToggleCollapse}
-            title="Clique para expandir o menu lateral"
+            title="Expandir Menu Lateral"
             style={{
               width: '36px',
               height: '36px',
-              borderRadius: '10px',
-              background: clinicBranding.primaryColor || '#059669',
-              color: 'white',
+              borderRadius: '9px',
+              background: primaryColor,
+              color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '1.125rem',
               cursor: 'pointer',
-              transition: 'transform 0.15s ease',
             }}
           >
-            Υ
+            <Heart size={18} fill="#ffffff" color="#ffffff" />
           </div>
         )}
 
-        {/* Expand / Collapse Button (ALWAYS VISIBLE AND ACCESSIBLE) */}
+        {/* Botão de Contração/Expansão Horizontal */}
         <button
+          type="button"
           onClick={onToggleCollapse}
-          title={collapsed ? 'Expandir Menu (Ver Descrições)' : 'Recolher Menu'}
+          title={collapsed ? 'Expandir Menu' : 'Recolher Menu'}
           style={{
-            background: collapsed
-              ? mode === 'professional'
-                ? 'rgba(255, 255, 255, 0.08)'
-                : '#f1f5f9'
-              : 'transparent',
-            border: collapsed
-              ? mode === 'professional'
-                ? '1px solid rgba(255, 255, 255, 0.12)'
-                : '1px solid #cbd5e1'
-              : 'none',
-            color: mode === 'professional' ? '#34d399' : '#059669',
+            background: 'transparent',
+            border: 'none',
+            color: '#64748b',
             cursor: 'pointer',
-            padding: '0.375rem',
+            padding: '0.35rem',
             borderRadius: '0.375rem',
-            display: 'flex',
+            display: collapsed ? 'none' : 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: collapsed ? '34px' : 'auto',
-            height: collapsed ? '34px' : 'auto',
+            transition: 'background 0.15s ease',
           }}
-          onMouseOver={(e) => {
-            (e.currentTarget as HTMLElement).style.backgroundColor =
-              mode === 'professional' ? 'rgba(255,255,255,0.15)' : '#e2e8f0';
-          }}
-          onMouseOut={(e) => {
-            (e.currentTarget as HTMLElement).style.backgroundColor = collapsed
-              ? mode === 'professional'
-                ? 'rgba(255, 255, 255, 0.08)'
-                : '#f1f5f9'
-              : 'transparent';
-          }}
+          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
+          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
         >
-          {collapsed ? <ChevronRight size={18} strokeWidth={2.5} /> : <ChevronLeft size={18} />}
+          <ChevronLeft size={16} />
         </button>
       </div>
 
-      {/* Navigation Menu List */}
+      {/* ========================================================
+          2. CAMPO DE BUSCA NO MENU (Estilo do Mockup)
+         ======================================================== */}
+      {!collapsed && mode === 'professional' && (
+        <div style={{ padding: '0.875rem 1rem 0.25rem 1rem' }}>
+          <div style={{ position: 'relative' }}>
+            <Search
+              size={14}
+              style={{
+                position: 'absolute',
+                left: '0.65rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: primaryColor,
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Buscar no menu..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.45rem 0.65rem 0.45rem 2.1rem',
+                borderRadius: '0.5rem',
+                border: `1.5px solid ${primaryColor}60`,
+                fontSize: '0.75rem',
+                color: '#334155',
+                outline: 'none',
+                boxSizing: 'border-box',
+                backgroundColor: '#ffffff',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+              onBlur={(e) => (e.target.style.borderColor = `${primaryColor}60`)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================
+          3. LISTA DE NAVEGAÇÃO
+         ======================================================== */}
       <div
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: collapsed ? '1rem 0.5rem' : '1rem 0.75rem',
+          padding: collapsed ? '0.75rem 0.35rem' : '0.75rem 0.75rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.25rem',
+          gap: '0.25rem',
         }}
       >
         {mode === 'professional' ? (
-          professionalSections.map((section) => {
-            const isLocked = section.isLicensed === false;
-            const isSectionCollapsed = !!collapsedSections[section.id];
+          <>
+            {/* Categoria: GOVERNANÇA & CLÍNICA */}
+            {!collapsed && (
+              <div
+                style={{
+                  fontSize: '0.625rem',
+                  fontWeight: 800,
+                  color: '#94a3b8',
+                  letterSpacing: '0.06em',
+                  padding: '0.5rem 0.6rem 0.25rem 0.6rem',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Governança & Clínica
+              </div>
+            )}
 
-            return (
-              <div key={section.id}>
-                {!collapsed ? (
-                  <button
-                    type="button"
-                    onClick={() => toggleSection(section.id)}
-                    title={isSectionCollapsed ? `Expandir ${section.title}` : `Recolher ${section.title}`}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0.35rem 0.5rem',
-                      marginBottom: '0.25rem',
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      borderRadius: '0.375rem',
-                      textAlign: 'left',
-                      transition: 'background 0.15s ease',
-                    }}
-                    onMouseOver={(e) => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor =
-                        mode === 'professional' ? 'rgba(255,255,255,0.06)' : '#f1f5f9';
-                    }}
-                    onMouseOut={(e) => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                      {isSectionCollapsed ? (
-                        <ChevronRight size={13} color={mode === 'professional' ? '#64748b' : '#94a3b8'} />
-                      ) : (
-                        <ChevronDown size={13} color={mode === 'professional' ? '#64748b' : '#94a3b8'} />
-                      )}
-                      <span
-                        style={{
-                          fontSize: '0.6875rem',
-                          fontWeight: 800,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                          color: mode === 'professional' ? '#94a3b8' : '#64748b',
-                        }}
-                      >
-                        {section.title}
-                      </span>
-                    </div>
-                    {section.badge && (
-                      <span
-                        style={{
-                          fontSize: '0.625rem',
-                          fontWeight: 700,
-                          padding: '0.125rem 0.375rem',
-                          borderRadius: '9999px',
-                          background:
-                            section.badge === 'Upgrade'
-                              ? 'rgba(234, 88, 12, 0.15)'
-                              : 'rgba(5, 150, 105, 0.15)',
-                          color: section.badge === 'Upgrade' ? '#ea580c' : '#10b981',
-                        }}
-                      >
-                        {section.badge}
-                      </span>
-                    )}
-                  </button>
-                ) : (
-                  <div
-                    style={{
-                      height: '1px',
-                      background: mode === 'professional' ? 'rgba(255,255,255,0.08)' : '#e2e8f0',
-                      margin: '0.375rem 0.25rem',
-                    }}
-                  />
+            {/* Item Ativo Principal: Dashboard de Pacientes */}
+            <button
+              type="button"
+              onClick={() => onSelectItem('dashboard_pacientes')}
+              title={collapsed ? 'Dashboard de Pacientes' : undefined}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.625rem',
+                padding: collapsed ? '0.65rem 0' : '0.55rem 0.75rem',
+                borderRadius: '0.5rem',
+                border: activeItem === 'dashboard_pacientes' ? `1px solid ${primaryColor}40` : '1px solid transparent',
+                backgroundColor: activeItem === 'dashboard_pacientes' ? '#ecfdf5' : 'transparent',
+                color: activeItem === 'dashboard_pacientes' ? primaryColor : '#475569',
+                fontWeight: activeItem === 'dashboard_pacientes' ? 700 : 500,
+                fontSize: '0.8125rem',
+                cursor: 'pointer',
+                width: '100%',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                textAlign: 'left',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseOver={(e) => {
+                if (activeItem !== 'dashboard_pacientes') {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (activeItem !== 'dashboard_pacientes') {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              <LayoutGrid size={16} strokeWidth={2.2} style={{ flexShrink: 0 }} />
+              {!collapsed && <span>Dashboard de Pacientes</span>}
+            </button>
+
+            {/* Accordion Vertical: Rotina */}
+            <div style={{ marginTop: '0.25rem' }}>
+              <button
+                type="button"
+                onClick={() => setExpandedRotina(!expandedRotina)}
+                title={collapsed ? 'Rotina' : undefined}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: collapsed ? 'center' : 'space-between',
+                  width: '100%',
+                  padding: collapsed ? '0.65rem 0' : '0.5rem 0.75rem',
+                  background: 'transparent',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  color: '#334155',
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                  <Calendar size={16} color="#64748b" style={{ flexShrink: 0 }} />
+                  {!collapsed && <span>Rotina</span>}
+                </div>
+                {!collapsed && (
+                  <div>{expandedRotina ? <ChevronDown size={14} color="#94a3b8" /> : <ChevronRight size={14} color="#94a3b8" />}</div>
                 )}
+              </button>
 
-                {/* Section Items: recolhe se o menu estiver expandido e a seção marcada como recolhida */}
-                {(!isSectionCollapsed || collapsed) && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  {section.items.map((item) => {
-                    const Icon = item.icon;
+              {/* Sub-itens de Rotina (Expandíveis/Contráteis Verticalmente) */}
+              {expandedRotina && !collapsed && (
+                <div style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.15rem' }}>
+                  {rotinaItems.map((item) => {
                     const isActive = activeItem === item.id;
-
                     return (
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => {
-                          if (!isLocked) onSelectItem(item.id);
-                        }}
-                        disabled={isLocked}
-                        title={collapsed ? item.label : undefined}
+                        onClick={() => onSelectItem(item.id)}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.75rem',
-                          padding: collapsed ? '0.625rem' : '0.625rem 0.75rem',
-                          borderRadius: '0.5rem',
+                          gap: '0.5rem',
+                          padding: '0.4rem 0.65rem',
+                          borderRadius: '0.375rem',
                           border: 'none',
-                          cursor: isLocked ? 'not-allowed' : 'pointer',
-                          background: isActive
-                            ? mode === 'professional'
-                              ? 'rgba(5, 150, 105, 0.2)'
-                              : '#ecfdf5'
-                            : 'transparent',
-                          color: isLocked
-                            ? '#475569'
-                            : isActive
-                            ? mode === 'professional'
-                              ? '#34d399'
-                              : '#059669'
-                            : mode === 'professional'
-                            ? '#cbd5e1'
-                            : '#475569',
+                          background: isActive ? '#ecfdf5' : 'transparent',
+                          color: isActive ? primaryColor : '#64748b',
+                          fontSize: '0.75rem',
                           fontWeight: isActive ? 700 : 500,
-                          fontSize: '0.8125rem',
-                          justifyContent: collapsed ? 'center' : 'flex-start',
-                          transition: 'all 0.15s ease',
-                          width: '100%',
+                          cursor: 'pointer',
                           textAlign: 'left',
-                          opacity: isLocked ? 0.45 : 1,
+                          width: '100%',
                         }}
                         onMouseOver={(e) => {
-                          if (!isActive && !isLocked) {
-                            (e.currentTarget as HTMLElement).style.backgroundColor =
-                              mode === 'professional' ? 'rgba(255, 255, 255, 0.05)' : '#f8fafc';
-                          }
+                          if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
                         }}
                         onMouseOut={(e) => {
-                          if (!isActive && !isLocked) {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                          }
+                          if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
                         }}
                       >
-                        <Icon size={18} strokeWidth={1.75} style={{ flexShrink: 0 }} />
-                        {!collapsed && (
-                          <span
-                            style={{
-                              flex: 1,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {item.label}
-                          </span>
-                        )}
-                        {!collapsed && item.badge && (
-                          <span
-                            style={{
-                              fontSize: '0.625rem',
-                              fontWeight: 700,
-                              padding: '0.125rem 0.375rem',
-                              borderRadius: '4px',
-                              background: 'rgba(5, 150, 105, 0.2)',
-                              color: '#34d399',
-                            }}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                        {!collapsed && isLocked && <Lock size={12} color="#64748b" />}
+                        <span>{item.label}</span>
                       </button>
                     );
                   })}
                 </div>
+              )}
+            </div>
+
+            {/* Accordion Vertical: Atendimento */}
+            <div style={{ marginTop: '0.25rem' }}>
+              <button
+                type="button"
+                onClick={() => setExpandedAtendimento(!expandedAtendimento)}
+                title={collapsed ? 'Atendimento' : undefined}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: collapsed ? 'center' : 'space-between',
+                  width: '100%',
+                  padding: collapsed ? '0.65rem 0' : '0.5rem 0.75rem',
+                  background: 'transparent',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  color: '#334155',
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                  <FileText size={16} color="#64748b" style={{ flexShrink: 0 }} />
+                  {!collapsed && <span>Atendimento</span>}
+                </div>
+                {!collapsed && (
+                  <div>{expandedAtendimento ? <ChevronDown size={14} color="#94a3b8" /> : <ChevronRight size={14} color="#94a3b8" />}</div>
                 )}
-              </div>
-            );
-          })
+              </button>
+
+              {/* Sub-itens de Atendimento */}
+              {expandedAtendimento && !collapsed && (
+                <div style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.15rem' }}>
+                  {atendimentoItems.map((item) => {
+                    const isActive = activeItem === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => onSelectItem(item.id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          padding: '0.4rem 0.65rem',
+                          borderRadius: '0.375rem',
+                          border: 'none',
+                          background: isActive ? '#ecfdf5' : 'transparent',
+                          color: isActive ? primaryColor : '#64748b',
+                          fontSize: '0.75rem',
+                          fontWeight: isActive ? 700 : 500,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          width: '100%',
+                        }}
+                        onMouseOver={(e) => {
+                          if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                        }}
+                        onMouseOut={(e) => {
+                          if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Linha Divisória */}
+            <div style={{ height: '1px', backgroundColor: '#f1f5f9', margin: '0.5rem 0.25rem' }} />
+
+            {/* Itens Diretos (Gestão de Contas, Clube, Treino, Configurações, Minha Conta) */}
+            {directItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeItem === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelectItem(item.id)}
+                  title={collapsed ? item.label : undefined}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.625rem',
+                    padding: collapsed ? '0.65rem 0' : '0.55rem 0.75rem',
+                    borderRadius: '0.5rem',
+                    border: 'none',
+                    backgroundColor: isActive ? '#ecfdf5' : 'transparent',
+                    color: isActive ? primaryColor : '#475569',
+                    fontWeight: isActive ? 700 : 500,
+                    fontSize: '0.8125rem',
+                    cursor: 'pointer',
+                    width: '100%',
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseOver={(e) => {
+                    if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <Icon size={16} strokeWidth={isActive ? 2.2 : 1.75} style={{ flexShrink: 0 }} />
+                  {!collapsed && <span>{item.label}</span>}
+                </button>
+              );
+            })}
+          </>
         ) : (
-          patientSections.map((section) => {
-            const isSectionCollapsed = !!collapsedSections[section.id];
-
+          /* Navegação do Paciente */
+          patientItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeItem === item.id;
             return (
-              <div key={section.id}>
-                {!collapsed ? (
-                  <button
-                    type="button"
-                    onClick={() => toggleSection(section.id)}
-                    title={isSectionCollapsed ? `Expandir ${section.title}` : `Recolher ${section.title}`}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.375rem',
-                      padding: '0.35rem 0.5rem',
-                      marginBottom: '0.25rem',
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      borderRadius: '0.375rem',
-                      textAlign: 'left',
-                      transition: 'background 0.15s ease',
-                    }}
-                    onMouseOver={(e) => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9';
-                    }}
-                    onMouseOut={(e) => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    {isSectionCollapsed ? (
-                      <ChevronRight size={13} color="#94a3b8" />
-                    ) : (
-                      <ChevronDown size={13} color="#94a3b8" />
-                    )}
-                    <span
-                      style={{
-                        fontSize: '0.6875rem',
-                        fontWeight: 800,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        color: '#64748b',
-                      }}
-                    >
-                      {section.title}
-                    </span>
-                  </button>
-                ) : (
-                  <div
-                    style={{
-                      height: '1px',
-                      background: '#e2e8f0',
-                      margin: '0.375rem 0.25rem',
-                    }}
-                  />
-                )}
-
-                {/* Patient Section Items */}
-                {(!isSectionCollapsed || collapsed) && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    {section.items.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = activeItem === item.id;
-
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => onSelectItem(item.id)}
-                          title={collapsed ? item.label : undefined}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.75rem',
-                            padding: collapsed ? '0.625rem' : '0.625rem 0.75rem',
-                            borderRadius: '0.5rem',
-                            border: 'none',
-                            cursor: 'pointer',
-                            background: isActive ? '#ecfdf5' : 'transparent',
-                            color: isActive ? '#059669' : '#334155',
-                            fontWeight: isActive ? 700 : 500,
-                            fontSize: '0.8125rem',
-                            justifyContent: collapsed ? 'center' : 'flex-start',
-                            transition: 'all 0.15s ease',
-                            width: '100%',
-                            textAlign: 'left',
-                          }}
-                          onMouseOver={(e) => {
-                            if (!isActive) {
-                              (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                            }
-                          }}
-                          onMouseOut={(e) => {
-                            if (!isActive) {
-                              (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                            }
-                          }}
-                        >
-                          <Icon size={18} strokeWidth={1.75} style={{ flexShrink: 0 }} />
-                          {!collapsed && (
-                            <span
-                              style={{
-                                flex: 1,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                              }}
-                            >
-                              {item.label}
-                            </span>
-                          )}
-                          {!collapsed && item.badge && (
-                            <span
-                              style={{
-                                fontSize: '0.625rem',
-                                fontWeight: 700,
-                                padding: '0.125rem 0.375rem',
-                                borderRadius: '4px',
-                                background: '#ecfdf5',
-                                color: '#059669',
-                              }}
-                            >
-                              {item.badge}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectItem(item.id)}
+                title={collapsed ? item.label : undefined}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.625rem',
+                  padding: collapsed ? '0.65rem 0' : '0.55rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'none',
+                  backgroundColor: isActive ? '#ecfdf5' : 'transparent',
+                  color: isActive ? primaryColor : '#475569',
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '0.8125rem',
+                  cursor: 'pointer',
+                  width: '100%',
+                  justifyContent: collapsed ? 'center' : 'flex-start',
+                  textAlign: 'left',
+                }}
+              >
+                <Icon size={16} style={{ flexShrink: 0 }} />
+                {!collapsed && <span>{item.label}</span>}
+              </button>
             );
           })
         )}
       </div>
 
-      {/* Footer Profile Box */}
+      {/* ========================================================
+          4. RODAPÉ DO SIDEBAR: VERSÃO & CARD DO USUÁRIO
+         ======================================================== */}
       <div
         style={{
-          padding: '1rem',
-          borderTop: mode === 'professional' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #f1f5f9',
+          borderTop: '1px solid #f1f5f9',
+          padding: collapsed ? '0.75rem 0.35rem' : '0.75rem 0.875rem',
+          backgroundColor: '#ffffff',
           display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          backgroundColor: mode === 'professional' ? 'rgba(0,0,0,0.2)' : '#fafafa',
+          flexDirection: 'column',
+          gap: '0.625rem',
         }}
       >
-        <div
-          style={{
-            width: '34px',
-            height: '34px',
-            borderRadius: '50%',
-            background: mode === 'professional' ? '#1e293b' : '#e0f2fe',
-            color: mode === 'professional' ? '#34d399' : '#0284c7',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 700,
-            fontSize: '0.8125rem',
-            flexShrink: 0,
-            border: '1px solid rgba(0,0,0,0.05)',
-          }}
-        >
-          {mode === 'professional'
-            ? user?.fullName
-              ? user.fullName
-                  .split(' ')
-                  .map((n) => n[0])
-                  .slice(0, 2)
-                  .join('')
-              : 'DR'
-            : 'GR'}
-        </div>
-
+        {/* Badge da Versão */}
         {!collapsed && (
-          <div style={{ overflow: 'hidden', flex: 1 }}>
-            <div
-              style={{
-                fontSize: '0.8125rem',
-                fontWeight: 700,
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                color: mode === 'professional' ? '#ffffff' : '#0f172a',
-              }}
-            >
-              {mode === 'professional' ? user?.fullName || 'Dra. Sofia Alencar' : 'Gabriel Rodrigues'}
-            </div>
-            <div
-              style={{
-                fontSize: '0.6875rem',
-                color: mode === 'professional' ? '#94a3b8' : '#64748b',
-              }}
-            >
-              {mode === 'professional'
-                ? user?.role === 'CLINIC_OWNER'
-                  ? 'Proprietário(a)'
-                  : 'Nutricionista Clínico'
-                : 'Plano Hipertrofia'}
-            </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              fontSize: '0.6875rem',
+              color: '#64748b',
+              padding: '0 0.25rem',
+            }}
+          >
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+            <span>Versão v0.58.0</span>
           </div>
         )}
+
+        {/* Card do Usuário */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'space-between',
+            gap: '0.5rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                backgroundColor: '#f1f5f9',
+                color: '#334155',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                border: '1px solid #e2e8f0',
+                flexShrink: 0,
+              }}
+            >
+              {user?.fullName
+                ? user.fullName
+                    .split(' ')
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join('')
+                : 'BF'}
+            </div>
+
+            {!collapsed && (
+              <div style={{ overflow: 'hidden' }}>
+                <div
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {user?.fullName || 'Bruno Ferreira'}
+                </div>
+                <div style={{ fontSize: '0.6875rem', color: '#64748b' }}>
+                  Administrador • ADMIN
+                </div>
+              </div>
+            )}
+          </div>
+
+          {!collapsed && (
+            <button
+              type="button"
+              onClick={handleLogoutAction}
+              title="Encerrar sessão"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                padding: '0.35rem',
+                borderRadius: '0.375rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'color 0.15s ease',
+              }}
+              onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = '#dc2626')}
+              onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#94a3b8')}
+            >
+              <LogOut size={15} />
+            </button>
+          )}
+        </div>
       </div>
     </aside>
   );

@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import {
-  LogOut,
-  Plus,
   Search,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { SettingsModule } from '../settings/SettingsModule';
+import { getStoredBranding } from '../../utils/branding';
 
 export interface AdminDashboardProps {
   onBackToHome?: () => void;
@@ -14,407 +18,451 @@ export interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  activeItem = 'configuracoes',
-  hideHeader = false,
+  activeItem = 'dashboard_pacientes',
 }) => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const branding = getStoredBranding();
+  const primaryColor = branding.primaryColor || '#059669';
 
-  // Search in Patients CRM
+  // State de busca de paciente
   const [patientSearch, setPatientSearch] = useState('');
+  const [selectedDay, setSelectedDay] = useState(21);
 
-  // Mock patient list
-  const mockPatients = [
+  // Lista de pacientes
+  const [patients] = useState([
     {
       id: '1',
-      name: 'Gabriel Rodrigues',
-      email: 'gabriel.rodrigues@email.com',
-      phone: '(11) 98765-1122',
-      goal: 'Hipertrofia & Ganho de Massa',
+      name: user?.fullName || 'Bruno Eduardo de Moura Ferreira',
+      initials: 'BF',
+      email: user?.email || 'brunoemf@gmail.com',
+      phone: '(19) 99292-2000',
+      goal: 'Performance & Modulação Metabólica',
       status: 'Ativo',
       lastConsult: '21/11/2026',
-      tags: ['Nutrição', 'Treino', 'Bioimpedância'],
     },
+  ]);
+
+  // Lista de agendamentos
+  const [appointments] = useState([
     {
-      id: '2',
-      name: 'Mariana Costa Lima',
-      email: 'mariana.costa@email.com',
-      phone: '(11) 99887-3344',
-      goal: 'Emagrecimento Saudável',
-      status: 'Ativo',
-      lastConsult: '18/11/2026',
-      tags: ['Nutrição', 'Exames AES-256'],
+      id: '1',
+      patientName: user?.fullName || 'Bruno Eduardo de Moura Ferreira',
+      status: 'Agendado',
+      type: 'Agendamento',
+      dayLabel: 'Amanhã',
+      time: '08:00',
     },
-    {
-      id: '3',
-      name: 'Lucas Ferreira Silveira',
-      email: 'lucas.silveira@email.com',
-      phone: '(11) 97766-5544',
-      goal: 'Performance Esportiva (Corrida)',
-      status: 'Retorno Pendente',
-      lastConsult: '04/11/2026',
-      tags: ['Nutrição', 'Treino Cardio'],
-    },
+  ]);
+
+  // Dias da semana para a régua de calendário do mockup
+  const weekDays = [
+    { label: 'D', day: 15, hasDot: false },
+    { label: 'S', day: 16, hasDot: false },
+    { label: 'T', day: 17, hasDot: false },
+    { label: 'Q', day: 18, hasDot: true },
+    { label: 'Q', day: 19, hasDot: false },
+    { label: 'S', day: 20, hasDot: false },
+    { label: 'S', day: 21, hasDot: false, isToday: true },
   ];
 
+  const filteredPatients = patients.filter((p) =>
+    p.name.toLowerCase().includes(patientSearch.toLowerCase()),
+  );
+
   return (
-    <div style={{ minHeight: '100%', backgroundColor: '#f8fafc', color: '#0f172a' }}>
-      {/* Standalone Header (only shown if not embedded inside AppLayout) */}
-      {!hideHeader && (
-        <header
+    <div
+      style={{
+        minHeight: '100%',
+        backgroundColor: '#f4f8f7',
+        padding: '1.75rem 2rem',
+        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+      }}
+    >
+      {/* ========================================================
+          VIEW: DASHBOARD DE PACIENTES (EXATAMENTE COMO NO MOCKUP)
+         ======================================================== */}
+      {activeItem === 'dashboard_pacientes' && (
+        <div
           style={{
-            background: 'white',
-            borderBottom: '1px solid #e2e8f0',
-            padding: '0.875rem 1.5rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))',
+            gap: '1.5rem',
+            alignItems: 'start',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                background: '#059669',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: '1.25rem',
-              }}
-            >
-              Υ
-            </div>
+          {/* ====================================================
+              CARD 1 (ESQUERDA): BUSCA E LISTA DE PACIENTES
+             ==================================================== */}
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '1rem',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: '440px',
+              justifyContent: 'space-between',
+            }}
+          >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <h1 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 800, color: '#0f172a' }}>
-                  {user?.clinicName || 'Consultório de Nutrição'}
-                </h1>
-                <span
+              {/* Campo de Busca de Paciente */}
+              <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+                <Search
+                  size={16}
                   style={{
-                    background: '#ecfdf5',
-                    color: '#065f46',
-                    fontSize: '0.6875rem',
-                    fontWeight: 700,
-                    padding: '0.125rem 0.5rem',
-                    borderRadius: '9999px',
-                    border: '1px solid #a7f3d0',
+                    position: 'absolute',
+                    left: '0.875rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#94a3b8',
                   }}
-                >
-                  RLS ATIVO
-                </span>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>
-                Painel do Proprietário • {user?.fullName || 'Nutricionista'}
-              </p>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              onClick={logout}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                background: '#fff1f2',
-                border: '1px solid #fecdd3',
-                borderRadius: '0.5rem',
-                padding: '0.5rem 0.875rem',
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-                color: '#be123c',
-                cursor: 'pointer',
-              }}
-            >
-              <LogOut size={15} />
-              <span>Sair</span>
-            </button>
-          </div>
-        </header>
-      )}
-
-      {/* Main Container */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-        {/* ========================================================
-            VIEW: MÓDULO CADASTROS / PACIENTES & ALUNOS
-           ======================================================== */}
-        {activeItem === 'cadastros_pacientes' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ fontSize: '1.375rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
-                  👥 Gestão de Pacientes & Alunos
-                </h2>
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#64748b' }}>
-                  Base unificada compartilhada entre os módulos de Nutrição e Treinamento.
-                </p>
-              </div>
-              <button
-                type="button"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  background: '#059669',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  padding: '0.625rem 1.125rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
-              >
-                <Plus size={16} />
-                <span>Novo Paciente / Aluno</span>
-              </button>
-            </div>
-
-            {/* Filter & Search Bar */}
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', background: 'white', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-              <div style={{ position: 'relative', flex: 1 }}>
-                <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                />
                 <input
                   type="text"
-                  placeholder="Buscar paciente por nome, CPF ou e-mail..."
+                  placeholder="Buscar paciente por nome ou chave..."
                   value={patientSearch}
                   onChange={(e) => setPatientSearch(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.75rem 0.5rem 2.25rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid #cbd5e1',
+                    padding: '0.75rem 1rem 0.75rem 2.6rem',
+                    borderRadius: '0.625rem',
+                    border: '1px solid #e2e8f0',
                     fontSize: '0.875rem',
+                    color: '#0f172a',
+                    outline: 'none',
                     boxSizing: 'border-box',
+                    transition: 'border-color 0.15s ease',
                   }}
+                  onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+                  onBlur={(e) => (e.target.style.borderColor = '#e2e8f0')}
                 />
               </div>
+
+              {/* Lista de Pacientes Encontrados */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {filteredPatients.map((patient) => (
+                  <div
+                    key={patient.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.875rem',
+                      padding: '0.75rem',
+                      borderRadius: '0.5rem',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.15s ease',
+                    }}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                    onClick={() => toast.info(`Prontuário de ${patient.name} selecionado.`)}
+                  >
+                    {/* Avatar em Círculo com Iniciais */}
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        backgroundColor: '#e2e8f0',
+                        color: '#475569',
+                        fontWeight: 700,
+                        fontSize: '0.8125rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {patient.initials}
+                    </div>
+
+                    {/* Nome do Paciente */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: '0.875rem',
+                          color: '#0f172a',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {patient.name}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Patients CRM Table */}
-            <div style={{ background: 'white', borderRadius: '1rem', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '0.875rem 1rem' }}>Paciente / Contato</th>
-                    <th style={{ padding: '0.875rem 1rem' }}>Objetivo Clínico</th>
-                    <th style={{ padding: '0.875rem 1rem' }}>Último Atendimento</th>
-                    <th style={{ padding: '0.875rem 1rem' }}>Módulos Vinculados</th>
-                    <th style={{ padding: '0.875rem 1rem', textAlign: 'right' }}>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockPatients.map((p) => (
-                    <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '1rem' }}>
-                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{p.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{p.email} • {p.phone}</div>
-                      </td>
-                      <td style={{ padding: '1rem' }}>
-                        <span style={{ fontWeight: 600, color: '#334155' }}>{p.goal}</span>
-                      </td>
-                      <td style={{ padding: '1rem', fontSize: '0.8125rem', color: '#64748b' }}>
-                        {p.lastConsult}
-                      </td>
-                      <td style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
-                          {p.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              style={{
-                                fontSize: '0.6875rem',
-                                fontWeight: 700,
-                                background: tag === 'Nutrição' ? '#ecfdf5' : tag === 'Treino' ? '#eff6ff' : '#f8fafc',
-                                color: tag === 'Nutrição' ? '#065f46' : tag === 'Treino' ? '#1d4ed8' : '#475569',
-                                border: '1px solid rgba(0,0,0,0.06)',
-                                padding: '0.125rem 0.5rem',
-                                borderRadius: '4px',
-                              }}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td style={{ padding: '1rem', textAlign: 'right' }}>
-                        <button
-                          type="button"
+            {/* Rodapé do Card: Contador & Ações */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingTop: '1.25rem',
+                borderTop: '1px solid #f1f5f9',
+                marginTop: '1.5rem',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+              }}
+            >
+              <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>
+                {patients.length} pacientes no total
+              </span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => toast.info('Carregando base completa de pacientes...')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: primaryColor,
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                  }}
+                >
+                  <span>Ver todos os pacientes</span>
+                  <ArrowRight size={14} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => toast.success('Formulário de cadastro aberto com sucesso.')}
+                  style={{
+                    backgroundColor: primaryColor,
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    padding: '0.55rem 1.15rem',
+                    fontSize: '0.8125rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.375rem',
+                    boxShadow: `0 2px 8px ${primaryColor}35`,
+                  }}
+                >
+                  <Plus size={15} />
+                  <span>Cadastrar paciente</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ====================================================
+              CARD 2 (DIREITA): AGENDA SEMANAL & ATENDIMENTOS
+             ==================================================== */}
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '1rem',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: '440px',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div>
+              {/* Régua de Navegação Semanal de Dias */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingBottom: '1.25rem',
+                  borderBottom: '1px solid #f1f5f9',
+                  marginBottom: '1.5rem',
+                  gap: '0.35rem',
+                }}
+              >
+                {/* Seta Esquerda */}
+                <button
+                  type="button"
+                  onClick={() => toast.info('Navegando para a semana anterior')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                    padding: '0.35rem',
+                    borderRadius: '0.375rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                {/* Dias da Semana (D S T Q Q S S) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flex: 1, justifyContent: 'space-around' }}>
+                  {weekDays.map((w) => {
+                    const isSelected = selectedDay === w.day;
+                    return (
+                      <button
+                        key={w.day}
+                        type="button"
+                        onClick={() => setSelectedDay(w.day)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '0.2rem',
+                          background: isSelected ? '#ecfdf5' : 'transparent',
+                          border: isSelected ? `1px solid ${primaryColor}40` : '1px solid transparent',
+                          borderRadius: '0.5rem',
+                          padding: '0.4rem 0.55rem',
+                          cursor: 'pointer',
+                          minWidth: '34px',
+                        }}
+                      >
+                        <span style={{ fontSize: '0.6875rem', color: isSelected ? primaryColor : '#64748b', fontWeight: 600 }}>
+                          {w.label}
+                        </span>
+                        <span
                           style={{
-                            background: '#f1f5f9',
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '0.375rem',
-                            padding: '0.375rem 0.75rem',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            color: '#334155',
-                            cursor: 'pointer',
+                            fontSize: '0.8125rem',
+                            fontWeight: isSelected ? 800 : 600,
+                            color: isSelected ? primaryColor : '#0f172a',
                           }}
                         >
-                          Ver Prontuário →
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================
-            VIEW: MÓDULO NUTRIÇÃO / PRESCRITOR
-           ======================================================== */}
-        {(activeItem.startsWith('nutri_')) && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ fontSize: '1.375rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
-                  🥗 Prescritor Nutricional & Tabela TACO
-                </h2>
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#64748b' }}>
-                  Elaboração de cardápios personalizados com cálculo clínico de VET e macronutrientes.
-                </p>
-              </div>
-              <span style={{ background: '#ecfdf5', color: '#065f46', fontWeight: 700, fontSize: '0.75rem', padding: '0.375rem 0.75rem', borderRadius: '9999px', border: '1px solid #a7f3d0' }}>
-                Módulo Nutrição Ativo
-              </span>
-            </div>
-
-            <div style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 800 }}>
-                    Paciente: Gabriel Rodrigues (29 anos • 76 kg • 178 cm)
-                  </h3>
-                  <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>
-                    Meta Calórica Alvo: <strong>2.450 kcal</strong> • Proteína: <strong>170g (2.2 g/kg)</strong>
-                  </span>
+                          {w.day}
+                        </span>
+                        {w.hasDot && (
+                          <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: primaryColor }} />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
+
+                {/* Seta Direita */}
                 <button
                   type="button"
+                  onClick={() => toast.info('Navegando para a próxima semana')}
                   style={{
-                    background: '#059669',
-                    color: 'white',
+                    background: 'none',
                     border: 'none',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontWeight: 700,
-                    fontSize: '0.8125rem',
+                    color: '#94a3b8',
                     cursor: 'pointer',
+                    padding: '0.35rem',
+                    borderRadius: '0.375rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
-                  Exportar PDF Timbrado
+                  <ChevronRight size={16} />
+                </button>
+
+                {/* Botão + de Novo Agendamento */}
+                <button
+                  type="button"
+                  onClick={() => toast.success('Novo agendamento de consulta iniciado.')}
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    backgroundColor: '#f1f5f9',
+                    border: '1px solid #e2e8f0',
+                    color: '#334155',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginLeft: '0.25rem',
+                  }}
+                >
+                  <Plus size={15} />
                 </button>
               </div>
 
-              {/* Sample Meal Builder Card */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginBottom: '0.5rem' }}>
-                    <span>Refeição 1: Café da Manhã (07:30)</span>
-                    <span style={{ color: '#059669' }}>480 kcal | 35g Prot</span>
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: '#475569' }}>
-                    3 ovos mexidos + 40g de aveia em flocos finos + 1 banana prata + café sem açúcar.
-                  </div>
-                </div>
-
-                <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginBottom: '0.5rem' }}>
-                    <span>Refeição 2: Almoço Principal (12:30)</span>
-                    <span style={{ color: '#059669' }}>750 kcal | 52g Prot</span>
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: '#475569' }}>
-                    150g Peito de frango grelhado (ou tilápia) + 140g arroz integral + 80g feijão + salada à vontade.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================
-            VIEW: MÓDULO TREINAMENTO / FICHAS
-           ======================================================== */}
-        {(activeItem.startsWith('treino_')) && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ fontSize: '1.375rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
-                  🏋️ Prescritor de Treinamento & Periodização
-                </h2>
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#64748b' }}>
-                  Fichas de musculação, controle de sobrecarga progressiva e prescrição aeróbia.
-                </p>
-              </div>
-              <span style={{ background: '#eff6ff', color: '#1d4ed8', fontWeight: 700, fontSize: '0.75rem', padding: '0.375rem 0.75rem', borderRadius: '9999px', border: '1px solid #bfdbfe' }}>
-                Módulo Treinamento Ativo
-              </span>
-            </div>
-
-            <div style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 800 }}>
-                    Aluno: Gabriel Rodrigues • Divisão Push / Pull / Legs (PPL)
-                  </h3>
-                  <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>
-                    Frequência: 5x/semana • Foco: Hipertrofia Miofibrilar • RIR 1-2
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  style={{
-                    background: '#1d4ed8',
-                    color: 'white',
-                    border: 'none',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    fontWeight: 700,
-                    fontSize: '0.8125rem',
-                    cursor: 'pointer',
-                  }}
-                >
-                  + Adicionar Exercício
-                </button>
-              </div>
-
-              {/* Sample Workout Sheet */}
+              {/* Item de Agendamento */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                  <div>
-                    <strong>Supino Reto com Barra</strong>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Peitoral Maior • Equipamento: Banco Olímpico</div>
-                  </div>
-                  <div style={{ textAlign: 'right', fontWeight: 700, fontSize: '0.875rem', color: '#1e293b' }}>
-                    4 séries × 8 a 10 reps (Carga: 80kg • RIR 1)
-                  </div>
-                </div>
+                {appointments.map((apt) => (
+                  <div
+                    key={apt.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.875rem 1rem',
+                      borderRadius: '0.625rem',
+                      border: '1px solid #f1f5f9',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>
+                        {apt.patientName}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.15rem' }}>
+                        {apt.type} • {apt.status}
+                      </div>
+                    </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                  <div>
-                    <strong>Puxada Alta na Barra Aberta (Pulldown)</strong>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Dorsal & Redondo Maior • Equipamento: Cabo</div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        {apt.dayLabel}
+                      </div>
+                      <div style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#0f172a' }}>
+                        {apt.time}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ textAlign: 'right', fontWeight: 700, fontSize: '0.875rem', color: '#1e293b' }}>
-                    4 séries × 10 a 12 reps (Carga: 65kg • Drop-set na última)
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ========================================================
-            VIEW: CONFIGURAÇÕES (MÓDULO UNIFICADO COMPLETO)
-           ======================================================== */}
-        {(activeItem === 'configuracoes' || activeItem.startsWith('config')) && (
-          <SettingsModule />
-        )}
-      </div>
+      {/* ========================================================
+          VIEW: CONFIGURAÇÕES UNIFICADAS
+         ======================================================== */}
+      {(activeItem === 'configuracoes' || activeItem.startsWith('config')) && (
+        <SettingsModule />
+      )}
+
+      {/* ========================================================
+          OUTRAS VIEWS (Agenda, CRM, Treino, etc.)
+         ======================================================== */}
+      {activeItem === 'rotina_agenda' && (
+        <div style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+            📅 Agenda de Consultas & Sessões
+          </h2>
+          <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
+            Visão completa do calendário clínico integrado com sincronização automática do Google Calendar.
+          </p>
+        </div>
+      )}
+
+      {activeItem === 'rotina_pacientes' && (
+        <div style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+            👥 Carteira de Pacientes
+          </h2>
+          <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
+            Gerenciamento completo de prontuários, anamneses, metas de peso e exames laboratoriais.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

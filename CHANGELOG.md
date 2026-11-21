@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 🏥 Redesenho Executivo do Painel Administrativo & Menu Lateral Bidirecional
+- **Frontend Web (`apps/web`)**:
+  - **Novo Menu Lateral Executivo (`Sidebar.tsx`)**:
+    - **Expansão e Colapso Bidirecional**:
+      - **Horizontal**: Alternância suave entre modo expandido (260px) com labels, subtítulos e badges, e modo compacto (72px) em ícones com tooltips flutuantes instantâneos.
+      - **Vertical (Acordeão)**: Menus aninhados para as categorias *Rotina* (Agenda, Pacientes, Daily, Acompanhamentos, Chat, Tarefas) e *Atendimento* (Formulário pré-consulta, Formulário pós-consulta) com setas indicativas de expansão e animação suave.
+    - **Identidade Visual e Navegação**: Ícone de squircle com a marca clínica, busca inline (`Buscar no menu...`), seção `GOVERNANÇA & CLÍNICA`, itens diretos (*Gestão de Contas*, *Clube de Vantagens*, *Módulo de Treino*, *Configurações*, *Minha Conta Admin*), indicador de versão (`🟢 Versão v0.58.0`) e card inferior com avatar e botão de logout.
+  - **Novo Top Header Executivo (`Header.tsx`)**:
+    - Breadcrumb hierárquico com ícone Home, título bold, subtítulo contextual descritivo e badge em pílula translúcida verde *"🛡️ Acesso Administrativo Exclusivo"*.
+  - **Dashboard de Pacientes em 2 Cards (`AdminDashboard.tsx`)**:
+    - **Card Esquerdo**: Barra de busca de pacientes por nome/chave, listagem de pacientes cadastrados com avatar de iniciais, status ativo, rodapé com contagem total, link *"Ver todos os pacientes →"* e botão primário com ícone *"Cadastrar paciente"*.
+    - **Card Direito**: Calendário horizontal da semana com seletor de dias interativo (`D 15`, `S 16`, ..., `S 21`) com botão de novo agendamento rápido `+`, e card de agendamento detalhado com status de confirmação e horário.
+    - Respeito integral à cor primária e tipografia configurada no sistema.
+
 ### 🎨 Nova Tela de Login Split-Screen com Branding White Label Dinâmico
 - **Frontend Web (`apps/web`)**:
   - **Redesenho Completo de `LoginPage.tsx` (Layout 50/50 em 2 Colunas)**:
