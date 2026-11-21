@@ -28,14 +28,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const [mode, setMode] = useState<UserRoleMode>(initialMode);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState(
-    initialMode === 'patient' ? 'patient_diet' : 'config_whitelabel',
+    initialMode === 'patient' ? 'patient_diet' : 'config_perfil',
   );
 
   // Sync mode if initialMode changes
   React.useEffect(() => {
     if (initialMode) {
       setMode(initialMode);
-      setActiveItem(initialMode === 'patient' ? 'patient_diet' : 'config_whitelabel');
+      setActiveItem(initialMode === 'patient' ? 'patient_diet' : 'config_perfil');
     }
   }, [initialMode]);
 
@@ -101,14 +101,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         return 'Treinamento / Periodização & Cargas';
       case 'treino_cardio':
         return 'Treinamento / Cardio & Frequência Cardíaca';
+      case 'config_perfil':
+        return 'Configurações / Perfil do Nutricionista';
       case 'config_whitelabel':
         return 'Configurações / White Label Studio';
-      case 'config_empresa':
-        return 'Configurações / Dados da Empresa';
-      case 'config_perfil':
-        return 'Configurações / Perfil Profissional (CRN/CREF)';
       case 'config_equipe':
-        return 'Configurações / Equipe & RBAC';
+        return 'Configurações / Equipe & Permissões';
       default:
         return 'Painel Administrativo';
     }
@@ -133,7 +131,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           mode={mode}
           onChangeMode={(newMode) => {
             setMode(newMode);
-            setActiveItem(newMode === 'professional' ? 'config_whitelabel' : 'patient_diet');
+            setActiveItem(newMode === 'professional' ? 'config_perfil' : 'patient_diet');
           }}
           activeModules={activeModules}
           onToggleModule={handleToggleModule}

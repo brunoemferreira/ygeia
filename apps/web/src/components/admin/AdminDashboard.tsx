@@ -24,20 +24,19 @@ export interface AdminDashboardProps {
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onBackToHome,
-  activeItem = 'config_whitelabel',
+  activeItem = 'config_perfil',
   hideHeader = false,
 }) => {
   const { user, token, logout } = useAuth();
 
-  // Internal tab state as fallback
-  const [activeTab, setActiveTab] = useState<'branding' | 'settings' | 'nutritionist' | 'team'>('branding');
+  // Internal tab state as fallback: focado 100% no Nutricionista
+  const [activeTab, setActiveTab] = useState<'nutritionist' | 'branding' | 'team'>('nutritionist');
 
   // Sync activeTab with activeItem when it comes from the modular sidebar
   useEffect(() => {
     if (activeItem.startsWith('config_')) {
-      if (activeItem === 'config_whitelabel') setActiveTab('branding');
-      else if (activeItem === 'config_empresa') setActiveTab('settings');
-      else if (activeItem === 'config_perfil') setActiveTab('nutritionist');
+      if (activeItem === 'config_perfil') setActiveTab('nutritionist');
+      else if (activeItem === 'config_whitelabel') setActiveTab('branding');
       else if (activeItem === 'config_equipe') setActiveTab('team');
     }
   }, [activeItem]);
@@ -48,9 +47,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // 1. Branding State
+  // 1. Branding State (Marca do Nutricionista / Consultório)
   const [branding, setBranding] = useState({
-    clinicName: user?.clinicName || 'Ygeía Clínica Modelo',
+    clinicName: user?.clinicName || 'Consultório de Nutrição',
     primaryColor: '#059669',
     secondaryColor: '#064e3b',
     accentColor: '#8b5cf6',
@@ -61,24 +60,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     letterheadTemplateUrl: '',
   });
 
-  // 2. Settings State (Dados da Empresa)
-  const [settings, setSettings] = useState({
-    legalName: user?.clinicName || '',
-    tradeName: user?.clinicName || '',
-    taxId: '',
-    phone: '',
-    whatsapp: '',
-    email: user?.email || '',
-    addressStreet: '',
-    addressNumber: '',
-    addressComplement: '',
-    addressNeighborhood: '',
-    addressCity: '',
-    addressState: 'SP',
-    addressZipCode: '',
-  });
-
-  // 3. Nutritionist Profile State (CRN)
+  // 2. Nutritionist Profile State (CRN / CREF & Contatos)
   const [profile, setProfile] = useState({
     fullName: user?.fullName || '',
     professionalName: user?.fullName || '',
@@ -86,6 +68,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     crnRegion: 'CRN-3',
     specialties: [] as string[],
     bio: '',
+    phone: '',
+    whatsapp: '',
     isTechnicalManager: true,
   });
   const [newSpecialty, setNewSpecialty] = useState('');
@@ -96,12 +80,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (user.clinicName) {
         setBranding((prev) => ({
           ...prev,
-          clinicName: prev.clinicName === 'Ygeía Clínica Modelo' ? user.clinicName! : prev.clinicName,
-        }));
-        setSettings((prev) => ({
-          ...prev,
-          legalName: prev.legalName || user.clinicName!,
-          tradeName: prev.tradeName || user.clinicName!,
+          clinicName: prev.clinicName === 'Consultório de Nutrição' || prev.clinicName === 'Ygeía Clínica Modelo' ? user.clinicName! : prev.clinicName,
         }));
       }
       if (user.fullName) {
@@ -109,12 +88,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           ...prev,
           fullName: prev.fullName || user.fullName,
           professionalName: prev.professionalName || user.fullName,
-        }));
-      }
-      if (user.email) {
-        setSettings((prev) => ({
-          ...prev,
-          email: prev.email || user.email,
         }));
       }
     }
@@ -183,19 +156,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           }));
         }
 
-        // Fetch Settings
-        const resSettings = await fetch(`${API_BASE}/tenants/settings`, { headers });
-        if (resSettings.ok) {
-          const sData = await resSettings.json();
-          setSettings((prev) => ({
-            ...prev,
-            ...sData,
-            legalName: sData.legalName || user?.clinicName || prev.legalName,
-            tradeName: sData.tradeName || user?.clinicName || prev.tradeName,
-            email: sData.email || user?.email || prev.email,
-          }));
-        }
-
         // Fetch Profile
         const resProfile = await fetch(`${API_BASE}/tenants/profile`, { headers });
         if (resProfile.ok) {
@@ -260,33 +220,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       }
 
       notifySuccess('Identidade visual White Label atualizada com sucesso!');
-    } catch (err: any) {
-      notifyError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Submit Settings
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/tenants/settings`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Falha ao salvar dados da empresa.');
-      }
-
-      notifySuccess('Dados cadastrais da clínica salvos com sucesso!');
     } catch (err: any) {
       notifyError(err.message);
     } finally {
@@ -1001,7 +934,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         {branding.clinicName}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                        {settings.addressStreet ? `${settings.addressStreet}, ${settings.addressNumber} • ${settings.addressCity}/${settings.addressState}` : 'Av. Paulista, 1000 • São Paulo/SP'}
+                        {profile.professionalName || 'Dra. Sofia Alencar'} • {profile.crnNumber || 'CRN-3 48.912/P'} • Atendimento Nutricional
                       </div>
                     </div>
                     <div
@@ -1036,119 +969,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         )}
 
         {/* ========================================================
-            VIEW: MÓDULO CONFIGURAÇÕES / DADOS DA EMPRESA
-           ======================================================== */}
-        {activeTab === 'settings' && activeItem.startsWith('config_') && (
-          <div
-            style={{
-              background: 'white',
-              borderRadius: '1rem',
-              padding: '2rem',
-              border: '1px solid #e2e8f0',
-              maxWidth: '850px',
-              margin: '0 auto',
-            }}
-          >
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>
-                🏢 Dados Cadastrais e Fiscais da Empresa
-              </h2>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
-                Informações jurídicas para emissão de recibos, contratos e cabeçalho de receitas.
-              </p>
-            </div>
-
-            <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    Razão Social
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={settings.legalName || ''}
-                    onChange={(e) => setSettings({ ...settings, legalName: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    Nome Fantasia
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.tradeName || ''}
-                    onChange={(e) => setSettings({ ...settings, tradeName: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    CNPJ ou CPF
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.taxId || ''}
-                    onChange={(e) => setSettings({ ...settings, taxId: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    WhatsApp de Atendimento
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.whatsapp || ''}
-                    onChange={(e) => setSettings({ ...settings, whatsapp: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    Telefone Comercial
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.phone || ''}
-                    onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  background: '#0f172a',
-                  color: 'white',
-                  padding: '0.875rem',
-                  borderRadius: '0.5rem',
-                  fontWeight: 700,
-                  fontSize: '0.9375rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  marginTop: '1rem',
-                }}
-              >
-                <Save size={18} />
-                <span>{loading ? 'Salvando...' : 'Salvar Dados Cadastrais'}</span>
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* ========================================================
-            VIEW: MÓDULO CONFIGURAÇÕES / PERFIL PROFISSIONAL
+            VIEW: CONFIGURAÇÕES / PERFIL DO NUTRICIONISTA
            ======================================================== */}
         {activeTab === 'nutritionist' && activeItem.startsWith('config_') && (
           <div
@@ -1225,6 +1046,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <option value="CRN-1">CRN-1 (DF, GO, MT, TO)</option>
                     <option value="CREF-SP">CREF-4 (São Paulo)</option>
                   </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    WhatsApp do Nutricionista
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="(11) 98765-4321"
+                    value={profile.whatsapp || ''}
+                    onChange={(e) => setProfile({ ...profile, whatsapp: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    Telefone de Atendimento / Consultório
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="(11) 3214-5500"
+                    value={profile.phone || ''}
+                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box' }}
+                  />
                 </div>
               </div>
 
