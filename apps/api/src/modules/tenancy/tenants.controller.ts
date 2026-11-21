@@ -18,6 +18,7 @@ import {
   TeamMemberResponse,
 } from './tenants.service';
 import { TenantContextService } from '../../common/context/tenant-context.service';
+import { TokenService } from '../../common/security/token.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import {
   updateTenantSettingsSchema,
@@ -31,6 +32,7 @@ export class TenantsController {
   constructor(
     @Inject(TenantsService) private readonly tenantsService: TenantsService,
     @Inject(TenantContextService) private readonly tenantContext: TenantContextService,
+    @Inject(TokenService) private readonly tokenService: TokenService,
   ) {}
 
   @Get('branding')
@@ -42,7 +44,18 @@ export class TenantsController {
       return await this.tenantsService.getBrandingBySlug(slug);
     }
 
-    const tenantId = this.tenantContext.getTenantId() || req?.tenantId || req?.user?.tenantId;
+    let tenantId = this.tenantContext.getTenantId() || req?.tenantId || req?.user?.tenantId;
+
+    if (!tenantId && req?.headers?.authorization?.startsWith('Bearer ')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const payload = this.tokenService.verifyAccessToken(token);
+        if (payload?.tenantId) {
+          tenantId = payload.tenantId;
+        }
+      } catch {}
+    }
+
     if (tenantId) {
       return await this.tenantsService.getBranding(tenantId);
     }

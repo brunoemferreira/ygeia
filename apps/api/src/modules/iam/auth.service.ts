@@ -32,6 +32,8 @@ export interface AuthResponse {
     fullName: string;
     role: string;
     tenantId: string;
+    clinicName?: string;
+    slug?: string;
   };
   tokens: GeneratedTokens;
 }
@@ -88,6 +90,22 @@ export class AuthService {
       );
       const user = userRes.rows[0];
 
+      // Cria Dados Cadastrais iniciais da Empresa
+      await client.query(
+        `INSERT INTO tenant_settings (tenant_id, trade_name, legal_name, email)
+         VALUES ($1, $2, $2, $3)`,
+        [tenantId, input.clinicName, email],
+      );
+
+      // Cria Perfil inicial do Nutricionista Responsável
+      await client.query(
+        `INSERT INTO nutritionist_profiles (
+           tenant_id, user_id, full_name, professional_name, crn_number, crn_region, is_technical_manager
+         )
+         VALUES ($1, $2, $3, $3, 'CRN Pendente', 'CRN-3', true)`,
+        [tenantId, user.id, input.ownerName],
+      );
+
       // Gera Tokens JWT + Refresh Token
       const tokens = this.tokenService.generateTokens({
         sub: user.id,
@@ -114,7 +132,12 @@ export class AuthService {
       );
 
       return {
-        user: { ...user, tenantId },
+        user: {
+          ...user,
+          tenantId,
+          clinicName: input.clinicName,
+          slug,
+        },
         tokens,
       };
     }, true);
@@ -161,9 +184,11 @@ export class AuthService {
 
     // Busca o usuário dentro do tenant específico
     const userRes = await this.db.query(
-      `SELECT id, email, password_hash as "passwordHash", full_name as "fullName", role, is_active as "isActive"
-       FROM users
-       WHERE tenant_id = $1 AND email = $2
+      `SELECT u.id, u.email, u.password_hash as "passwordHash", u.full_name as "fullName", u.role, u.is_active as "isActive",
+              t.name as "clinicName", t.slug
+       FROM users u
+       JOIN tenants t ON t.id = u.tenant_id
+       WHERE u.tenant_id = $1 AND u.email = $2
        LIMIT 1`,
       [resolvedTenantId, email],
       true, // bypass rls para validar login
@@ -217,6 +242,8 @@ export class AuthService {
         fullName: user.fullName,
         role: user.role,
         tenantId: resolvedTenantId,
+        clinicName: user.clinicName,
+        slug: user.slug,
       },
       tokens,
     };

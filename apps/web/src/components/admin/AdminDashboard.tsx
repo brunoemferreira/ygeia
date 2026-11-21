@@ -50,7 +50,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // 1. Branding State
   const [branding, setBranding] = useState({
-    clinicName: 'Ygeía Clínica Modelo',
+    clinicName: user?.clinicName || 'Ygeía Clínica Modelo',
     primaryColor: '#059669',
     secondaryColor: '#064e3b',
     accentColor: '#8b5cf6',
@@ -63,12 +63,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // 2. Settings State (Dados da Empresa)
   const [settings, setSettings] = useState({
-    legalName: '',
-    tradeName: '',
+    legalName: user?.clinicName || '',
+    tradeName: user?.clinicName || '',
     taxId: '',
     phone: '',
     whatsapp: '',
-    email: '',
+    email: user?.email || '',
     addressStreet: '',
     addressNumber: '',
     addressComplement: '',
@@ -80,8 +80,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // 3. Nutritionist Profile State (CRN)
   const [profile, setProfile] = useState({
-    fullName: '',
-    professionalName: '',
+    fullName: user?.fullName || '',
+    professionalName: user?.fullName || '',
     crnNumber: '',
     crnRegion: 'CRN-3',
     specialties: [] as string[],
@@ -143,7 +143,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const headers = { Authorization: `Bearer ${token}` };
 
         // Fetch Branding
-        const resBranding = await fetch(`${API_BASE}/tenants/branding`, { credentials: 'omit' });
+        const resBranding = await fetch(`${API_BASE}/tenants/branding`, { headers });
         if (resBranding.ok) {
           const bData = await resBranding.json();
           setBranding((prev) => ({ ...prev, ...bData }));

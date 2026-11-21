@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { WhiteLabelStudioInteractive } from './components/WhiteLabelStudioInteractive';
@@ -15,12 +15,13 @@ import { AppLayout } from './components/layout/AppLayout';
 import { PatientPortal } from './components/patient/PatientPortal';
 
 const MainAppContent: React.FC = () => {
+  const { user } = useAuth();
   const [currentView, setCurrentView] = useState<'landing' | 'app'>('landing');
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  // Clinic branding state for layout
+  // Clinic branding state for layout (uses authenticated clinic info if present)
   const clinicBranding = {
-    clinicName: 'Instituto Vitalis & Ygeía',
+    clinicName: user?.clinicName || 'Instituto Vitalis & Ygeía',
     primaryColor: '#059669',
     secondaryColor: '#064e3b',
   };

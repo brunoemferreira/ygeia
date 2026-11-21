@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   Users,
   Calendar,
@@ -69,6 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   clinicBranding,
   activeModules,
 }) => {
+  const { user } = useAuth();
   // Professional Sidebar Structure (Modular Governance)
   const professionalSections: NavSection[] = [
     {
@@ -537,7 +539,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             border: '1px solid rgba(0,0,0,0.05)',
           }}
         >
-          {mode === 'professional' ? 'SA' : 'GR'}
+          {mode === 'professional'
+            ? user?.fullName
+              ? user.fullName
+                  .split(' ')
+                  .map((n) => n[0])
+                  .slice(0, 2)
+                  .join('')
+              : 'DR'
+            : 'GR'}
         </div>
 
         {!collapsed && (
@@ -552,7 +562,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 color: mode === 'professional' ? '#ffffff' : '#0f172a',
               }}
             >
-              {mode === 'professional' ? 'Dra. Sofia Alencar' : 'Gabriel Rodrigues'}
+              {mode === 'professional' ? user?.fullName || 'Dra. Sofia Alencar' : 'Gabriel Rodrigues'}
             </div>
             <div
               style={{
@@ -560,7 +570,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 color: mode === 'professional' ? '#94a3b8' : '#64748b',
               }}
             >
-              {mode === 'professional' ? 'CRN-3 48.912/P' : 'Plano Hipertrofia'}
+              {mode === 'professional'
+                ? user?.role === 'CLINIC_OWNER'
+                  ? 'Proprietário(a)'
+                  : 'Nutricionista Clínico'
+                : 'Plano Hipertrofia'}
             </div>
           </div>
         )}
