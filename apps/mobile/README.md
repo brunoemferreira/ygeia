@@ -34,3 +34,15 @@ EXPO_PUBLIC_API_URL=http://10.0.2.2:3333 # Emulador Android
 - **SecureStore**: Armazenamento no iOS Keychain e Android Keystore.
 - **Biometria**: Face ID / Touch ID nativos via `expo-local-authentication`.
 - **Offline-First**: Cache local de plano alimentar para consulta em supermercados ou locais sem internet.
+
+---
+
+## 📜 Changelog da Aplicação
+
+Consulte o histórico detalhado em [CHANGELOG.md](./CHANGELOG.md).
+
+### Versão Atual: `v0.1.0` (2026-11-21)
+- Setup inicial da aplicação móvel em **React Native** com **Expo Bare Workflow (CNG)**.
+- Configuração do `app.json` sincronizado com a versão central do Monorepo.
+- Estrutura base de segurança com `expo-secure-store` e autenticação biométrica.
+- Configuração de ambiente (`.env.example`) e execução multiplataforma (iOS e Android).

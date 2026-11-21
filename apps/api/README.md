@@ -51,3 +51,19 @@ cp .env.example .env
 - `src/modules/tenancy/`: Gerenciamento de tenants, custom domains e branding.
 - `src/modules/diet-planning/`: Prescrição nutricional e alimentos.
 - `src/modules/patient/`: Prontuário eletrônico e anamnese.
+
+---
+
+## 📜 Changelog da Aplicação
+
+Consulte o histórico detalhado em [CHANGELOG.md](./CHANGELOG.md).
+
+### Versão Atual: `v0.1.0` (2026-11-21)
+- **Fase 1 (Multi-Tenancy, IAM, RLS e Autenticação)**:
+  - Migrations SQL com ativação de PostgreSQL Row-Level Security (`0001_initial_schema.sql`).
+  - `DatabaseService` com transações e context injection de tenant (`SET app.current_tenant_id`).
+  - `PasswordHasherService` com algoritmo Argon2id (64MB, 3 iterações).
+  - `TokenService` com Access Token JWT de 15m e Refresh Token de 7 dias com rotação e detecção de reuso.
+  - `TenantResolutionMiddleware` com `AsyncLocalStorage`.
+  - Endpoints de autenticação (`/auth/register-clinic`, `/auth/login`, `/auth/refresh`, `/auth/me`) e branding (`/tenants/branding`).
+- Setup inicial da API NestJS com Fastify Adapter e testes unitários.

@@ -35,3 +35,15 @@ cp .env.example .env
 | :--- | :--- | :--- |
 | `VITE_API_URL` | URL da API NestJS | `http://localhost:3333` |
 | `VITE_APP_DOMAIN` | Domínio base da plataforma | `ygeia.app` |
+
+---
+
+## 📜 Changelog da Aplicação
+
+Consulte o histórico detalhado em [CHANGELOG.md](./CHANGELOG.md).
+
+### Versão Atual: `v0.1.0` (2026-11-21)
+- Setup inicial da aplicação em **React 19** com **Vite** e TypeScript estrito.
+- Diretrizes de interface **Mobile-First Responsive Design** (touch targets 48px, thumb zone).
+- Injeção dinâmica de CSS variables no `:root` via endpoint de branding do tenant.
+- Configuração de ambiente (`.env.example`), `index.html` e `src/main.tsx`.
