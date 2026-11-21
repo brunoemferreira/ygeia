@@ -164,7 +164,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => onToggleModule('nutrition')}
-              title="Alternar licença do Módulo Nutrição"
+              title="Alternar licença: Nutrição"
               style={{
                 fontSize: '0.6875rem',
                 fontWeight: 700,
@@ -181,7 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => onToggleModule('training')}
-              title="Alternar licença do Módulo Treinamento"
+              title="Alternar licença: Treinamento"
               style={{
                 fontSize: '0.6875rem',
                 fontWeight: 700,

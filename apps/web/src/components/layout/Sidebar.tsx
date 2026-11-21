@@ -19,6 +19,7 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Lock,
   Utensils,
   Droplets,
@@ -71,11 +72,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeModules,
 }) => {
   const { user } = useAuth();
-  // Professional Sidebar Structure (Modular Governance)
+
+  // Estado de recolhimento/expansão de cada seção do menu (Accordion)
+  const [collapsedSections, setCollapsedSections] = React.useState<Record<string, boolean>>({});
+
+  const toggleSection = (sectionId: string) => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  };
+
+  // Estrutura de Navegação Profissional (sem o termo "Módulo")
   const professionalSections: NavSection[] = [
     {
       id: 'cadastros',
-      title: '1. Cadastros Gerais',
+      title: 'Cadastros Gerais',
       badge: 'Sempre Ativo',
       items: [
         { id: 'cadastros_pacientes', label: 'Pacientes & Alunos', icon: Users },
@@ -86,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'nutricao',
-      title: '2. Módulo Nutrição',
+      title: 'Nutrição',
       isLicensed: activeModules.nutrition,
       badge: activeModules.nutrition ? 'Ativo' : 'Upgrade',
       items: [
@@ -98,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'treinamento',
-      title: '3. Módulo Treinamento',
+      title: 'Treinamento',
       isLicensed: activeModules.training,
       badge: activeModules.training ? 'Ativo' : 'Upgrade',
       items: [
@@ -110,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'configuracoes',
-      title: '4. Configurações',
+      title: 'Configurações',
       badge: 'Sempre Ativo',
       items: [
         { id: 'config_whitelabel', label: 'White Label Studio', icon: Palette },
@@ -304,30 +316,55 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {mode === 'professional' ? (
           professionalSections.map((section) => {
             const isLocked = section.isLicensed === false;
+            const isSectionCollapsed = !!collapsedSections[section.id];
 
             return (
               <div key={section.id}>
-                {!collapsed && (
-                  <div
+                {!collapsed ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(section.id)}
+                    title={isSectionCollapsed ? `Expandir ${section.title}` : `Recolher ${section.title}`}
                     style={{
+                      width: '100%',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
-                      padding: '0.25rem 0.5rem',
-                      marginBottom: '0.375rem',
+                      padding: '0.35rem 0.5rem',
+                      marginBottom: '0.25rem',
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      borderRadius: '0.375rem',
+                      textAlign: 'left',
+                      transition: 'background 0.15s ease',
+                    }}
+                    onMouseOver={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor =
+                        mode === 'professional' ? 'rgba(255,255,255,0.06)' : '#f1f5f9';
+                    }}
+                    onMouseOut={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
                     }}
                   >
-                    <span
-                      style={{
-                        fontSize: '0.6875rem',
-                        fontWeight: 800,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        color: mode === 'professional' ? '#64748b' : '#94a3b8',
-                      }}
-                    >
-                      {section.title}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                      {isSectionCollapsed ? (
+                        <ChevronRight size={13} color={mode === 'professional' ? '#64748b' : '#94a3b8'} />
+                      ) : (
+                        <ChevronDown size={13} color={mode === 'professional' ? '#64748b' : '#94a3b8'} />
+                      )}
+                      <span
+                        style={{
+                          fontSize: '0.6875rem',
+                          fontWeight: 800,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          color: mode === 'professional' ? '#94a3b8' : '#64748b',
+                        }}
+                      >
+                        {section.title}
+                      </span>
+                    </div>
                     {section.badge && (
                       <span
                         style={{
@@ -345,10 +382,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         {section.badge}
                       </span>
                     )}
-                  </div>
+                  </button>
+                ) : (
+                  <div
+                    style={{
+                      height: '1px',
+                      background: mode === 'professional' ? 'rgba(255,255,255,0.08)' : '#e2e8f0',
+                      margin: '0.375rem 0.25rem',
+                    }}
+                  />
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                {/* Section Items: recolhe se o menu estiver expandido e a seção marcada como recolhida */}
+                {(!isSectionCollapsed || collapsed) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                   {section.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeItem === item.id;
@@ -436,99 +483,145 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     );
                   })}
                 </div>
+                )}
               </div>
             );
           })
         ) : (
-          patientSections.map((section) => (
-            <div key={section.id}>
-              {!collapsed && (
-                <div
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    marginBottom: '0.375rem',
-                    fontSize: '0.6875rem',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    color: '#94a3b8',
-                  }}
-                >
-                  {section.title}
-                </div>
-              )}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                {section.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeItem === item.id;
+          patientSections.map((section) => {
+            const isSectionCollapsed = !!collapsedSections[section.id];
 
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => onSelectItem(item.id)}
-                      title={collapsed ? item.label : undefined}
+            return (
+              <div key={section.id}>
+                {!collapsed ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(section.id)}
+                    title={isSectionCollapsed ? `Expandir ${section.title}` : `Recolher ${section.title}`}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.375rem',
+                      padding: '0.35rem 0.5rem',
+                      marginBottom: '0.25rem',
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      borderRadius: '0.375rem',
+                      textAlign: 'left',
+                      transition: 'background 0.15s ease',
+                    }}
+                    onMouseOver={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9';
+                    }}
+                    onMouseOut={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    {isSectionCollapsed ? (
+                      <ChevronRight size={13} color="#94a3b8" />
+                    ) : (
+                      <ChevronDown size={13} color="#94a3b8" />
+                    )}
+                    <span
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        padding: collapsed ? '0.625rem' : '0.625rem 0.75rem',
-                        borderRadius: '0.5rem',
-                        border: 'none',
-                        cursor: 'pointer',
-                        background: isActive ? '#ecfdf5' : 'transparent',
-                        color: isActive ? '#059669' : '#334155',
-                        fontWeight: isActive ? 700 : 500,
-                        fontSize: '0.8125rem',
-                        justifyContent: collapsed ? 'center' : 'flex-start',
-                        transition: 'all 0.15s ease',
-                        width: '100%',
-                        textAlign: 'left',
-                      }}
-                      onMouseOver={(e) => {
-                        if (!isActive) {
-                          (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                        }
-                      }}
-                      onMouseOut={(e) => {
-                        if (!isActive) {
-                          (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                        }
+                        fontSize: '0.6875rem',
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        color: '#64748b',
                       }}
                     >
-                      <Icon size={18} strokeWidth={1.75} style={{ flexShrink: 0 }} />
-                      {!collapsed && (
-                        <span
+                      {section.title}
+                    </span>
+                  </button>
+                ) : (
+                  <div
+                    style={{
+                      height: '1px',
+                      background: '#e2e8f0',
+                      margin: '0.375rem 0.25rem',
+                    }}
+                  />
+                )}
+
+                {/* Patient Section Items */}
+                {(!isSectionCollapsed || collapsed) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeItem === item.id;
+
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => onSelectItem(item.id)}
+                          title={collapsed ? item.label : undefined}
                           style={{
-                            flex: 1,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: collapsed ? '0.625rem' : '0.625rem 0.75rem',
+                            borderRadius: '0.5rem',
+                            border: 'none',
+                            cursor: 'pointer',
+                            background: isActive ? '#ecfdf5' : 'transparent',
+                            color: isActive ? '#059669' : '#334155',
+                            fontWeight: isActive ? 700 : 500,
+                            fontSize: '0.8125rem',
+                            justifyContent: collapsed ? 'center' : 'flex-start',
+                            transition: 'all 0.15s ease',
+                            width: '100%',
+                            textAlign: 'left',
+                          }}
+                          onMouseOver={(e) => {
+                            if (!isActive) {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                            }
+                          }}
+                          onMouseOut={(e) => {
+                            if (!isActive) {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                            }
                           }}
                         >
-                          {item.label}
-                        </span>
-                      )}
-                      {!collapsed && item.badge && (
-                        <span
-                          style={{
-                            fontSize: '0.625rem',
-                            fontWeight: 700,
-                            padding: '0.125rem 0.375rem',
-                            borderRadius: '4px',
-                            background: '#ecfdf5',
-                            color: '#059669',
-                          }}
-                        >
-                          {item.badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+                          <Icon size={18} strokeWidth={1.75} style={{ flexShrink: 0 }} />
+                          {!collapsed && (
+                            <span
+                              style={{
+                                flex: 1,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {item.label}
+                            </span>
+                          )}
+                          {!collapsed && item.badge && (
+                            <span
+                              style={{
+                                fontSize: '0.625rem',
+                                fontWeight: 700,
+                                padding: '0.125rem 0.375rem',
+                                borderRadius: '4px',
+                                background: '#ecfdf5',
+                                color: '#059669',
+                              }}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
