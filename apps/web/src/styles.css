@@ -72,19 +72,29 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient Background Mesh */
+/* Ambient Background Mesh - Full 100% Viewport Width (Zero Edge Cutoff) */
+.hero-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 3.5rem;
+  padding-bottom: 5.5rem;
+  overflow: hidden;
+  background: 
+    radial-gradient(ellipse 100% 80% at 50% -15%, rgba(5, 150, 105, 0.16) 0%, rgba(2, 132, 199, 0.09) 45%, transparent 75%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
 .ambient-mesh {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100vw;
-  max-width: 1440px;
-  height: 800px;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: 
-    radial-gradient(circle at 50% -10%, rgba(5, 150, 105, 0.12) 0%, transparent 60%),
-    radial-gradient(circle at 15% 25%, rgba(2, 132, 199, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 85% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
+    radial-gradient(circle at 50% 0%, rgba(5, 150, 105, 0.14) 0%, transparent 60%),
+    radial-gradient(circle at 5% 25%, rgba(2, 132, 199, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 95% 25%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
   pointer-events: none;
   z-index: 0;
 }

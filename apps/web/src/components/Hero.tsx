@@ -45,12 +45,7 @@ export const Hero: React.FC = () => {
   const [activeClinic, setActiveClinic] = useState<ClinicPreset>(CLINIC_PRESETS[0]);
 
   return (
-    <section style={{
-      position: 'relative',
-      paddingTop: '3.5rem',
-      paddingBottom: '5rem',
-      overflow: 'hidden'
-    }}>
+    <section className="hero-wrapper">
       <div className="ambient-mesh" />
 
       <div className="container" style={{ textAlign: 'center' }}>
