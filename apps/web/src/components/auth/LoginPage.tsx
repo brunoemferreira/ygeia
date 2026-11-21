@@ -41,6 +41,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [slug, setSlug] = useState('');
+  const [loginSlug, setLoginSlug] = useState('');
+  const [showAdvancedSlug, setShowAdvancedSlug] = useState(false);
   const [clinicName, setClinicName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -48,7 +50,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 1-Click Demo Login: Nutricionista / Admin
+  // 1-Click Demo Login: Nutricionista / Admin (Dra. Camila Alencar)
   const handleQuickAdminDemo = async () => {
     setError(null);
     setLoading(true);
@@ -57,6 +59,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       onSuccess('professional');
     } catch (err: any) {
       setError(err.message || 'Falha ao logar como demonstração de nutricionista.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 1-Click Demo Login: Bruno Ferreira (Instituto BR)
+  const handleQuickBrunoDemo = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await login('brunoemf@gmail.com', 'senha123456');
+      onSuccess('professional');
+    } catch (err: any) {
+      setError(err.message || 'Falha ao logar com o usuário Bruno Ferreira.');
     } finally {
       setLoading(false);
     }
@@ -83,17 +99,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     try {
       if (activeTab === 'professional') {
-        await login(email, password, slug || undefined);
+        await login(email.trim(), password, loginSlug.trim() || undefined);
         onSuccess('professional');
       } else if (activeTab === 'patient') {
-        await login(email, password, slug || undefined);
+        await login(email.trim(), password, loginSlug.trim() || undefined);
         onSuccess('patient');
       } else {
         await registerClinic({
           clinicName,
           slug: slug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
           ownerName,
-          email,
+          email: email.trim(),
           password,
         });
         onSuccess('professional');
@@ -395,10 +411,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
             {/* 1-Click Quick Demo Fast Access Button */}
             {activeTab === 'professional' && (
-              <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <button
                   type="button"
-                  onClick={handleQuickAdminDemo}
+                  onClick={handleQuickBrunoDemo}
                   disabled={loading}
                   style={{
                     width: '100%',
@@ -426,14 +442,46 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                 >
                   <Sparkles size={16} color="#059669" />
-                  <span>Entrar com Conta Demo (Dra. Camila Alencar)</span>
+                  <span>Entrar como Bruno Ferreira (Instituto BR)</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handleQuickAdminDemo}
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '0.625rem',
+                    padding: '0.625rem 1rem',
+                    color: '#334155',
+                    fontWeight: 600,
+                    fontSize: '0.8125rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseOver={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9';
+                  }}
+                  onMouseOut={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                  }}
+                >
+                  <Stethoscope size={15} color="#059669" />
+                  <span>Entrar como Dra. Camila (Demo Modelo)</span>
+                </button>
+
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    margin: '1.25rem 0 0.25rem 0',
+                    margin: '0.75rem 0 0 0',
                   }}
                 >
                   <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
@@ -688,24 +736,66 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
               {/* Remember Me checkbox */}
               {activeTab !== 'register' && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                  <input
-                    type="checkbox"
-                    id="rememberMe"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    style={{
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '4px',
-                      accentColor: '#059669',
-                      cursor: 'pointer',
-                    }}
-                  />
-                  <label htmlFor="rememberMe" style={{ fontSize: '0.8125rem', color: '#64748b', cursor: 'pointer' }}>
-                    Lembrar deste dispositivo por 30 dias
-                  </label>
-                </div>
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                    <input
+                      type="checkbox"
+                      id="rememberMe"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '4px',
+                        accentColor: '#059669',
+                        cursor: 'pointer',
+                      }}
+                    />
+                    <label htmlFor="rememberMe" style={{ fontSize: '0.8125rem', color: '#64748b', cursor: 'pointer' }}>
+                      Lembrar deste dispositivo por 30 dias
+                    </label>
+                  </div>
+
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvancedSlug(!showAdvancedSlug)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        padding: 0,
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      {showAdvancedSlug ? '▾ Ocultar identificador da clínica' : '▸ Informar identificador da clínica (opcional)'}
+                    </button>
+                    {showAdvancedSlug && (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <input
+                          type="text"
+                          placeholder="Ex: instituto-br ou demo-clinica"
+                          value={loginSlug}
+                          onChange={(e) => setLoginSlug(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '0.5rem',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '0.8125rem',
+                            boxSizing: 'border-box',
+                            outline: 'none',
+                          }}
+                        />
+                        <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                          Necessário apenas se você possuir conta em mais de uma clínica com o mesmo e-mail.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
 
               {/* Submit Button */}
