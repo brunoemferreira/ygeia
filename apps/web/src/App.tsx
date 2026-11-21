@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -13,11 +13,60 @@ import { AuthModal } from './components/auth/AuthModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AppLayout } from './components/layout/AppLayout';
 import { PatientPortal } from './components/patient/PatientPortal';
+import { UserRoleMode } from './components/layout/Sidebar';
 
 const MainAppContent: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [currentView, setCurrentView] = useState<'landing' | 'app'>('landing');
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authInitialRole, setAuthInitialRole] = useState<'professional' | 'patient'>('professional');
+  const [appMode, setAppMode] = useState<UserRoleMode>('professional');
+
+  // SEGURANÇA E REGRA DE NEGÓCIO: Área Admin e Paciente SÓ PODEM SER ACESSADAS POR LOGIN!
+  // Se tentar acessar 'app' sem autenticação, bloqueia imediatamente e abre o modal de login
+  useEffect(() => {
+    if (currentView === 'app' && !isAuthenticated) {
+      setCurrentView('landing');
+      setAuthModalOpen(true);
+    }
+  }, [currentView, isAuthenticated]);
+
+  const handleOpenAdmin = () => {
+    if (!isAuthenticated) {
+      setAuthInitialRole('professional');
+      setAuthModalOpen(true);
+      return;
+    }
+    setAppMode('professional');
+    setCurrentView('app');
+  };
+
+  const handleOpenPatient = () => {
+    if (!isAuthenticated) {
+      setAuthInitialRole('patient');
+      setAuthModalOpen(true);
+      return;
+    }
+    setAppMode('patient');
+    setCurrentView('app');
+  };
+
+  const handleOpenAuth = (role?: 'professional' | 'patient') => {
+    setAuthInitialRole(role || 'professional');
+    setAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = (targetRole?: 'professional' | 'patient') => {
+    setAuthModalOpen(false);
+    const effectiveRole = targetRole || (user?.role === 'PATIENT' ? 'patient' : 'professional');
+    setAppMode(effectiveRole);
+    setCurrentView('app');
+  };
+
+  const handleLogout = () => {
+    logout();
+    setCurrentView('landing');
+  };
 
   // Clinic branding state for layout (uses authenticated clinic info if present)
   const clinicBranding = {
@@ -28,9 +77,11 @@ const MainAppContent: React.FC = () => {
 
   return (
     <>
-      {currentView === 'app' ? (
+      {currentView === 'app' && isAuthenticated ? (
         <AppLayout
+          initialMode={appMode}
           onBackToLanding={() => setCurrentView('landing')}
+          onLogout={handleLogout}
           clinicBranding={clinicBranding}
         >
           {({ mode, activeItem }) => {
@@ -49,8 +100,10 @@ const MainAppContent: React.FC = () => {
       ) : (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Navbar
-            onOpenAuth={() => setAuthModalOpen(true)}
-            onOpenAdmin={() => setCurrentView('app')}
+            onOpenAuth={handleOpenAuth}
+            onOpenAdmin={handleOpenAdmin}
+            onOpenPatient={handleOpenPatient}
+            onLogout={handleLogout}
           />
           <main style={{ flexGrow: 1 }}>
             <Hero />
@@ -67,11 +120,9 @@ const MainAppContent: React.FC = () => {
 
       <AuthModal
         isOpen={authModalOpen}
+        initialRole={authInitialRole}
         onClose={() => setAuthModalOpen(false)}
-        onSuccess={() => {
-          setAuthModalOpen(false);
-          setCurrentView('app');
-        }}
+        onSuccess={handleAuthSuccess}
       />
     </>
   );

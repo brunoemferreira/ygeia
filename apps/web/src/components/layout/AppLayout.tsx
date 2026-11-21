@@ -9,21 +9,35 @@ interface AppLayoutProps {
     activeModules: { nutrition: boolean; training: boolean };
   }) => React.ReactNode;
   onBackToLanding: () => void;
+  onLogout: () => void;
   clinicBranding: {
     clinicName: string;
     primaryColor: string;
     secondaryColor: string;
   };
+  initialMode?: UserRoleMode;
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({
   children,
   onBackToLanding,
+  onLogout,
   clinicBranding,
+  initialMode = 'professional',
 }) => {
-  const [mode, setMode] = useState<UserRoleMode>('professional');
+  const [mode, setMode] = useState<UserRoleMode>(initialMode);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeItem, setActiveItem] = useState('config_whitelabel');
+  const [activeItem, setActiveItem] = useState(
+    initialMode === 'patient' ? 'patient_diet' : 'config_whitelabel',
+  );
+
+  // Sync mode if initialMode changes
+  React.useEffect(() => {
+    if (initialMode) {
+      setMode(initialMode);
+      setActiveItem(initialMode === 'patient' ? 'patient_diet' : 'config_whitelabel');
+    }
+  }, [initialMode]);
 
   // Modular SaaS Licenses simulation
   const [activeModules, setActiveModules] = useState({
@@ -124,6 +138,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           activeModules={activeModules}
           onToggleModule={handleToggleModule}
           onBackToLanding={onBackToLanding}
+          onLogout={onLogout}
           breadcrumbs={getBreadcrumbs()}
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}

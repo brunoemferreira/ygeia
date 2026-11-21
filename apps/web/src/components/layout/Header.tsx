@@ -4,7 +4,10 @@ import {
   ShieldCheck,
   PanelLeftClose,
   PanelLeftOpen,
+  LogOut,
+  User,
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { UserRoleMode } from './Sidebar';
 
 interface HeaderProps {
@@ -16,6 +19,7 @@ interface HeaderProps {
   };
   onToggleModule: (module: 'nutrition' | 'training') => void;
   onBackToLanding: () => void;
+  onLogout: () => void;
   breadcrumbs: string;
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
@@ -27,10 +31,12 @@ export const Header: React.FC<HeaderProps> = ({
   activeModules,
   onToggleModule,
   onBackToLanding,
+  onLogout,
   breadcrumbs,
   sidebarCollapsed,
   onToggleSidebar,
 }) => {
+  const { user } = useAuth();
   return (
     <header
       style={{
@@ -192,9 +198,31 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
 
+        {/* User identification badge */}
+        {user && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '9999px',
+              padding: '0.25rem 0.625rem',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: '#334155',
+            }}
+          >
+            <User size={13} color="#059669" />
+            <span>{user.fullName || user.email}</span>
+          </div>
+        )}
+
         {/* Back to Home CTA */}
         <button
           onClick={onBackToLanding}
+          title="Visualizar a Landing Page pública"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -211,6 +239,35 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <ExternalLink size={14} />
           <span>Landing Page</span>
+        </button>
+
+        {/* Logout Button */}
+        <button
+          onClick={onLogout}
+          title="Encerrar sessão com segurança"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '0.5rem',
+            padding: '0.375rem 0.75rem',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            color: '#b91c1c',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+          onMouseOver={(e) => {
+            (e.currentTarget as HTMLElement).style.background = '#fee2e2';
+          }}
+          onMouseOut={(e) => {
+            (e.currentTarget as HTMLElement).style.background = '#fef2f2';
+          }}
+        >
+          <LogOut size={14} />
+          <span>Sair</span>
         </button>
       </div>
     </header>

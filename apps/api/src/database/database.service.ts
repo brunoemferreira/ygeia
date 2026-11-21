@@ -139,6 +139,22 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         userId = existingUser.rows[0].id;
       }
 
+      // Check Patient User (Demo Paciente)
+      const existingPatient = await this.query(
+        "SELECT id FROM users WHERE tenant_id = $1 AND email = 'paciente@ygeia.com' LIMIT 1",
+        [tenantId],
+        true,
+      );
+      if (existingPatient.rows.length === 0) {
+        const passwordHash = await this.passwordHasher.hash('senha123456');
+        await this.query(
+          `INSERT INTO users (tenant_id, email, password_hash, full_name, role, is_active)
+           VALUES ($1, 'paciente@ygeia.com', $2, 'Gabriel Rodrigues', 'PATIENT', true)`,
+          [tenantId, passwordHash],
+          true,
+        );
+      }
+
       // Check Tenant Settings
       await this.query(
         `INSERT INTO tenant_settings (
