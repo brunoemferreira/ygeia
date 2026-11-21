@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { PasswordHasherService } from '../../common/security/password-hasher.service';
@@ -38,9 +39,9 @@ export interface AuthResponse {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly db: DatabaseService,
-    private readonly passwordHasher: PasswordHasherService,
-    private readonly tokenService: TokenService,
+    @Inject(DatabaseService) private readonly db: DatabaseService,
+    @Inject(PasswordHasherService) private readonly passwordHasher: PasswordHasherService,
+    @Inject(TokenService) private readonly tokenService: TokenService,
   ) {}
 
   async registerClinic(input: RegisterClinicInput): Promise<AuthResponse> {
@@ -131,14 +132,32 @@ export class AuthService {
         true,
       );
       if (tenantRes.rows.length === 0) {
-        throw new NotFoundException(`Clínica não encontrada.`);
+        throw new NotFoundException(`Clínica '${input.slug}' não encontrada.`);
       }
       tenantId = tenantRes.rows[0].id;
+    }
+
+    // Se ainda não tem tenantId, busca se o usuário pertence a uma única clínica ativa
+    if (!tenantId) {
+      const userLookup = await this.db.query(
+        'SELECT tenant_id FROM users WHERE email = $1 AND is_active = true',
+        [email],
+        true,
+      );
+      if (userLookup.rows.length === 1) {
+        tenantId = userLookup.rows[0].tenant_id;
+      } else if (userLookup.rows.length > 1) {
+        throw new BadRequestException('Você possui conta em múltiplas clínicas. Informe o slug ou domínio da sua clínica.');
+      } else {
+        throw new UnauthorizedException('Credenciais inválidas.');
+      }
     }
 
     if (!tenantId) {
       throw new BadRequestException('Identificador ou slug da clínica é obrigatório para autenticação.');
     }
+
+    const resolvedTenantId: string = tenantId;
 
     // Busca o usuário dentro do tenant específico
     const userRes = await this.db.query(
@@ -146,7 +165,7 @@ export class AuthService {
        FROM users
        WHERE tenant_id = $1 AND email = $2
        LIMIT 1`,
-      [tenantId, email],
+      [resolvedTenantId, email],
       true, // bypass rls para validar login
     );
 
@@ -168,7 +187,7 @@ export class AuthService {
     // Gera Tokens
     const tokens = this.tokenService.generateTokens({
       sub: user.id,
-      tenantId,
+      tenantId: resolvedTenantId,
       role: user.role,
       email: user.email,
     });
@@ -179,7 +198,7 @@ export class AuthService {
     await this.db.query(
       `INSERT INTO refresh_tokens (user_id, tenant_id, token_hash, family_id, expires_at)
        VALUES ($1, $2, $3, $4, $5)`,
-      [user.id, tenantId, tokenHash, tokens.familyId, expiresAt],
+      [user.id, resolvedTenantId, tokenHash, tokens.familyId, expiresAt],
       true,
     );
 
@@ -187,7 +206,7 @@ export class AuthService {
     await this.db.query(
       `INSERT INTO audit_logs (tenant_id, user_id, action, resource, ip_address, user_agent)
        VALUES ($1, $2, 'LOGIN', 'auth', $3, $4)`,
-      [tenantId, user.id, ipAddress, userAgent],
+      [resolvedTenantId, user.id, ipAddress, userAgent],
       true,
     );
 
@@ -197,7 +216,7 @@ export class AuthService {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
-        tenantId,
+        tenantId: resolvedTenantId,
       },
       tokens,
     };

@@ -8,6 +8,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService, RegisterClinicInput, LoginInput } from './auth.service';
@@ -17,8 +18,8 @@ import { TenantContextService } from '../../common/context/tenant-context.servic
 @Controller('api/v1/auth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService,
-    private readonly tenantContext: TenantContextService,
+    @Inject(AuthService) private readonly authService: AuthService,
+    @Inject(TenantContextService) private readonly tenantContext: TenantContextService,
   ) {}
 
   @Post('register-clinic')

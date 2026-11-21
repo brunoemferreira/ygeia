@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { TokenService } from '../security/token.service';
 import { TenantContextService } from '../context/tenant-context.service';
@@ -10,8 +11,8 @@ import { TenantContextService } from '../context/tenant-context.service';
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
-    private readonly tokenService: TokenService,
-    private readonly tenantContext: TenantContextService,
+    @Inject(TokenService) private readonly tokenService: TokenService,
+    @Inject(TenantContextService) private readonly tenantContext: TenantContextService,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {

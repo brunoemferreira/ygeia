@@ -6,6 +6,12 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [0.1.0] - 2026-11-21
 
 ### Adicionado
+- **Fase 2 (Painel Admin da Clínica, White Label Studio & Gestão de Equipe)**:
+  - `AdminDashboard`: Painel com abas White Label Studio, Dados Cadastrais da Clínica, Perfil do Nutricionista & CRN (CFN Res. 600/2018) e Equipe com RBAC e aviso de sigilo médico LGPD.
+  - Pré-visualização ao vivo do timbrado de prescrição e topo do aplicativo mobile.
+  - `AuthModal`: Modal para autenticação e cadastro de clínicas com botão de acesso rápido com 1-clique (Demo Clínica Modelo).
+  - `AuthContext`: Gerenciamento centralizado de sessão, token JWT e persistência local.
+  - Conexão do botão "Entrar / Painel Admin" na Navbar com status do usuário logado.
 - **Landing Page Institucional Completa & Mobile-First**:
   - Seção Hero destacando **Exames Laboratoriais Criptografados**, White Label completo e conformidade CFN/LGPD.
   - Grade de vantagens com 8 diferenciais: Exames Criptografados com URLs pré-assinadas temporárias (15 min), Domínio Próprio White Label, Prontuário CFN & LGPD, Motor Antropométrico, Tabela TACO, App Mobile React Native Offline-First, PostgreSQL RLS e Ergonomia Mobile-First (touch targets 48px).
