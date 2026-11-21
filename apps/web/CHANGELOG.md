@@ -17,6 +17,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
     - Definição de Meta Calórica Alvo (Emagrecimento, Manutenção, Hipertrofia).
     - Presets clínicos rápidos em 1-clique (Hipertrofia, Cutting, Low Carb, Equilibrada).
     - Entradas numéricas diretas combinadas com sliders e botão de auto-alinhamento de carboidratos.
+  - **Arquitetura de Layout Base (`AppLayout`) & Sidebar Modular**:
+    - Sidebar retrátil esquerda com 4 blocos (Cadastros, Nutrição, Treinamento, Configurações).
+    - Seletor rápido de modo (Nutricionista / Admin vs. Portal do Paciente) no topo.
+    - Simulador de licenças ativas para validação do bloqueio/desbloqueio modular.
+    - `PatientPortal`: portal do paciente estilo Apple Health com hidratação, cardápio interativo e substituições flexíveis.
   - Conexão do botão "Entrar / Painel Admin" na Navbar com status do usuário logado.
 - **Landing Page Institucional Completa & Mobile-First**:
   - Seção Hero destacando **Exames Laboratoriais Criptografados**, White Label completo e conformidade CFN/LGPD.

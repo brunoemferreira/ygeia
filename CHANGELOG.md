@@ -39,6 +39,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
     - **Presets Clínicos em 1-Clique**: Botões rápidos para *Hipertrofia* (2.2 g/kg), *Cutting* (2.0 g/kg), *Low Carb* e *Equilibrada*.
     - **Entrada Numérica Direta e Sliders Híbridos**: Permite tanto arrastar controles quanto digitar gramas ou medidas exatas.
     - **Balanço Calórico e Ajuste Automático**: Comparação visual entre VET dos macronutrientes e a Meta Calórica Alvo com botão de ajuste automático em carboidratos.
+  - **Arquitetura de Navegação Modular & AppLayout**:
+    - `AppLayout`: Layout base com Menu Lateral Esquerdo Retrátil Inteligente (264px expandido / 72px recolhido) e cabeçalho responsivo.
+    - `Sidebar` Modular em 4 blocos de governança estrita:
+      1. **Cadastros Gerais** (Universal/Sempre Ativo): Pacientes & Alunos CRM, Agenda, Avaliação Física e Cofre de Exames AES-256.
+      2. **Nutrição** (Condicionado à Licença): Prescritor Nutricional, Tabela TACO, Biblioteca de Receitas e Suplementação.
+      3. **Treinamento** (Condicionado à Licença): Prescritor de Treinos A/B/C/D, Banco de Exercícios, Periodização/1RM e Cardio.
+      4. **Configurações** (Universal/Sempre Ativo): White Label Studio, Dados da Empresa, Perfil CRN/CREF e Equipe RBAC.
+    - Seletor em tempo real no cabeçalho para alternar entre **Área do Nutricionista / Admin** e **Área do Paciente**, com simulador de licenças modulares (*Nutri*, *Treino* ou *Combo Completo*).
+    - `PatientPortal`: Portal do paciente estilo *Apple Health* com anel interativo de hidratação (+250ml/+500ml), timeline de refeições com botões de substituição flexível de alimentos e painel de exames laboratoriais criptografados.
   - Conexão do botão "Entrar / Painel Admin" na Navbar com feedback de usuário logado.
 - **Validação Compartilhada (`packages/validation-schemas`)**:
   - Zod schemas para `updateTenantSettingsSchema`, `updateNutritionistProfileSchema`, `updateTenantBrandingSchema`, `inviteTeamMemberSchema` e `registerClinicSchema`.

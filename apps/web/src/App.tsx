@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { WhiteLabelStudioInteractive } from './components/WhiteLabelStudioInteractive';
@@ -11,21 +11,45 @@ import { FAQSection } from './components/FAQSection';
 import { Footer } from './components/Footer';
 import { AuthModal } from './components/auth/AuthModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { AppLayout } from './components/layout/AppLayout';
+import { PatientPortal } from './components/patient/PatientPortal';
 
 const MainAppContent: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  const [currentView, setCurrentView] = useState<'landing' | 'admin'>('landing');
+  const [currentView, setCurrentView] = useState<'landing' | 'app'>('landing');
   const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  // Clinic branding state for layout
+  const clinicBranding = {
+    clinicName: 'Instituto Vitalis & Ygeía',
+    primaryColor: '#059669',
+    secondaryColor: '#064e3b',
+  };
 
   return (
     <>
-      {currentView === 'admin' && isAuthenticated ? (
-        <AdminDashboard onBackToHome={() => setCurrentView('landing')} />
+      {currentView === 'app' ? (
+        <AppLayout
+          onBackToLanding={() => setCurrentView('landing')}
+          clinicBranding={clinicBranding}
+        >
+          {({ mode, activeItem }) => {
+            if (mode === 'patient') {
+              return <PatientPortal />;
+            }
+            return (
+              <AdminDashboard
+                onBackToHome={() => setCurrentView('landing')}
+                activeItem={activeItem}
+                hideHeader={true}
+              />
+            );
+          }}
+        </AppLayout>
       ) : (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Navbar
             onOpenAuth={() => setAuthModalOpen(true)}
-            onOpenAdmin={() => setCurrentView('admin')}
+            onOpenAdmin={() => setCurrentView('app')}
           />
           <main style={{ flexGrow: 1 }}>
             <Hero />
@@ -45,7 +69,7 @@ const MainAppContent: React.FC = () => {
         onClose={() => setAuthModalOpen(false)}
         onSuccess={() => {
           setAuthModalOpen(false);
-          setCurrentView('admin');
+          setCurrentView('app');
         }}
       />
     </>
