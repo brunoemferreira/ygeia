@@ -11,6 +11,12 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
   - Pré-visualização ao vivo do timbrado de prescrição e topo do aplicativo mobile.
   - `AuthModal`: Modal para autenticação e cadastro de clínicas com botão de acesso rápido com 1-clique (Demo Clínica Modelo).
   - `AuthContext`: Gerenciamento centralizado de sessão, token JWT e persistência local.
+  - **Simulador Científico Nutricional Reformulado**:
+    - Cálculo de IMC com classificação OMS em tempo real.
+    - Fator de atividade física FAO/OMS e cálculo do Gasto Energético Total (GET).
+    - Definição de Meta Calórica Alvo (Emagrecimento, Manutenção, Hipertrofia).
+    - Presets clínicos rápidos em 1-clique (Hipertrofia, Cutting, Low Carb, Equilibrada).
+    - Entradas numéricas diretas combinadas com sliders e botão de auto-alinhamento de carboidratos.
   - Conexão do botão "Entrar / Painel Admin" na Navbar com status do usuário logado.
 - **Landing Page Institucional Completa & Mobile-First**:
   - Seção Hero destacando **Exames Laboratoriais Criptografados**, White Label completo e conformidade CFN/LGPD.

@@ -32,6 +32,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - **Modal de Autenticação (`AuthModal`)**:
     - Botão de acesso rápido em 1-clique para teste da clínica modelo (`Dra. Sofia Alencar`).
     - Abas para login e cadastro de nova clínica SaaS.
+  - **Simulador Científico Interativo (`@ygeia/domain-core`) Totalmente Reformulado**:
+    - **Cálculo de IMC & Classificação OMS**: Avaliação antropométrica instantânea com badge de estado nutricional (Eutrofia, Sobrepeso, Obesidade).
+    - **Gasto Energético Total (GET / TDEE)**: Incorporação de fator de atividade física FAO/OMS (1.2 a 1.9).
+    - **Objetivo Clínico Prescritivo**: Ajuste de meta calórica para Emagrecimento (-400 kcal), Manutenção ou Hipertrofia (+350 kcal).
+    - **Presets Clínicos em 1-Clique**: Botões rápidos para *Hipertrofia* (2.2 g/kg), *Cutting* (2.0 g/kg), *Low Carb* e *Equilibrada*.
+    - **Entrada Numérica Direta e Sliders Híbridos**: Permite tanto arrastar controles quanto digitar gramas ou medidas exatas.
+    - **Balanço Calórico e Ajuste Automático**: Comparação visual entre VET dos macronutrientes e a Meta Calórica Alvo com botão de ajuste automático em carboidratos.
   - Conexão do botão "Entrar / Painel Admin" na Navbar com feedback de usuário logado.
 - **Validação Compartilhada (`packages/validation-schemas`)**:
   - Zod schemas para `updateTenantSettingsSchema`, `updateNutritionistProfileSchema`, `updateTenantBrandingSchema`, `inviteTeamMemberSchema` e `registerClinicSchema`.
