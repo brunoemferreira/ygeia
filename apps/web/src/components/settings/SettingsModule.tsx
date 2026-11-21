@@ -42,14 +42,14 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
   const [personalData, setPersonalData] = useState({
     nomeCompleto: user?.fullName || 'Bruno Ferreira',
     email: user?.email || 'brunoemf@gmail.com',
-    telefone: '+55 19 9929220',
-    crn: 'CRN-3 48.912/P',
+    telefone: '+55 199929220',
+    crn: '',
     cpfCnpj: '218.980.718-29',
-    especialidades: 'Nutrição Clínica & Esportiva',
+    especialidades: '',
     cep: '13060611',
     logradouro: 'Rua Doutor Jeber Juabre, nº 145, Jardim Márcia',
-    cidadeUf: 'Campinas / SP',
-    fotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+    cidadeUf: '',
+    fotoUrl: '/bruno-profile.jpg',
   });
 
   // 2. White Label (Personalização) State

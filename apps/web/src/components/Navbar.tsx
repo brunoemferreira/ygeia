@@ -2,19 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu,
   X,
-  ArrowRight,
   ShieldCheck,
   Heart,
   LogOut,
   Stethoscope,
   ChevronDown,
   LogIn,
-  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
-  onNavigateToLogin: (role?: 'professional' | 'patient' | 'register') => void;
+  onNavigateToLogin: (role?: 'professional' | 'patient') => void;
   onLogout: () => void;
 }
 
@@ -299,16 +297,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 )}
               </div>
-
-              {/* Free Trial Button */}
-              <button
-                onClick={() => onNavigateToLogin('register')}
-                className="btn-primary header-cta"
-                style={{ cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.8125rem' }}
-              >
-                <span>Experimentar</span>
-                <ArrowRight size={14} />
-              </button>
             </div>
           )}
 
@@ -418,29 +406,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Heart size={16} color="#059669" />
                 <span>Portal do Paciente</span>
-              </button>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onNavigateToLogin('register');
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  borderRadius: '0.5rem',
-                  background: '#f8fafc',
-                  color: '#475569',
-                  border: '1px solid #cbd5e1',
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                <Sparkles size={16} color="#059669" />
-                <span>Criar Nova Clínica (14 dias grátis)</span>
               </button>
             </div>
           )}

@@ -78,20 +78,20 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* CTA Box */}
+          {/* Informações da Plataforma */}
           <div>
             <h4 style={{ color: 'white', fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Comece no Seu Consultório
+              Plataforma Ygeía
             </h4>
             <p style={{ fontSize: '0.875rem', lineHeight: '1.5', marginBottom: '1rem', color: '#94a3b8' }}>
-              Coloque sua clínica em outro patamar tecnológico com 14 dias de teste gratuito sem compromisso.
+              Ecossistema clínico de alta performance com cálculos metabólicos de precisão, cofre de exames e aplicativo nativo.
             </p>
             <a
               href="#whitelabel"
               className="btn-primary"
               style={{ width: '100%', minHeight: '44px', fontSize: '0.9rem' }}
             >
-              Criar Minha Clínica White Label
+              Conhecer White Label
             </a>
           </div>
         </div>

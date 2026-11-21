@@ -3,8 +3,6 @@ import {
   ArrowLeft,
   Lock,
   Mail,
-  Building,
-  UserCheck,
   ShieldCheck,
   Sparkles,
   AlertCircle,
@@ -16,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-export type LoginRoleMode = 'professional' | 'patient' | 'register';
+export type LoginRoleMode = 'professional' | 'patient';
 
 interface LoginPageProps {
   initialRole?: LoginRoleMode;
@@ -29,7 +27,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   onBackToLanding,
   onSuccess,
 }) => {
-  const { login, registerClinic } = useAuth();
+  const { login } = useAuth();
   const [activeTab, setActiveTab] = useState<LoginRoleMode>(initialRole);
 
   useEffect(() => {
@@ -40,29 +38,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [slug, setSlug] = useState('');
   const [loginSlug, setLoginSlug] = useState('');
   const [showAdvancedSlug, setShowAdvancedSlug] = useState(false);
-  const [clinicName, setClinicName] = useState('');
-  const [ownerName, setOwnerName] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // 1-Click Demo Login: Nutricionista / Admin (Dra. Camila Alencar)
-  const handleQuickAdminDemo = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await login('admin@ygeia.com', 'senha123456', 'demo-clinica');
-      onSuccess('professional');
-    } catch (err: any) {
-      setError(err.message || 'Falha ao logar como demonstração de nutricionista.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // 1-Click Demo Login: Bruno Ferreira (Instituto BR)
   const handleQuickBrunoDemo = async () => {
@@ -78,7 +59,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
   };
 
-  // 1-Click Demo Login: Paciente
+  // 1-Click Demo Login: Nutricionista / Admin (Dra. Camila Alencar)
+  const handleQuickAdminDemo = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await login('admin@ygeia.com', 'senha123456', 'demo-clinica');
+      onSuccess('professional');
+    } catch (err: any) {
+      setError(err.message || 'Falha ao logar como demonstração de nutricionista.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 1-Click Demo Login: Paciente (Gabriel Rodrigues)
   const handleQuickPatientDemo = async () => {
     setError(null);
     setLoading(true);
@@ -98,22 +93,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setLoading(true);
 
     try {
-      if (activeTab === 'professional') {
-        await login(email.trim(), password, loginSlug.trim() || undefined);
-        onSuccess('professional');
-      } else if (activeTab === 'patient') {
-        await login(email.trim(), password, loginSlug.trim() || undefined);
-        onSuccess('patient');
-      } else {
-        await registerClinic({
-          clinicName,
-          slug: slug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
-          ownerName,
-          email: email.trim(),
-          password,
-        });
-        onSuccess('professional');
-      }
+      await login(email.trim(), password, loginSlug.trim() || undefined);
+      onSuccess(activeTab);
     } catch (err: any) {
       setError(err.message || 'Ocorreu um erro na autenticação. Verifique suas credenciais.');
     } finally {
@@ -231,10 +212,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           }}
         >
           <ShieldCheck size={14} />
-          <span style={{ display: 'none' /* on mobile */ }} className="desktop-inline">
-            AES-256 GCM • RLS Multi-Tenant
-          </span>
-          <span style={{ fontSize: '0.7rem' }}>Seguro</span>
+          <span style={{ fontSize: '0.75rem' }}>AES-256 GCM • RLS</span>
         </div>
       </header>
 
@@ -251,7 +229,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div
           style={{
             width: '100%',
-            maxWidth: '460px',
+            maxWidth: '440px',
             backgroundColor: '#ffffff',
             borderRadius: '1.25rem',
             border: '1px solid #e2e8f0',
@@ -264,7 +242,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
+              gridTemplateColumns: '1fr 1fr',
               background: '#f8fafc',
               borderBottom: '1px solid #e2e8f0',
               padding: '0.375rem',
@@ -281,10 +259,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.375rem',
-                padding: '0.625rem 0.25rem',
+                gap: '0.5rem',
+                padding: '0.625rem 0.5rem',
                 borderRadius: '0.5rem',
-                fontSize: '0.75rem',
+                fontSize: '0.8125rem',
                 fontWeight: 700,
                 border: 'none',
                 cursor: 'pointer',
@@ -297,8 +275,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     : 'none',
               }}
             >
-              <Stethoscope size={14} color={activeTab === 'professional' ? '#059669' : '#94a3b8'} />
-              <span>Nutricionista</span>
+              <Stethoscope size={15} color={activeTab === 'professional' ? '#059669' : '#94a3b8'} />
+              <span>Área do Nutricionista</span>
             </button>
 
             <button
@@ -311,10 +289,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.375rem',
-                padding: '0.625rem 0.25rem',
+                gap: '0.5rem',
+                padding: '0.625rem 0.5rem',
                 borderRadius: '0.5rem',
-                fontSize: '0.75rem',
+                fontSize: '0.8125rem',
                 fontWeight: 700,
                 border: 'none',
                 cursor: 'pointer',
@@ -327,38 +305,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     : 'none',
               }}
             >
-              <Heart size={14} color={activeTab === 'patient' ? '#059669' : '#94a3b8'} />
-              <span>Paciente</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('register');
-                setError(null);
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.375rem',
-                padding: '0.625rem 0.25rem',
-                borderRadius: '0.5rem',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: activeTab === 'register' ? '#ffffff' : 'transparent',
-                color: activeTab === 'register' ? '#065f46' : '#64748b',
-                boxShadow:
-                  activeTab === 'register'
-                    ? '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)'
-                    : 'none',
-              }}
-            >
-              <Sparkles size={14} color={activeTab === 'register' ? '#059669' : '#94a3b8'} />
-              <span>Criar Clínica</span>
+              <Heart size={15} color={activeTab === 'patient' ? '#059669' : '#94a3b8'} />
+              <span>Portal do Paciente</span>
             </button>
           </div>
 
@@ -374,17 +322,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   color: '#0f172a',
                 }}
               >
-                {activeTab === 'professional' && 'Área do Nutricionista'}
-                {activeTab === 'patient' && 'Portal do Paciente'}
-                {activeTab === 'register' && 'Cadastrar Nova Clínica'}
+                {activeTab === 'professional' ? 'Área do Nutricionista' : 'Portal do Paciente'}
               </h1>
               <p style={{ margin: 0, fontSize: '0.8125rem', color: '#64748b' }}>
-                {activeTab === 'professional' &&
-                  'Acesse seu consultório digital, prescrições e prontuários.'}
-                {activeTab === 'patient' &&
-                  'Consulte seu plano de dieta, evolução e exames criptografados.'}
-                {activeTab === 'register' &&
-                  'Configure seu White Label multi-tenant com 14 dias grátis.'}
+                {activeTab === 'professional'
+                  ? 'Acesse seu consultório digital, prescrições e prontuários.'
+                  : 'Consulte seu plano alimentar, evolução e exames criptografados.'}
               </p>
             </div>
 
@@ -409,7 +352,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             )}
 
-            {/* 1-Click Quick Demo Fast Access Button */}
+            {/* 1-Click Fast Access Buttons */}
             {activeTab === 'professional' && (
               <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <button
@@ -525,7 +468,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                 >
                   <Sparkles size={16} color="#059669" />
-                  <span>Entrar com Conta Demo (Gabriel Rodrigues - Paciente)</span>
+                  <span>Entrar como Gabriel Rodrigues (Paciente)</span>
                 </button>
                 <div
                   style={{
@@ -546,104 +489,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
             {/* Main Form */}
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {/* Register specific fields */}
-              {activeTab === 'register' && (
-                <>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      Nome da Clínica / Consultório
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <Building size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ex: Instituto Vitalis Nutrição"
-                        value={clinicName}
-                        onChange={(e) => {
-                          setClinicName(e.target.value);
-                          if (!slug) {
-                            setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-'));
-                          }
-                        }}
-                        style={{
-                          width: '100%',
-                          padding: '0.65rem 0.75rem 0.65rem 2.25rem',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.875rem',
-                          boxSizing: 'border-box',
-                          outline: 'none',
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      Subdomínio White Label
-                    </label>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <input
-                        type="text"
-                        required
-                        placeholder="vitalis"
-                        value={slug}
-                        onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-                        style={{
-                          flex: 1,
-                          padding: '0.65rem 0.75rem',
-                          borderRadius: '0.5rem 0 0 0.5rem',
-                          border: '1px solid #cbd5e1',
-                          borderRight: 'none',
-                          fontSize: '0.875rem',
-                          boxSizing: 'border-box',
-                          outline: 'none',
-                        }}
-                      />
-                      <span
-                        style={{
-                          background: '#f1f5f9',
-                          border: '1px solid #cbd5e1',
-                          padding: '0.65rem 0.75rem',
-                          borderRadius: '0 0.5rem 0.5rem 0',
-                          fontSize: '0.8125rem',
-                          color: '#64748b',
-                          fontWeight: 600,
-                        }}
-                      >
-                        .ygeia.app
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      Seu Nome Completo (Nutricionista Responsável)
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <UserCheck size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ex: Dra. Camila Ferreira"
-                        value={ownerName}
-                        onChange={(e) => setOwnerName(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.65rem 0.75rem 0.65rem 2.25rem',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.875rem',
-                          boxSizing: 'border-box',
-                          outline: 'none',
-                        }}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
               {/* Email */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
@@ -680,18 +525,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>
                     Senha
                   </label>
-                  {activeTab !== 'register' && (
-                    <a
-                      href="#esqueceu-senha"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        alert('Para redefinir sua senha, entre em contato com o suporte ou utilize o link enviado ao seu e-mail.');
-                      }}
-                      style={{ fontSize: '0.75rem', color: '#059669', textDecoration: 'none', fontWeight: 600 }}
-                    >
-                      Esqueceu a senha?
-                    </a>
-                  )}
+                  <a
+                    href="#esqueceu-senha"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert('Para redefinir sua senha, entre em contato com o suporte institucional.');
+                    }}
+                    style={{ fontSize: '0.75rem', color: '#059669', textDecoration: 'none', fontWeight: 600 }}
+                  >
+                    Esqueceu a senha?
+                  </a>
                 </div>
                 <div style={{ position: 'relative' }}>
                   <Lock size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
@@ -735,68 +578,65 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
 
               {/* Remember Me checkbox */}
-              {activeTab !== 'register' && (
-                <>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '4px',
+                    accentColor: '#059669',
+                    cursor: 'pointer',
+                  }}
+                />
+                <label htmlFor="rememberMe" style={{ fontSize: '0.8125rem', color: '#64748b', cursor: 'pointer' }}>
+                  Lembrar deste dispositivo por 30 dias
+                </label>
+              </div>
+
+              {/* Advanced optional slug */}
+              <div style={{ marginTop: '0.25rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedSlug(!showAdvancedSlug)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748b',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    padding: 0,
+                    textDecoration: 'underline',
+                  }}
+                >
+                  {showAdvancedSlug ? '▾ Ocultar identificador da clínica' : '▸ Informar identificador da clínica (opcional)'}
+                </button>
+                {showAdvancedSlug && (
+                  <div style={{ marginTop: '0.5rem' }}>
                     <input
-                      type="checkbox"
-                      id="rememberMe"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
+                      type="text"
+                      placeholder="Ex: instituto-br ou demo-clinica"
+                      value={loginSlug}
+                      onChange={(e) => setLoginSlug(e.target.value)}
                       style={{
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '4px',
-                        accentColor: '#059669',
-                        cursor: 'pointer',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.8125rem',
+                        boxSizing: 'border-box',
+                        outline: 'none',
                       }}
                     />
-                    <label htmlFor="rememberMe" style={{ fontSize: '0.8125rem', color: '#64748b', cursor: 'pointer' }}>
-                      Lembrar deste dispositivo por 30 dias
-                    </label>
+                    <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                      Necessário apenas se você possuir conta em mais de uma clínica com o mesmo e-mail.
+                    </div>
                   </div>
-
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => setShowAdvancedSlug(!showAdvancedSlug)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#64748b',
-                        fontSize: '0.75rem',
-                        cursor: 'pointer',
-                        padding: 0,
-                        textDecoration: 'underline',
-                      }}
-                    >
-                      {showAdvancedSlug ? '▾ Ocultar identificador da clínica' : '▸ Informar identificador da clínica (opcional)'}
-                    </button>
-                    {showAdvancedSlug && (
-                      <div style={{ marginTop: '0.5rem' }}>
-                        <input
-                          type="text"
-                          placeholder="Ex: instituto-br ou demo-clinica"
-                          value={loginSlug}
-                          onChange={(e) => setLoginSlug(e.target.value)}
-                          style={{
-                            width: '100%',
-                            padding: '0.5rem 0.75rem',
-                            borderRadius: '0.5rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                            boxSizing: 'border-box',
-                            outline: 'none',
-                          }}
-                        />
-                        <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.25rem' }}>
-                          Necessário apenas se você possuir conta em mais de uma clínica com o mesmo e-mail.
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                )}
+              </div>
 
               {/* Submit Button */}
               <button
@@ -825,69 +665,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <span>Processando...</span>
                 ) : (
                   <span>
-                    {activeTab === 'professional' && 'Entrar no Consultório'}
-                    {activeTab === 'patient' && 'Acessar Portal do Paciente'}
-                    {activeTab === 'register' && 'Criar Minha Clínica'}
+                    {activeTab === 'professional' ? 'Entrar no Consultório' : 'Acessar Portal do Paciente'}
                   </span>
                 )}
               </button>
             </form>
-
-            {/* Bottom helper */}
-            <div
-              style={{
-                marginTop: '1.5rem',
-                paddingTop: '1.25rem',
-                borderTop: '1px solid #f1f5f9',
-                textAlign: 'center',
-                fontSize: '0.8125rem',
-                color: '#64748b',
-              }}
-            >
-              {activeTab === 'register' ? (
-                <span>
-                  Já possui uma clínica cadastrada?{' '}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('professional');
-                      setError(null);
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#059669',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      padding: 0,
-                    }}
-                  >
-                    Fazer Login
-                  </button>
-                </span>
-              ) : (
-                <span>
-                  Deseja assinar para seu consultório?{' '}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('register');
-                      setError(null);
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#059669',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      padding: 0,
-                    }}
-                  >
-                    Cadastre-se grátis
-                  </button>
-                </span>
-              )}
-            </div>
           </div>
 
           {/* Footer security trust banner */}
