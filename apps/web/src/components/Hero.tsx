@@ -157,23 +157,17 @@ export const Hero: React.FC = () => {
             background: '#090d16',
             color: 'white',
             borderRadius: '16px 16px 0 0',
-            padding: '1rem 1.5rem',
+            padding: '0.875rem 1.25rem',
             display: 'flex',
             flexWrap: 'wrap',
             justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '1rem'
+            gap: '0.75rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textAlign: 'left' }}>
-              <div style={{
-                width: '10px',
-                height: '10px',
-                borderRadius: '50%',
-                background: '#10b981',
-                boxShadow: '0 0 10px #10b981'
-              }} />
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600 }}>
-                SELECIONE A IDENTIDADE DA CLÍNICA PARA TESTAR O WHITE LABEL AO VIVO:
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', textAlign: 'left' }}>
+              <span className="pulsing-dot" />
+              <span style={{ fontSize: '0.825rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Simulador White Label ao Vivo:
               </span>
             </div>
 
@@ -184,12 +178,12 @@ export const Hero: React.FC = () => {
                   key={idx}
                   onClick={() => setActiveClinic(preset)}
                   style={{
-                    padding: '0.4rem 0.85rem',
+                    padding: '0.35rem 0.75rem',
                     borderRadius: '8px',
-                    fontSize: '0.825rem',
+                    fontSize: '0.8rem',
                     fontWeight: 700,
                     border: activeClinic.name === preset.name ? `2px solid ${preset.primaryColor}` : '1px solid #334155',
-                    background: activeClinic.name === preset.name ? 'rgba(255,255,255,0.1)' : '#1e293b',
+                    background: activeClinic.name === preset.name ? 'rgba(255,255,255,0.12)' : '#1e293b',
                     color: 'white',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
