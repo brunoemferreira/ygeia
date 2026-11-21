@@ -8,7 +8,7 @@ import { TenantsService } from './modules/tenancy/tenants.service';
 import { TenantsController } from './modules/tenancy/tenants.controller';
 import { AuthService } from './modules/iam/auth.service';
 import { AuthController } from './modules/iam/auth.controller';
-import { HealthController } from './main';
+import { HealthController } from './health.controller';
 
 @Module({
   controllers: [HealthController, TenantsController, AuthController],

@@ -1,12 +1,12 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware, Inject } from '@nestjs/common';
 import { TenantContextService } from '../context/tenant-context.service';
 import { DatabaseService } from '../../database/database.service';
 
 @Injectable()
 export class TenantResolutionMiddleware implements NestMiddleware {
   constructor(
-    private readonly tenantContext: TenantContextService,
-    private readonly db: DatabaseService,
+    @Inject(TenantContextService) private readonly tenantContext: TenantContextService,
+    @Inject(DatabaseService) private readonly db: DatabaseService,
   ) {}
 
   async use(req: any, res: any, next: () => void) {
