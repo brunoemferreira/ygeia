@@ -5,6 +5,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Design Unificado do Campo de Telefone (`NewPatientView.tsx`, `NewPatientModal.tsx`)**:
+  - Implementação do design unificado `[ 🇧🇷 +55 ⌄ | (00) 00000-0000 ]`:
+    - Container único com borda suave, foco integrado e cantos arredondados.
+    - Botão de DDI à esquerda com bandeira vetorial nítida e divisor vertical.
+    - Input de telefone transparente com placeholder `(00) 00000-0000`.
+
 ### Removido
 - **Links e Textos de Apoio no Rodapé (`NewPatientView.tsx`, `NewPatientModal.tsx`)**:
   - Remoção de *"Vindo de outro software? Clique aqui para importar"* e *"Se precisar de ajuda, clique aqui 💬"*, proporcionando um encerramento mais limpo e desobstruído no cadastro de pacientes.

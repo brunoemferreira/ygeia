@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📱 Padronização Visual do Campo de Telefone (Design Unificado com Bandeira e DDI)
+- **Frontend Web (`apps/web`)**:
+  - `NewPatientView.tsx` e `NewPatientModal.tsx`:
+    - Unificação do campo de telefone em um container único com borda arredondada (`rounded-lg`), fundo branco e divisor vertical suave.
+    - Seletor de país integrado à esquerda com bandeira nítida em SVG (Brasil 🇧🇷 com cores oficiais precisas), código DDI (`+55`) e seta indicadora (`⌄`).
+    - Campo de número à direita com placeholder padronizado `(00) 00000-0000`, sem bordas internas e máscara automática de formatação.
+
 ### 🧹 Limpeza nos Rodapés de Cadastro de Pacientes
 - **Frontend Web (`apps/web`)**:
   - `NewPatientView.tsx` e `NewPatientModal.tsx`: Remoção completa dos textos e links de rodapé (*"Vindo de outro software? Clique aqui para importar"* e *"Se precisar de ajuda, clique aqui 💬"*), deixando os formulários mais concisos e com foco total nas etapas clínicas.

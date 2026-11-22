@@ -547,25 +547,42 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.35rem' }}>
                         Telefone
                       </label>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          borderRadius: '0.5rem',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#ffffff',
+                          height: '40px',
+                          transition: 'all 0.15s ease',
+                          overflow: 'hidden',
+                        }}
+                      >
                         <div
                           style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.35rem',
-                            backgroundColor: '#f8fafc',
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '0.5rem',
+                            backgroundColor: 'transparent',
+                            borderRight: '1px solid #cbd5e1',
                             padding: '0 0.65rem',
+                            height: '100%',
                             fontSize: '0.8125rem',
-                            color: '#334155',
+                            color: '#0f172a',
+                            fontWeight: 500,
                             flexShrink: 0,
                           }}
                         >
-                          <span>🇧🇷 +55</span>
+                          <svg width="20" height="14" viewBox="0 0 20 14" fill="none" style={{ borderRadius: '2px', flexShrink: 0 }}>
+                            <rect width="20" height="14" rx="2" fill="#009B3A" />
+                            <path d="M10 2L17.5 7L10 12L2.5 7L10 2Z" fill="#FEDF00" />
+                            <circle cx="10" cy="7" r="3.2" fill="#002776" />
+                          </svg>
+                          <span>+55</span>
                           <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>▾</span>
                         </div>
                         <input
@@ -574,17 +591,31 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                           value={phone}
                           onChange={(e) => setPhone(formatPhone(e.target.value))}
                           style={{
-                            width: '100%',
-                            padding: '0.65rem 0.875rem',
-                            borderRadius: '0.5rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.875rem',
+                            flex: 1,
+                            height: '100%',
+                            border: 'none',
+                            padding: '0 0.75rem',
+                            fontSize: '0.8125rem',
                             color: '#0f172a',
                             outline: 'none',
+                            backgroundColor: 'transparent',
                             boxSizing: 'border-box',
+                            width: '100%',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                          onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                          onFocus={(e) => {
+                            const parent = e.target.parentElement;
+                            if (parent) {
+                              parent.style.borderColor = primaryColor;
+                              parent.style.boxShadow = '0 0 0 2px rgba(16,185,129,0.2)';
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const parent = e.target.parentElement;
+                            if (parent) {
+                              parent.style.borderColor = '#cbd5e1';
+                              parent.style.boxShadow = 'none';
+                            }
+                          }}
                         />
                       </div>
                     </div>

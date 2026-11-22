@@ -28,6 +28,15 @@ export interface CountryDialCode {
   name: string;
 }
 
+// Bandeira SVG nítida do Brasil para consistência em todos os sistemas operacionais
+const BrazilFlagIcon: React.FC = () => (
+  <svg width="20" height="14" viewBox="0 0 20 14" fill="none" style={{ borderRadius: '2px', flexShrink: 0, display: 'inline-block' }}>
+    <rect width="20" height="14" rx="2" fill="#009B3A" />
+    <path d="M10 2L17.5 7L10 12L2.5 7L10 2Z" fill="#FEDF00" />
+    <circle cx="10" cy="7" r="3.2" fill="#002776" />
+  </svg>
+);
+
 export const COUNTRY_DIAL_CODES: CountryDialCode[] = [
   { code: 'BR', dialCode: '+55', flag: '🇧🇷', name: 'Brasil' },
   { code: 'US', dialCode: '+1', flag: '🇺🇸', name: 'Estados Unidos / Canadá' },
@@ -710,16 +719,18 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.375rem' }}>
                       Telefone
                     </label>
                     <div style={{ position: 'relative' }}>
                       <div
                         style={{
                           display: 'flex',
+                          alignItems: 'center',
                           borderRadius: '0.5rem',
                           border: '1px solid #cbd5e1',
                           backgroundColor: '#ffffff',
+                          height: '40px',
                           transition: 'all 0.15s ease',
                           overflow: 'visible',
                         }}
@@ -732,49 +743,53 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.375rem',
-                            backgroundColor: '#f8fafc',
+                            backgroundColor: 'transparent',
                             border: 'none',
                             borderRight: '1px solid #cbd5e1',
-                            padding: '0 0.75rem',
-                            fontSize: '0.875rem',
-                            color: '#334155',
-                            fontWeight: 600,
+                            padding: '0 0.65rem',
+                            height: '100%',
+                            fontSize: '0.8125rem',
+                            color: '#0f172a',
+                            fontWeight: 500,
                             cursor: 'pointer',
-                            borderTopLeftRadius: '0.5rem',
-                            borderBottomLeftRadius: '0.5rem',
                             outline: 'none',
                             whiteSpace: 'nowrap',
                             flexShrink: 0,
                           }}
                           title="Selecione o país do código de área telefônica"
                         >
-                          <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{selectedCountry.flag}</span>
+                          {selectedCountry.code === 'BR' ? (
+                            <BrazilFlagIcon />
+                          ) : (
+                            <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{selectedCountry.flag}</span>
+                          )}
                           <span>{selectedCountry.dialCode}</span>
-                          <ChevronDown size={14} color="#64748b" />
+                          <ChevronDown size={12} color="#94a3b8" strokeWidth={1.75} />
                         </button>
 
                         <input
                           type="text"
                           value={phone}
                           onChange={(e) => setPhone(selectedCountry.code === 'BR' ? formatPhone(e.target.value) : e.target.value)}
-                          placeholder={selectedCountry.code === 'BR' ? '(00) 00000-0000' : 'Número do telefone'}
+                          placeholder="(00) 00000-0000"
                           maxLength={selectedCountry.code === 'BR' ? 15 : 20}
                           style={{
                             flex: 1,
+                            height: '100%',
                             border: 'none',
-                            padding: '0.625rem 0.875rem',
-                            fontSize: '0.875rem',
+                            padding: '0 0.75rem',
+                            fontSize: '0.8125rem',
                             outline: 'none',
-                            borderTopRightRadius: '0.5rem',
-                            borderBottomRightRadius: '0.5rem',
+                            backgroundColor: 'transparent',
                             boxSizing: 'border-box',
                             width: '100%',
+                            color: '#0f172a',
                           }}
                           onFocus={(e) => {
                             const parent = (e.target.parentElement as HTMLElement);
                             if (parent) {
-                              parent.style.borderColor = 'var(--primary)';
-                              parent.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                              parent.style.borderColor = 'var(--primary, #10b981)';
+                              parent.style.boxShadow = '0 0 0 2px var(--primary-glow, rgba(16,185,129,0.2))';
                             }
                           }}
                           onBlur={(e) => {
