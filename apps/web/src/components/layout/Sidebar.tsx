@@ -124,10 +124,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Helper de Accordion para reutilização
   const renderAccordionGroup = (
     title: string,
-    icon: React.ComponentType<{ size?: number; color?: string; style?: React.CSSProperties }>,
+    icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; style?: React.CSSProperties }>,
     isExpanded: boolean,
     onToggle: () => void,
-    items: Array<{ id: string; label: string; icon: React.ComponentType<{ size?: number; color?: string; style?: React.CSSProperties }> }>,
+    items: Array<{ id: string; label: string; icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; style?: React.CSSProperties }> }>,
   ) => {
     const IconComponent = icon;
     const hasActiveChild = items.some((i) => i.id === activeItem);
@@ -164,32 +164,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </button>
 
-        {/* Sub-itens */}
-        {isExpanded && !collapsed && (
-          <div style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.15rem' }}>
+        {/* Sub-itens: Exibidos com ícones tanto expandido quanto recolhido */}
+        {isExpanded && (
+          <div
+            style={{
+              paddingLeft: collapsed ? '0' : '1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.15rem',
+              marginTop: '0.15rem',
+              alignItems: collapsed ? 'center' : 'stretch',
+            }}
+          >
             {items
               .filter((item) => !searchTerm || item.label.toLowerCase().includes(searchTerm.toLowerCase()))
               .map((item) => {
+                const ItemIcon = item.icon;
                 const isActive = activeItem === item.id;
                 return (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => handleSelectItem(item.id)}
+                    title={item.label}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: collapsed ? 'center' : 'flex-start',
                       gap: '0.5rem',
-                      padding: '0.4rem 0.65rem',
+                      padding: collapsed ? '0.5rem 0' : '0.4rem 0.65rem',
                       borderRadius: '0.375rem',
-                      border: 'none',
+                      border: isActive && collapsed ? `1px solid ${primaryColor}40` : 'none',
                       background: isActive ? 'var(--primary-light)' : 'transparent',
                       color: isActive ? primaryColor : '#64748b',
                       fontSize: '0.75rem',
                       fontWeight: isActive ? 700 : 500,
                       cursor: 'pointer',
                       textAlign: 'left',
-                      width: '100%',
+                      width: collapsed ? '36px' : '100%',
+                      height: collapsed ? '36px' : 'auto',
+                      transition: 'all 0.15s ease',
                     }}
                     onMouseOver={(e) => {
                       if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
@@ -198,7 +212,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
                     }}
                   >
-                    <span>{item.label}</span>
+                    <ItemIcon size={14} strokeWidth={isActive ? 2.2 : 1.75} style={{ flexShrink: 0 }} />
+                    {!collapsed && <span>{item.label}</span>}
                   </button>
                 );
               })}
@@ -239,12 +254,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           justifyContent: collapsed ? 'center' : 'space-between',
         }}
       >
-        {!collapsed ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', overflow: 'hidden' }}>
+        {collapsed ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
             <div
               style={{
                 width: '34px',
                 height: '34px',
+                minWidth: '34px',
+                minHeight: '34px',
+                maxWidth: '34px',
+                maxHeight: '34px',
                 borderRadius: '9px',
                 background: primaryColor,
                 color: '#ffffff',
@@ -252,104 +271,143 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
+                aspectRatio: '1 / 1',
               }}
             >
               <Heart size={18} fill="#ffffff" color="#ffffff" />
             </div>
-            <div style={{ overflow: 'hidden' }}>
-              <div
-                style={{
-                  fontSize: '0.9375rem',
-                  fontWeight: 800,
-                  color: '#0f172a',
-                  whiteSpace: 'nowrap',
-                  textOverflow: 'ellipsis',
-                  overflow: 'hidden',
-                  lineHeight: 1.2,
-                }}
-              >
-                {(!clinicBranding.clinicName || clinicBranding.clinicName.includes('Better Health'))
-                  ? 'Ygeía'
-                  : clinicBranding.clinicName}
-              </div>
-              <div
-                style={{
-                  fontSize: '0.6875rem',
-                  color: primaryColor,
-                  fontWeight: 700,
-                }}
-              >
-                {mode === 'professional' ? 'Admin Console' : 'Portal do Paciente'}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div
-            onClick={onToggleCollapse}
-            title="Expandir Menu Lateral"
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '9px',
-              background: primaryColor,
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            <Heart size={18} fill="#ffffff" color="#ffffff" />
-          </div>
-        )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-          {/* Botão de Fechar no Mobile */}
-          {onCloseMobile && (
             <button
               type="button"
-              onClick={onCloseMobile}
-              className="mobile-only"
-              title="Fechar Menu"
+              onClick={onToggleCollapse}
+              className="desktop-only"
+              title="Expandir Menu"
               style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#64748b',
+                background: 'var(--primary-light)',
+                border: '1px solid var(--primary-border)',
+                color: primaryColor,
                 cursor: 'pointer',
-                padding: '0.35rem',
+                padding: '0.3rem',
                 borderRadius: '0.375rem',
+                display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                transition: 'all 0.15s ease',
+                width: '28px',
+                height: '28px',
+              }}
+              onMouseOver={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)';
+                (e.currentTarget as HTMLElement).style.color = '#ffffff';
+              }}
+              onMouseOut={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-light)';
+                (e.currentTarget as HTMLElement).style.color = primaryColor;
               }}
             >
-              <X size={18} />
+              <ChevronRight size={16} />
             </button>
-          )}
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  minWidth: '34px',
+                  minHeight: '34px',
+                  maxWidth: '34px',
+                  maxHeight: '34px',
+                  borderRadius: '9px',
+                  background: primaryColor,
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  aspectRatio: '1 / 1',
+                }}
+              >
+                <Heart size={18} fill="#ffffff" color="#ffffff" />
+              </div>
+              <div style={{ overflow: 'hidden' }}>
+                <div
+                  style={{
+                    fontSize: '0.8125rem',
+                    fontWeight: 800,
+                    color: '#0f172a',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {(!clinicBranding.clinicName || clinicBranding.clinicName.includes('Better Health'))
+                    ? 'Ygeía'
+                    : clinicBranding.clinicName}
+                </div>
+                <div
+                  style={{
+                    fontSize: '0.65rem',
+                    color: primaryColor,
+                    fontWeight: 700,
+                  }}
+                >
+                  {mode === 'professional' ? 'Admin Console' : 'Portal do Paciente'}
+                </div>
+              </div>
+            </div>
 
-          {/* Botão de Contração/Expansão Horizontal (Desktop) */}
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            className="desktop-only"
-            title={collapsed ? 'Expandir Menu' : 'Recolher Menu'}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#64748b',
-              cursor: 'pointer',
-              padding: '0.35rem',
-              borderRadius: '0.375rem',
-              display: collapsed ? 'none' : 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.15s ease',
-            }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <ChevronLeft size={16} />
-          </button>
-        </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              {/* Botão de Fechar no Mobile */}
+              {onCloseMobile && (
+                <button
+                  type="button"
+                  onClick={onCloseMobile}
+                  className="mobile-only"
+                  title="Fechar Menu"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer',
+                    padding: '0.35rem',
+                    borderRadius: '0.375rem',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              )}
+
+              {/* Botão de Contração/Expansão Horizontal (Desktop) */}
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="desktop-only"
+                title="Recolher Menu"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  padding: '0.35rem',
+                  borderRadius: '0.375rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background 0.15s ease',
+                }}
+                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
+                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+              >
+                <ChevronLeft size={16} />
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* ========================================================

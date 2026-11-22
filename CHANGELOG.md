@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🧭 Correções de UX e Ícones no Menu Principal (Sidebar)
+- **Frontend Web (`apps/web`)**:
+  - `Sidebar.tsx`:
+    - Preservação rígida das proporções do logotipo (`34px x 34px`, `aspectRatio: 1 / 1`, `flexShrink: 0`) prevenindo deformação ou esmagamento ("amassar") nas transições de contração e expansão.
+    - Inversão direcional da seta horizontal de recolhimento: aponta para a esquerda (`ChevronLeft`) quando expandido e inverte para a direita (`ChevronRight`) quando contraído, indicando com clareza o sentido do retorno.
+    - Redução da tipografia do título do logotipo para `0.8125rem` (13px) e subtítulo para `0.65rem`.
+    - Adição e renderização de ícones para todos os subitens do menu principal (`Pacientes`, `Cálculo TMB / GET`, `Planejador de Cardápios`, `Avaliação & Pregas`, `Exames Laboratoriais`, `Prescrição de Treinos`, etc.), viabilizando a navegação e cliques com tooltips no modo contraído.
+  - `Header.tsx`:
+    - Atualização do botão desktop de expansão lateral com `ChevronRight` unificado.
+
 ### 📝 Transformação do Editor de Anamneses e Ajustes do Grid
 - **Frontend Web (`apps/web`)**:
   - `AnamneseEditor.tsx`:

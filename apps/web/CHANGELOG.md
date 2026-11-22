@@ -6,6 +6,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Modificado
+- **Aprimoramentos de Layout e Navegação no Menu Principal (`Sidebar.tsx`, `Header.tsx`)**:
+  - Trava rígida de proporção no container do logotipo (`34px x 34px`, `aspectRatio: 1 / 1`, `flexShrink: 0`) para eliminar qualquer esmagamento ou distorção visual durante transições de largura.
+  - Correção na orientação da seta retrátil horizontal: apontando à esquerda (`ChevronLeft`, "Recolher Menu") quando aberto e virando para a direita (`ChevronRight`, "Expandir Menu") quando fechado.
+  - Redução do tamanho da fonte do título do logotipo para `0.8125rem` (13px).
+  - Exibição de ícones dedicados para todos os subitens de menu em *Cadastros*, *Nutrição* e *Treinamento*, mantendo-os totalmente clicáveis e com tooltips explicativos mesmo quando o menu estiver recolhido.
+
+### Modificado
 - **Editor Unificado de Anamnese em Documento Contínuo (`AnamneseEditor.tsx`)**:
   - Conversão do formulário de múltiplas caixas de texto em um editor de texto clínico contínuo e fluído (`contentEditable`), onde os tópicos clínicos (*Queixa principal e objetivo*, *História clínica e medicamentos*, *Hábito intestinal*, *Hidratação*, *Rotina alimentar* e *Sono e atividade física*) são carregados diretamente como títulos para digitação livre logo abaixo pelo profissional.
   - Remoção da aba de transcrição de voz e microfone da tela de anamneses.

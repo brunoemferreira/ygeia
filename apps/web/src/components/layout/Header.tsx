@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Home,
   ShieldCheck,
-  PanelLeftOpen,
   LogOut,
   ChevronRight,
   Menu,
@@ -115,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
               flexShrink: 0,
             }}
           >
-            <PanelLeftOpen size={17} />
+            <ChevronRight size={17} />
           </button>
         )}
 
