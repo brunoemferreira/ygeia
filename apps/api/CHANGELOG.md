@@ -6,6 +6,14 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Filtro Global de Exceções HTTP RFC 7807 & Probes de Liveness/Readiness (`http-exception.filter.ts`, `health.controller.ts`, `main.ts`)**:
+  - Implementação de `HttpExceptionFilter` interceptando todas as exceções da API, sanitizando mensagens e formatando respostas de erro em JSON padronizado com código HTTP semântico, prevenindo vazamento de dados internos de infraestrutura.
+  - Adição do método `ping()` no `DatabaseService` para medição de latência da conexão com o PostgreSQL em tempo real.
+  - Endpoints de observabilidade no `HealthController`: `/health/live` para verificação de liveness do processo e `/health/ready` com verificação de prontidão e conectividade com o banco de dados.
+  - Registro global do filtro no bootstrap do Fastify em `main.ts`.
+
+
+### Adicionado
 - **Governança DBA Sênior, Migrações Idempotentes e Tunning de Performance PostgreSQL (`0005_dba_performance_tuning_and_indexes.sql`, `database.service.ts`)**:
   - Migração `0005`:
     - Criação da tabela `schema_migrations` com registro de versões e timestamps de aplicação.

@@ -4,6 +4,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import fastifyCookie from '@fastify/cookie';
 import fastifyHelmet from '@fastify/helmet';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -13,6 +14,9 @@ async function bootstrap() {
       bodyLimit: 1048576, // 1MB limite estrito de payload contra ataques DoS
     }),
   );
+
+  // Filtro Global de Exceções HTTP (RFC 7807)
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Registro de Plugins Fastify
   await app.register(fastifyCookie as any, {

@@ -105,6 +105,28 @@ Este documento estabelece as regras e padrões de engenharia para qualquer agent
   - **Auditoria Obrigatória Front-End Pré-Entrega**:
     - O agente/desenvolvedor DEVE verificar se os componentes do Design System unificado (`AppInput`, `AppSelect`, `AppButton`, `AppModal`, `ClinicalDataGrid`) foram utilizados, se não há inline styles duplicados dispensáveis, se não há avisos no console e se a tela responde com fluidez em mobile e desktop.
 
+## 9. Regra Estrita de Engenharia Back-End, Arquitetura de Software & Dev Back-End Sênior Obrigatório
+- **Atuação Obrigatória como Arquiteto de Software & Dev Back-End Sênior**: Toda arquitetura, endpoints de API, serviços, microsserviços/módulos, camadas de repositório, middlewares, segurança de transporte, controle de concorrência e modelagem de domínio no back-end (`apps/api` e pacotes compartilhados) DEVEM ser rigorosamente revisados sob a ótica de um Engenheiro de Back-End Sênior e Arquiteto de Software.
+  - **Pilares de Alta Performance & Baixa Latência**:
+    - **I/O Não Bloqueante e Event Loop Saudável**: Evitar operações síncronas bloqueantes (`fs.readFileSync` em tempo de requisição, loops CPU-bound não fragmentados, regexes catastróficas ReDoS).
+    - **Otimização de Payload & Serialização**: Projeção estrita de colunas no banco para DTOs enxutos, serialização acelerada (Fastify JSON stringify / `class-transformer` eficiente), compressão HTTP (Gzip/Brotli) e paginação baseada em cursor ou `limit/offset` indexado.
+    - **Pool de Conexões e Gestão de Recursos**: Reuso rigoroso de conexões via `pg.Pool`, liberação defensiva no bloco `finally`, timeouts de statement para blindagem contra queries lentas e prevenção de memory leaks.
+  - **Confiabilidade, Resiliência & Transações Atômicas**:
+    - **Atomicidade (ACID)**: Operações multi-tabela (ex: criar clínica + usuário administrador + branding + termos) DEVEM rodar obrigatoriamente dentro de transações de banco (`BEGIN ... COMMIT / ROLLBACK`).
+    - **Tratamento Uniforme de Erros (RFC 7807 / Standard Envelope)**: Respostas de erro padronizadas com código HTTP semântico, mensagem clara para o usuário em português e código interno de erro (ex: `TENANT_NOT_FOUND`, `INVALID_CREDENTIALS`), sem nunca expor stack traces ou detalhes internos da infraestrutura em produção através do `HttpExceptionFilter`.
+    - **Health Checks & Observabilidade Robusta**: Endpoints de integridade ativos (`/health/live`, `/health/ready`) checando conectividade com PostgreSQL com latência de resposta, além de logs estruturados (JSON) com correlação de requisição (`x-request-id`).
+  - **Segurança de APIs (OWASP API Security Top 10 & Defesa em Profundidade)**:
+    - **Validação de Entrada Estrita**: Validação e sanitização profunda de 100% dos payloads, parâmetros de rota e queries via Zod / ValidationPipes (previne API1, API2 e API3).
+    - **Isolamento Multi-Tenant Garantido**: Nenhuma rota pode confiar cegamente em `tenant_id` vindo do corpo da requisição; o tenant deve ser resolvido e injetado pelo contexto criptográfico da sessão JWT ou subdomínio verificado, e blindado pelo PostgreSQL RLS.
+    - **Rate Limiting & Anti-Abuso**: Proteção contra força bruta em rotas sensíveis (`/auth/login`, `/auth/refresh`, envio de convites) e limitação de taxa por IP/Tenant.
+    - **Timing-Safe Operations**: Comparações de hashes e tokens com algoritmos resistentes a ataques de temporização (`crypto.timingSafeEqual`).
+  - **Clean Architecture & DDD (Domain-Driven Design)**:
+    - O domínio de negócio (`@ygeia/domain-core`) deve permanecer puro, sem dependência de NestJS, Fastify, banco de dados ou bibliotecas externas.
+    - Serviços de aplicação orquestram casos de uso; controladores apenas recebem DTOs, delegam e retornam respostas HTTP sem acoplamento de regra de negócio.
+  - **Auditoria Obrigatória Back-End Pré-Entrega**:
+    - O agente/desenvolvedor DEVE auditar: se o endpoint possui testes automatizados unitários/integração, se há validação de payload, se o tratamento de erro está encapsulado, se a transação atômica está ativa e se o isolamento multi-tenant está garantido.
+
+
 
 
 

@@ -9,6 +9,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### ⚙️ Regra Estrita de Engenharia Back-End & Arquiteto de Software Sênior (AGENTS.md)
+- **Regras Globais de Engenharia (`AGENTS.md`)**:
+  - **Inclusão da Seção 9**: Estabelecida regra obrigatória e permanente de atuação como Engenheiro de Back-End Sênior e Arquiteto de Software em toda a camada de APIs e lógica de negócio (`apps/api`).
+  - Imposição de princípios: I/O não bloqueante, serialização rápida de DTOs, transações atômicas ACID obrigatórias em operações compostas, padronização de erros HTTP (RFC 7807), liveness/readiness probes com diagnóstico de latência de banco e conformidade com o OWASP API Security Top 10.
+- **Backend API (`apps/api`)**:
+  - `common/filters/http-exception.filter.ts`: Criação do filtro global de exceções padronizando respostas de erro amigáveis em JSON (envelope semântico com código de status, mensagem sanitizada e timestamp), impedindo vazamento de stack traces ou detalhes internos da infraestrutura em produção.
+  - `database.service.ts`: Implementação do método `ping()` com cálculo de latência de conexão para diagnósticos de saúde em tempo real.
+  - `health.controller.ts`: Evolução do endpoint de observabilidade com rotas `/health/live` (liveness probe) e `/health/ready` (readiness probe com verificação ativa do PostgreSQL).
+  - `main.ts`: Registro global do `HttpExceptionFilter`.
+
+
 ### 🏋️‍♂️ Especialização em UX/UI Design Sênior em Nutrição, Nutrição Esportiva & Treinamento Físico
 - **Regras Globais de Engenharia (`AGENTS.md`)**:
   - **Atualização da Seção 5**: Formalizado o papel obrigatório de atuação como **Senior UX/UI Product Designer** especialista em plataformas de **Nutrição Clínica, Nutrição Esportiva, Composição Corporal e Treinamento Físico de Alta Performance**.

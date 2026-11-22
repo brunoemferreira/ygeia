@@ -177,4 +177,26 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       client.release();
     }
   }
+
+  /**
+   * Executa um ping de diagnóstico rápido para health checks e readiness probes.
+   * Retorna a latência da consulta em milissegundos.
+   */
+  async ping(): Promise<{ healthy: boolean; latencyMs: number }> {
+    if (!this.pool) {
+      return { healthy: false, latencyMs: -1 };
+    }
+    const start = Date.now();
+    try {
+      const client = await this.pool.connect();
+      try {
+        await client.query('SELECT 1');
+        return { healthy: true, latencyMs: Date.now() - start };
+      } finally {
+        client.release();
+      }
+    } catch {
+      return { healthy: false, latencyMs: Date.now() - start };
+    }
+  }
 }
