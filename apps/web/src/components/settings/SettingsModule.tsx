@@ -203,8 +203,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                 transition: 'all 0.15s ease',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'var(--primary, #10b981)';
-                e.target.style.boxShadow = '0 0 0 3px var(--primary-glow, rgba(16,185,129,0.15))';
+                e.target.style.borderColor = 'var(--primary)';
+                e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = '#e2e8f0';
@@ -307,7 +307,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                       display: 'inline-flex',
                       alignItems: 'center',
                       borderRadius: '0.375rem',
-                      backgroundColor: '#10b981',
+                      backgroundColor: 'var(--primary)',
                       padding: '0.45rem 1.15rem',
                       fontSize: '0.8125rem',
                       fontWeight: 600,
@@ -317,8 +317,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                       boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
                       transition: 'background-color 0.15s ease',
                     }}
-                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#059669')}
-                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#10b981')}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
                   >
                     Editar
                   </button>
@@ -347,13 +347,16 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                         padding: '0.45rem 1rem',
                         borderRadius: '0.375rem',
                         border: 'none',
-                        backgroundColor: '#10b981',
+                        backgroundColor: 'var(--primary)',
                         fontSize: '0.8125rem',
                         fontWeight: 600,
                         color: '#ffffff',
                         cursor: 'pointer',
                         boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                        transition: 'background-color 0.15s ease',
                       }}
+                      onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                      onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
                     >
                       Salvar
                     </button>

@@ -728,8 +728,8 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                           onFocus={(e) => {
                             const parent = (e.target.parentElement as HTMLElement);
                             if (parent) {
-                              parent.style.borderColor = 'var(--primary, #10b981)';
-                              parent.style.boxShadow = '0 0 0 2px var(--primary-glow, rgba(16,185,129,0.2))';
+                              parent.style.borderColor = 'var(--primary)';
+                              parent.style.boxShadow = '0 0 0 2px var(--primary-glow)';
                             }
                           }}
                           onBlur={(e) => {

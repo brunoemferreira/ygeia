@@ -5,7 +5,10 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
-### Adicionado
+### Modificado
+- **Aplicação Completa do Tema Dinâmico em Telas Novas e Existentes (`PatientProfileView.tsx`, `NewPatientModal.tsx`, `NewPatientView.tsx`, `SettingsModule.tsx`)**:
+  - Auditoria e remoção de todas as cores de marca estáticas (`#10b981`, `#059669`, `#ecfdf5`, etc.), substituindo por tokens do tema dinâmico (`var(--primary)`, `var(--primary-hover)`, `var(--primary-light)`, `var(--primary-border)`, `var(--primary-glow)`).
+  - A nova tela de visualização clínica do paciente (`PatientProfileView.tsx`) e os formulários de cadastro e configurações agora respondem dinamicamente e com precisão a qualquer personalização de cores do White Label da clínica.
 - **Layout Clínico 1:1 DietSystem ao Visualizar Paciente (`PatientProfileView.tsx`)**:
   - Implementação da tela exatamente conforme a imagem de referência do DietSystem:
     - Top bar com dados do paciente (nome, idade em anos e meses, chave com cópia, status `• ATIVO`, botões `Financeiro`, `Linha do tempo` e menu `...`).

@@ -364,11 +364,11 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   alignItems: 'center',
                   gap: '0.3rem',
                   borderRadius: '9999px',
-                  backgroundColor: '#ecfdf5',
+                  backgroundColor: 'var(--primary-light)',
                   padding: '0.15rem 0.55rem',
                   fontSize: '0.6875rem',
                   fontWeight: 700,
-                  color: '#10b981',
+                  color: 'var(--primary)',
                   letterSpacing: '0.04em',
                 }}
               >
@@ -377,7 +377,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     width: '5px',
                     height: '5px',
                     borderRadius: '50%',
-                    backgroundColor: '#10b981',
+                    backgroundColor: 'var(--primary)',
                   }}
                 />
                 {patient.status ? patient.status.toUpperCase() : 'ATIVO'}
@@ -666,8 +666,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     padding: '0.5rem 0.65rem',
                     borderRadius: '0.375rem',
                     border: 'none',
-                    background: isActive ? '#f0fdf4' : 'transparent',
-                    color: isActive ? '#10b981' : '#334155',
+                    background: isActive ? 'var(--primary-light)' : 'transparent',
+                    color: isActive ? 'var(--primary)' : '#334155',
                     fontWeight: isActive ? 600 : 500,
                     fontSize: '0.8125rem',
                     cursor: 'pointer',
@@ -681,7 +681,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
                   }}
                 >
-                  <Icon size={15} color={isActive ? '#10b981' : '#64748b'} />
+                  <Icon size={15} color={isActive ? 'var(--primary)' : '#64748b'} />
                   <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {item.label}
                   </span>
@@ -708,7 +708,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     borderRadius: '0.375rem',
                     border: 'none',
                     background: 'transparent',
-                    color: hasActiveChild ? '#10b981' : '#334155',
+                    color: hasActiveChild ? 'var(--primary)' : '#334155',
                     fontWeight: hasActiveChild ? 700 : 500,
                     fontSize: '0.8125rem',
                     cursor: 'pointer',
@@ -728,13 +728,13 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                         bottom: '4px',
                         width: '3px',
                         borderRadius: '0 2px 2px 0',
-                        backgroundColor: '#10b981',
+                        backgroundColor: 'var(--primary)',
                       }}
                     />
                   )}
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <GroupIcon size={15} color={hasActiveChild ? '#10b981' : '#64748b'} />
+                    <GroupIcon size={15} color={hasActiveChild ? 'var(--primary)' : '#64748b'} />
                     <span>{item.label}</span>
                   </div>
 
@@ -768,8 +768,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                             justifyContent: 'space-between',
                             padding: '0.4rem 0.65rem',
                             borderRadius: '0.375rem',
-                            backgroundColor: isSubActive ? '#ecfdf5' : 'transparent',
-                            color: isSubActive ? '#10b981' : '#475569',
+                            backgroundColor: isSubActive ? 'var(--primary-light)' : 'transparent',
+                            color: isSubActive ? 'var(--primary)' : '#475569',
                             fontWeight: isSubActive ? 600 : 400,
                             fontSize: '0.78125rem',
                             cursor: 'pointer',
@@ -793,8 +793,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                                 style={{
                                   fontSize: '0.625rem',
                                   fontWeight: 700,
-                                  color: '#10b981',
-                                  backgroundColor: '#d1fae5',
+                                  color: 'var(--primary)',
+                                  backgroundColor: 'var(--primary-light)',
                                   borderRadius: '0.25rem',
                                   padding: '0.1rem 0.35rem',
                                 }}
@@ -818,7 +818,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                                 style={{
                                   background: 'none',
                                   border: 'none',
-                                  color: '#10b981',
+                                  color: 'var(--primary)',
                                   cursor: 'pointer',
                                   padding: 0,
                                   display: 'flex',
@@ -907,17 +907,18 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                       alignItems: 'center',
                       gap: '0.45rem',
                       borderRadius: '0.375rem',
-                      backgroundColor: '#10b981',
+                      backgroundColor: 'var(--primary)',
                       color: '#ffffff',
                       padding: '0.45rem 0.95rem',
                       fontSize: '0.8125rem',
                       fontWeight: 600,
                       border: 'none',
                       cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(16, 185, 129, 0.2)',
+                      boxShadow: '0 1px 2px var(--primary-border)',
+                      transition: 'background-color 0.15s ease',
                     }}
-                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#059669')}
-                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#10b981')}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
                   >
                     <Plus size={15} />
                     <span>Adicionar anamnese</span>
@@ -1029,7 +1030,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     type="button"
                     onClick={() => toast.success('Evolução clínica adicionada ao prontuário!')}
                     style={{
-                      backgroundColor: '#10b981',
+                      backgroundColor: 'var(--primary)',
                       color: '#ffffff',
                       border: 'none',
                       borderRadius: '0.375rem',
@@ -1037,7 +1038,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                       fontSize: '0.78125rem',
                       fontWeight: 600,
                       cursor: 'pointer',
+                      transition: 'background-color 0.15s ease',
                     }}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
                   >
                     Salvar no Prontuário
                   </button>
@@ -1129,7 +1133,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                 </div>
                 <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
                   <span style={{ fontSize: '0.6875rem', color: '#64748b' }}>Gordura Corporal</span>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>16.8%</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)' }}>16.8%</div>
                 </div>
                 <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
                   <span style={{ fontSize: '0.6875rem', color: '#64748b' }}>Massa Muscular</span>
@@ -1178,7 +1182,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.35rem',
-                    backgroundColor: '#10b981',
+                    backgroundColor: 'var(--primary)',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '0.375rem',
@@ -1186,7 +1190,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     fontSize: '0.8125rem',
                     fontWeight: 600,
                     cursor: 'pointer',
+                    transition: 'background-color 0.15s ease',
                   }}
+                  onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                  onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
                 >
                   <Plus size={14} />
                   <span>Adicionar registro</span>
@@ -1295,13 +1302,16 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   style={{
                     borderRadius: '0.375rem',
                     border: 'none',
-                    backgroundColor: '#10b981',
+                    backgroundColor: 'var(--primary)',
                     padding: '0.45rem 1rem',
                     fontSize: '0.8125rem',
                     fontWeight: 700,
                     color: '#ffffff',
                     cursor: 'pointer',
+                    transition: 'background-color 0.15s ease',
                   }}
+                  onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                  onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
                 >
                   Salvar Anamnese
                 </button>

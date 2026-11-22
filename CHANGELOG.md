@@ -9,6 +9,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🎨 Padronização e Conformidade 100% com o Tema Dinâmico White Label
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - Substituição integral de cores estáticas/hardcoded pelos tokens e variáveis CSS do tema dinâmico (`var(--primary)`, `var(--primary-hover)`, `var(--primary-light)`, `var(--primary-border)`).
+    - Status pill `• ATIVO`, barra indicadora de grupo ativo da sidebar, subitens selecionados, badges de novidade, botões de adição (`+`), botões de ação e modal de nova anamnese agora refletem instantaneamente a identidade visual e as cores da clínica personalizada.
+  - `NewPatientModal.tsx`:
+    - Substituição das cores estáticas no item ativo da navegação vertical, ícones de notificação, switches toggle de envio de e-mail/WhatsApp de boas-vindas e botão principal de submissão do paciente.
+  - `NewPatientView.tsx`:
+    - Eliminação de fallbacks hardcoded no seletor de telefone unificado, padronizando os estados de foco e glow com `var(--primary)` e `var(--primary-glow)`.
+  - `SettingsModule.tsx`:
+    - Adaptação dos botões de ação de edição e salvamento dos dados pessoais para uso estrito de `var(--primary)` e `var(--primary-hover)`.
+
 ### 🏥 Tela Completa de Visualização Clínica do Paciente (Layout 1:1 DietSystem)
 - **Frontend Web (`apps/web`)**:
   - `PatientProfileView.tsx`:

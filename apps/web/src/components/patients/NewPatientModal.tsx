@@ -334,14 +334,14 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                       padding: '0.625rem 0.75rem',
                       borderRadius: '0.5rem',
                       border: 'none',
-                      backgroundColor: isActive ? '#ecfdf5' : 'transparent',
-                      color: isActive ? '#059669' : '#64748b',
+                      backgroundColor: isActive ? 'var(--primary-light)' : 'transparent',
+                      color: isActive ? 'var(--primary)' : '#64748b',
                       fontWeight: isActive ? 700 : 500,
                       fontSize: '0.8125rem',
                       cursor: 'pointer',
                       textAlign: 'left',
                       transition: 'all 0.15s ease',
-                      borderLeft: isActive ? `3px solid #10b981` : '3px solid transparent',
+                      borderLeft: isActive ? '3px solid var(--primary)' : '3px solid transparent',
                     }}
                     onMouseOver={(e) => {
                       if (!isActive) {
@@ -356,7 +356,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                       }
                     }}
                   >
-                    <IconComponent size={16} color={isActive ? '#059669' : '#94a3b8'} />
+                    <IconComponent size={16} color={isActive ? 'var(--primary)' : '#94a3b8'} />
                     <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {s.label}
                     </span>
@@ -800,7 +800,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                   {/* Seção: Mensagem de boas-vindas */}
                   <div style={{ marginTop: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.2rem' }}>
-                      <Bell size={15} color="#059669" />
+                      <Bell size={15} color="var(--primary)" />
                       <span>Mensagem de boas-vindas</span>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem' }}>
@@ -836,7 +836,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                           style={{
                             width: '42px',
                             height: '24px',
-                            backgroundColor: welcomeEmail ? '#10b981' : '#cbd5e1',
+                            backgroundColor: welcomeEmail ? 'var(--primary)' : '#cbd5e1',
                             borderRadius: '9999px',
                             position: 'relative',
                             cursor: 'pointer',
@@ -888,7 +888,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                           style={{
                             width: '42px',
                             height: '24px',
-                            backgroundColor: welcomeWhatsapp ? '#10b981' : '#cbd5e1',
+                            backgroundColor: welcomeWhatsapp ? 'var(--primary)' : '#cbd5e1',
                             borderRadius: '9999px',
                             position: 'relative',
                             cursor: 'pointer',
@@ -1195,7 +1195,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                   type="submit"
                   disabled={loading}
                   style={{
-                    backgroundColor: '#10b981',
+                    backgroundColor: 'var(--primary)',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '0.5rem',
@@ -1206,8 +1206,15 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                    boxShadow: '0 4px 12px var(--primary-border)',
                     opacity: loading ? 0.75 : 1,
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseOver={(e) => {
+                    if (!loading) (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)';
+                  }}
+                  onMouseOut={(e) => {
+                    if (!loading) (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)';
                   }}
                 >
                   {loading ? (
