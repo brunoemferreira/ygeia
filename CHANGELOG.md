@@ -10,6 +10,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased] - 2026-11-22
 
 ### 🥗🏋️‍♂️ Conclusão da Fase 3: Nutrição Clínica Geral & Esportiva Balanceada (Abordagem Dual Adaptativa)
+- **Ergonomia & Acesso Imediato ao Plano Alimentar (`apps/web`)**:
+  - Inclusão de botão de atalho em destaque **"Plano alimentar"** no cabeçalho superior do paciente, possibilitando acesso em 1 clique direto.
+  - Abertura padrão dos grupos **"Prescrição dietética"** e **"Antropometria"** no menu lateral esquerdo.
+  - Ação de clique no grupo pai: ao clicar no grupo "Prescrição dietética", a interface agora navega diretamente para o Plano Alimentar.
 - **Pacote de Domínio Puro (`@ygeia/domain-core`)**:
   - Implementação das fórmulas preditivas padrão-ouro de atletas baseadas em Massa Livre de Gordura (MLG):
     - `CunninghamStrategy` (1980): $TMB = 500 + 22 \times MLG$.

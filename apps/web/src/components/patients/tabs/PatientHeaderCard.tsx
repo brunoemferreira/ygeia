@@ -8,6 +8,7 @@ import {
   Edit2,
   MessageCircle,
   Trash2,
+  Utensils,
 } from 'lucide-react';
 import { PatientRecord } from '../PatientDirectory';
 import { useToast } from '../../../context/ToastContext';
@@ -188,8 +189,32 @@ export const PatientHeaderCard: React.FC<PatientHeaderCardProps> = ({
           </div>
         </div>
 
-        {/* Direita: Ações Rápidas (Financeiro, Linha do Tempo, Mais Ações) */}
+        {/* Direita: Ações Rápidas (Plano Alimentar, Linha do Tempo, Financeiro, Mais Ações) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
+          <button
+            type="button"
+            onClick={() => onNavigateSection('plano_alimentar', 'prescricao_dietetica')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              borderRadius: '0.375rem',
+              border: '1px solid var(--primary-border, #bbf7d0)',
+              backgroundColor: 'var(--primary-light, #f0fdf4)',
+              padding: '0.45rem 0.85rem',
+              fontSize: '0.8125rem',
+              fontWeight: 700,
+              color: 'var(--primary, #166534)',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#dcfce7')}
+            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-light, #f0fdf4)')}
+          >
+            <Utensils size={14} color="var(--primary, #166534)" />
+            <span>Plano alimentar</span>
+          </button>
+
           <button
             type="button"
             onClick={() => onNavigateSection('arquivo_recibo', 'arquivos_paciente')}

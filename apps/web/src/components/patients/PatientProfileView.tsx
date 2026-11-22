@@ -57,8 +57,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   const [activeSection, setActiveSection] = useState<string>('anamnese_transcricao');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     avaliacao_nutricional: true,
-    antropometria: false,
-    prescricao_dietetica: false,
+    antropometria: true,
+    prescricao_dietetica: true,
     avaliacao_bioquimica: false,
     metas_adesao: false,
     comunicacao_engajamento: false,

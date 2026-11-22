@@ -5,6 +5,12 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Ergonomia e Acesso Imediato ao Plano Alimentar (`PatientHeaderCard.tsx`, `PatientSidebarNav.tsx`, `PatientProfileView.tsx`)**:
+  - Inclusão do botão de ação rápida destacado **"Plano alimentar"** no topo superior do prontuário (ao lado de Financeiro e Linha do Tempo), permitindo acesso em 1 clique direto.
+  - Expansão automática por padrão do grupo **"Prescrição dietética"** e **"Antropometria"** no menu lateral esquerdo.
+  - Comportamento inteligente de clique: clicar no título do grupo "Prescrição dietética" no menu lateral agora abre automaticamente a aba de plano alimentar e cálculo energético.
+
 ### Adicionado
 - **Módulo de Prescrição Dietética & Gasto Calórico Dual Adaptativo (`PatientMealPlanTab.tsx`)**:
   - Implementação da aba de planejamento nutricional integrada ao `packages/domain-core`:

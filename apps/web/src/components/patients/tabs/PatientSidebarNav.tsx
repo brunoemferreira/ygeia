@@ -112,7 +112,16 @@ export const PatientSidebarNav: React.FC<PatientSidebarNavProps> = ({
           <div key={item.id} style={{ display: 'flex', flexDirection: 'column' }}>
             <button
               type="button"
-              onClick={() => onToggleGroup(item.id)}
+              onClick={() => {
+                onToggleGroup(item.id);
+                if (!isExpanded && item.children && item.children.length > 0) {
+                  if (item.id === 'prescricao_dietetica') {
+                    onSelectSection('plano_alimentar');
+                  } else {
+                    onSelectSection(item.children[0].id);
+                  }
+                }
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
