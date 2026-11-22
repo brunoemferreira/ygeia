@@ -7,6 +7,36 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [Unreleased] - 2026-11-22
+
+### 📱 Mobile First Integral, Padronização de Configurações & Menus Principais (Cadastros, Nutrição e Treinamento)
+- **Frontend Web (`apps/web`)**:
+  - **Arquitetura Mobile First em Todos os Componentes e Telas**:
+    - `Sidebar.tsx`: Implementado menu lateral responsivo off-canvas drawer para telas `< 1024px`, com deslize suave via CSS transitions, backdrop escuro com `backdrop-filter: blur(4px)`, fechamento automático ao selecionar itens e botão de fechar (`X`). No desktop (`>= 1024px`), preservado o comportamento retrátil em 72px e 260px.
+    - `Header.tsx`: Adicionado botão hamburger com padrão de acessibilidade táctil (`touch-target`, altura mínima 44px) visível exclusivamente no mobile para controle do drawer, além de layout elástico para breadcrumbs e títulos sem quebra ou overflow horizontal.
+    - `AppLayout.tsx`: Orquestração reativa do estado do drawer mobile (`mobileSidebarOpen`) conectando o botão do Header com a Sidebar e o backdrop escurecido.
+    - `NewPatientView.tsx`: Substituição do grid rígido de 12 colunas por layout fluido `ygeia-wizard-container`. No mobile, o stepper de 8 etapas agora atua como uma fita horizontal touch (`ygeia-wizard-stepper`) com scroll momentum sem barra visível. Inputs e seletores agrupados em `ygeia-grid-1-2` empilhando verticalmente em 1 coluna em telas `< 640px` e expandindo para 2 colunas em telas maiores.
+    - `PatientDirectory.tsx`: Grid de métricas de topo reconfigurado com `ygeia-grid-metrics` (1 coluna em smartphones, 2 colunas em phablets/tablets, 4 colunas em desktops), barra de busca e filtro empilháveis no mobile e tabela com contêiner com rolagem touch horizontal `-webkit-overflow-scrolling: touch`.
+  - **Refatoração Completa do Módulo de Configurações (`SettingsModule.tsx`)**:
+    - Migração integral para o Design System Ygeía utilizando `AppCard`, `AppButton`, `AppInput` e `AppBadge`.
+    - Eliminação completa de cores estáticas hardcoded (`#10b981`, `#ecfdf5`, `#059669`), adotando variáveis CSS reativas de tema (`var(--primary)`, `var(--primary-light)`, `var(--primary-border)`, `var(--primary-hover)`).
+    - Layout mobile-first responsivo (`ygeia-settings-container` e `ygeia-settings-nav`), onde as categorias de navegação tornam-se pílulas horizontais touch no mobile e sidebar lateral no desktop.
+    - Padronização de todas as sub-abas: Dados pessoais, Senha e Segurança, Secretárias & Equipe, Papel Timbrado, Sincronização Google Calendar e Estúdio White-Label.
+  - **Novos Menus Principais no Menu Lateral & Workspaces Clínicos Conectados**:
+    - **`Cadastros`**:
+      - `cadastros_pacientes`: Acesso direto à carteira e wizard de pacientes idênticos ao padrão Better Health.
+      - `cadastros_alimentos`: Tabela TACO (UNICAMP) pesquisável por nome e categoria com detalhamento de macronutrientes (Kcal, Proteínas, Carboidratos, Lipídios, Fibras).
+      - `cadastros_suplementos`: Catálogo de suplementos clínicos e fitoterápicos com dosagens e posologias recomendadas (Creatina, Whey, Ômega-3, Vitamina D3+K2, Magnésio, CoQ10).
+      - `cadastros_modelos`: Modelos de prescrição pré-configurados (Hipertrofia Limpa, Emagrecimento, Low FODMAPs, Mediterrânea).
+      - `cadastros_locais`: Gestão de salas físicas e atendimento por telemedicina segura.
+    - **`Nutrição`**:
+      - `nutricao_tmb`: Calculadora bioenergética interativa em tempo real com as estratégias científicas `MifflinStJeorStrategy` e `HarrisBenedictStrategy` de `@ygeia/domain-core`, fator de atividade física, metas calóricas (-500 kcal déficit, +350 kcal superávit) e distribuição de macronutrientes recomendada pelo CFN.
+      - `nutricao_cardapio`: Planejador de cardápios com fracionamento em refeições (Café da Manhã, Almoço, Lanche, Jantar) e cálculo calórico por refeição.
+      - `nutricao_antropometria`: Avaliação de composição corporal (% gordura Pollock 7 e 3 dobras, Faulkner, circunferências e Relação Cintura-Quadril).
+      - `nutricao_exames`: Painel de biomarcadores laboratoriais com faixas de referência clínica (Glicemia, HbA1c, Perfil lipídico, Vitamina D, Ferritina).
+    - **`Treinamento`**:
+      - Prescrição de treinos com divisão semanal ABCD, banco de exercícios com bi-sets, cadência, sobrecarga progressiva e tempo de descanso.
+
 ## [Unreleased] - 2026-11-21
 
 ### 💎 Aplicação Global de Tema Customizado White-Label & Migração Completa do Design Better Health

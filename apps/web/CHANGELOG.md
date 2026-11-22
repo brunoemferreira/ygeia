@@ -3,6 +3,27 @@
 Todas as alterações da aplicação Web React serão registradas aqui.
 Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/).
 
+## [Unreleased] - 2026-11-22
+
+### Adicionado
+- **Arquitetura Mobile First Obrigatória em Telas e Componentes**:
+  - `styles.css`: Novas classes utilitárias responsivas (`touch-target` com altura mínima 44px, `.ygeia-mobile-backdrop`, `.ygeia-sidebar-drawer`, `.ygeia-wizard-container`, `.ygeia-wizard-stepper`, `.ygeia-settings-container`, `.ygeia-settings-nav`, `.ygeia-grid-1-2`, `.ygeia-grid-1-3`, `.ygeia-grid-metrics`).
+  - `Header.tsx`: Botão hamburger de menu mobile e ajuste elástico de cabeçalho com breadcrumbs.
+  - `AppLayout.tsx`: Orquestração do drawer mobile e camada de backdrop com bloqueio de clique externo.
+  - `Sidebar.tsx`: Gaveta deslizante off-canvas no mobile (< 1024px) com fechamento automático no toque e botão `X`.
+  - `NewPatientView.tsx`: Fita horizontal touch no stepper mobile e agrupamento elástico em colunas fluidas.
+  - `PatientDirectory.tsx`: Grid métrico responsivo adaptado de 1 a 4 colunas e tabela com rolagem touch.
+- **Novos Menus Principais e Workspaces Clínicos Conectados (`Sidebar.tsx`, `AdminDashboard.tsx`)**:
+  - **Menu Cadastros**: Submenus e telas para `Pacientes`, `Alimentos (TACO)`, `Suplementos & Doses`, `Modelos de Prescrição` e `Locais de Atendimento`.
+  - **Menu Nutrição**: Submenus e ferramentas para `Cálculo TMB / GET` (integrado com `MifflinStJeorStrategy` e `HarrisBenedictStrategy` de `@ygeia/domain-core`), `Planejador de Cardápios`, `Avaliação & Pregas` e `Exames Laboratoriais`.
+  - **Menu Treinamento**: Submenus e fichas interativas para `Prescrição de Treinos`, `Exercícios & Bi-Sets`, `Divisão Semanal (ABCD)` e `Volume & Sobrecarga`.
+
+### Modificado
+- **Padronização Completa de Configurações (`SettingsModule.tsx`)**:
+  - Migração de 100% dos formulários e cartões para os componentes de design system `AppCard`, `AppButton`, `AppInput` e `AppBadge`.
+  - Eliminação de cores estáticas hardcoded, passando a responder dinamicamente às variáveis do tema customizado ativo (`var(--primary)`, `var(--primary-light)`, `var(--primary-border)`).
+  - Navegação de categorias reformulada para rolagem horizontal em smartphones e coluna lateral no desktop.
+
 ## [Unreleased] - 2026-11-21
 
 ### Adicionado

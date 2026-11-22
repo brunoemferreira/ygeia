@@ -371,26 +371,13 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
         </button>
       </div>
 
-      {/* 2. Grid de 2 Colunas: Stepper à Esquerda (3 col) + Form à Direita (9 col) */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(12, 1fr)',
-          gap: '1.5rem',
-        }}
-      >
-        {/* COLUNA ESQUERDA: STEPPER */}
-        <aside style={{ gridColumn: 'span 3' }}>
-          <div
-            style={{
-              borderRadius: '1rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
+      {/* 2. Layout Responsivo Mobile First: Stepper + Form */}
+      <div className="ygeia-wizard-container">
+        {/* STEPPER: Carrossel Horizontal com Swipe no Mobile, Barra Lateral no Desktop */}
+        <aside>
+          <div className="ygeia-wizard-stepper">
             <h2
+              className="desktop-only"
               style={{
                 fontSize: '0.875rem',
                 fontWeight: 700,
@@ -401,7 +388,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
             >
               Novo paciente
             </h2>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <nav style={{ display: 'flex', flexDirection: 'inherit', gap: '0.25rem', width: '100%' }}>
               {STEPS.map((step) => {
                 const Icon = step.icon;
                 const isActive = currentStep === step.id;
@@ -410,22 +397,23 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                     key={step.id}
                     type="button"
                     onClick={() => setCurrentStep(step.id)}
+                    className="touch-target"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.75rem',
-                      width: '100%',
-                      padding: '0.625rem 0.75rem',
+                      gap: '0.625rem',
+                      padding: '0.55rem 0.875rem',
                       borderRadius: '0.5rem',
-                      border: 'none',
+                      border: isActive ? '1px solid var(--primary-border)' : '1px solid transparent',
                       borderLeft: isActive ? '4px solid var(--primary)' : '4px solid transparent',
                       backgroundColor: isActive ? 'var(--primary-light)' : 'transparent',
                       color: isActive ? 'var(--primary)' : '#475569',
                       fontWeight: isActive ? 700 : 500,
-                      fontSize: '0.875rem',
+                      fontSize: '0.8125rem',
                       textAlign: 'left',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease',
+                      flexShrink: 0,
                     }}
                     onMouseOver={(e) => {
                       if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
@@ -434,7 +422,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
                     }}
                   >
-                    <Icon size={16} />
+                    <Icon size={16} style={{ flexShrink: 0 }} />
                     <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {step.label}
                     </span>
@@ -446,13 +434,13 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
         </aside>
 
         {/* COLUNA DIREITA: CONTEÚDO DA ETAPA ATIVA */}
-        <main style={{ gridColumn: 'span 9' }}>
+        <main style={{ minWidth: 0, width: '100%' }}>
           <div
             style={{
               borderRadius: '1rem',
               border: '1px solid #e2e8f0',
               backgroundColor: '#ffffff',
-              padding: '1.75rem 2rem',
+              padding: '1.25rem 1.5rem',
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
             }}
           >
@@ -495,7 +483,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 </div>
 
                 {/* Data de Nascimento e Sexo */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                <div className="ygeia-grid-1-2">
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       Data de nascimento <span style={{ color: 'var(--primary)' }}>*</span>
@@ -562,7 +550,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 </div>
 
                 {/* E-mail e Telefone */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                <div className="ygeia-grid-1-2">
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       E-mail
@@ -670,7 +658,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 </div>
 
                 {/* Responsável (Para menores) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                <div className="ygeia-grid-1-2">
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       Nome do responsável
@@ -1094,7 +1082,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 </div>
 
                 {insuranceName !== 'Sem convênio' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                  <div className="ygeia-grid-1-2">
                     <div>
                       <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                         Número da carteirinha
@@ -1500,7 +1488,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 </div>
 
                 {/* Logradouro e Número */}
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                <div className="ygeia-grid-1-2">
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       Logradouro
@@ -1544,7 +1532,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 </div>
 
                 {/* Complemento e Bairro */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                <div className="ygeia-grid-1-2">
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       Complemento
@@ -1588,7 +1576,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 </div>
 
                 {/* Cidade e UF */}
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                <div className="ygeia-grid-1-2">
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       Cidade

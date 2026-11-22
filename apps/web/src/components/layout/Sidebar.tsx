@@ -27,6 +27,13 @@ import {
   Lock,
   CalendarCheck,
   MessageCircleHeart,
+  FolderPlus,
+  Apple,
+  Activity,
+  X,
+  Layers,
+  Flame,
+  Award,
 } from 'lucide-react';
 
 export type UserRoleMode = 'professional' | 'patient';
@@ -44,6 +51,8 @@ interface SidebarProps {
   };
   activeModules?: Record<string, boolean>;
   onLogout?: () => void;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -54,15 +63,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectItem,
   clinicBranding,
   onLogout,
+  mobileOpen = false,
+  onCloseMobile,
 }) => {
   const { user, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Vertical accordion collapse states
+  const [expandedCadastros, setExpandedCadastros] = useState(true);
+  const [expandedNutricao, setExpandedNutricao] = useState(true);
+  const [expandedTreinamento, setExpandedTreinamento] = useState(true);
   const [expandedRotina, setExpandedRotina] = useState(true);
-  const [expandedAtendimento, setExpandedAtendimento] = useState(true);
+  const [expandedAtendimento, setExpandedAtendimento] = useState(false);
 
   const primaryColor = clinicBranding.primaryColor || '#059669';
+
+  const handleSelectItem = (id: string) => {
+    onSelectItem(id);
+    if (onCloseMobile) {
+      onCloseMobile();
+    }
+  };
 
   const handleLogoutAction = () => {
     if (onLogout) {
@@ -73,6 +94,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const sidebarWidth = collapsed ? '72px' : '260px';
+
+  // Submenus de Cadastros (Novo Módulo Principal)
+  const cadastrosItems = [
+    { id: 'cadastros_pacientes', label: 'Pacientes', icon: Users },
+    { id: 'cadastros_alimentos', label: 'Alimentos (TACO)', icon: Utensils },
+    { id: 'cadastros_suplementos', label: 'Suplementos & Doses', icon: Pill },
+    { id: 'cadastros_modelos', label: 'Modelos de Prescrição', icon: FileText },
+    { id: 'cadastros_locais', label: 'Locais de Atendimento', icon: Sparkles },
+  ];
+
+  // Submenus de Nutrição (Novo Módulo Principal)
+  const nutricaoItems = [
+    { id: 'nutricao_tmb', label: 'Cálculo TMB / GET', icon: Flame },
+    { id: 'nutricao_cardapio', label: 'Planejador de Cardápios', icon: Apple },
+    { id: 'nutricao_antropometria', label: 'Avaliação & Pregas', icon: Activity },
+    { id: 'nutricao_exames', label: 'Exames Laboratoriais', icon: Lock },
+  ];
+
+  // Submenus de Treinamento (Novo Módulo Principal)
+  const treinamentoItems = [
+    { id: 'treino_prescricao', label: 'Prescrição de Treinos', icon: Dumbbell },
+    { id: 'treino_exercicios', label: 'Exercícios & Bi-Sets', icon: Layers },
+    { id: 'treino_divisao', label: 'Divisão Semanal (ABCD)', icon: CalendarCheck },
+    { id: 'treino_volume', label: 'Volume & Sobrecarga', icon: Award },
+  ];
 
   // Submenus de Rotina
   const rotinaItems = [
@@ -94,7 +140,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const directItems = [
     { id: 'gestao_contas', label: 'Gestão de Contas', icon: CreditCard },
     { id: 'clube_vantagens', label: 'Clube de Vantagens', icon: Sparkles },
-    { id: 'treino_modulo', label: 'Módulo de Treino', icon: Dumbbell },
     { id: 'configuracoes', label: 'Configurações', icon: Settings },
     { id: 'minha_conta', label: 'Minha Conta Admin', icon: UserCheck },
   ];
@@ -110,8 +155,96 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'patient_chat', label: 'Falar com Nutricionista', icon: MessageCircleHeart },
   ];
 
+  // Helper de Accordion para reutilização
+  const renderAccordionGroup = (
+    title: string,
+    icon: React.ComponentType<{ size?: number; color?: string; style?: React.CSSProperties }>,
+    isExpanded: boolean,
+    onToggle: () => void,
+    items: Array<{ id: string; label: string; icon: React.ComponentType<{ size?: number; color?: string; style?: React.CSSProperties }> }>,
+  ) => {
+    const IconComponent = icon;
+    const hasActiveChild = items.some((i) => i.id === activeItem);
+
+    return (
+      <div style={{ marginTop: '0.25rem' }}>
+        <button
+          type="button"
+          onClick={onToggle}
+          title={collapsed ? title : undefined}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'space-between',
+            width: '100%',
+            padding: collapsed ? '0.65rem 0' : '0.5rem 0.75rem',
+            background: hasActiveChild && collapsed ? 'var(--primary-light)' : 'transparent',
+            border: 'none',
+            borderRadius: '0.5rem',
+            color: hasActiveChild ? primaryColor : '#334155',
+            fontSize: '0.8125rem',
+            fontWeight: hasActiveChild ? 700 : 600,
+            cursor: 'pointer',
+          }}
+          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hasActiveChild && collapsed ? 'var(--primary-light)' : 'transparent')}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            <IconComponent size={16} color={hasActiveChild ? primaryColor : '#64748b'} style={{ flexShrink: 0 }} />
+            {!collapsed && <span>{title}</span>}
+          </div>
+          {!collapsed && (
+            <div>{isExpanded ? <ChevronDown size={14} color="#94a3b8" /> : <ChevronRight size={14} color="#94a3b8" />}</div>
+          )}
+        </button>
+
+        {/* Sub-itens */}
+        {isExpanded && !collapsed && (
+          <div style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.15rem' }}>
+            {items
+              .filter((item) => !searchTerm || item.label.toLowerCase().includes(searchTerm.toLowerCase()))
+              .map((item) => {
+                const isActive = activeItem === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSelectItem(item.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.4rem 0.65rem',
+                      borderRadius: '0.375rem',
+                      border: 'none',
+                      background: isActive ? 'var(--primary-light)' : 'transparent',
+                      color: isActive ? primaryColor : '#64748b',
+                      fontSize: '0.75rem',
+                      fontWeight: isActive ? 700 : 500,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      width: '100%',
+                    }}
+                    onMouseOver={(e) => {
+                      if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseOut={(e) => {
+                      if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <aside
+      className={`ygeia-sidebar-drawer ${mobileOpen ? 'open' : ''}`}
       style={{
         width: sidebarWidth,
         minWidth: sidebarWidth,
@@ -129,7 +262,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }}
     >
       {/* ========================================================
-          1. TOPO: LOGO DA MARCA & BOTÃO RETRÁTIL HORIZONTAL
+          1. TOPO: LOGO DA MARCA, BOTÃO RETRÁTIL & CLOSE MOBILE
          ======================================================== */}
       <div
         style={{
@@ -204,32 +337,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* Botão de Contração/Expansão Horizontal */}
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          title={collapsed ? 'Expandir Menu' : 'Recolher Menu'}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: '#64748b',
-            cursor: 'pointer',
-            padding: '0.35rem',
-            borderRadius: '0.375rem',
-            display: collapsed ? 'none' : 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'background 0.15s ease',
-          }}
-          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-        >
-          <ChevronLeft size={16} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          {/* Botão de Fechar no Mobile */}
+          {onCloseMobile && (
+            <button
+              type="button"
+              onClick={onCloseMobile}
+              className="mobile-only"
+              title="Fechar Menu"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#64748b',
+                cursor: 'pointer',
+                padding: '0.35rem',
+                borderRadius: '0.375rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <X size={18} />
+            </button>
+          )}
+
+          {/* Botão de Contração/Expansão Horizontal (Desktop) */}
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="desktop-only"
+            title={collapsed ? 'Expandir Menu' : 'Recolher Menu'}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: '0.35rem',
+              borderRadius: '0.375rem',
+              display: collapsed ? 'none' : 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.15s ease',
+            }}
+            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
+            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+          >
+            <ChevronLeft size={16} />
+          </button>
+        </div>
       </div>
 
       {/* ========================================================
-          2. CAMPO DE BUSCA NO MENU (Estilo do Mockup)
+          2. CAMPO DE BUSCA NO MENU
          ======================================================== */}
       {!collapsed && mode === 'professional' && (
         <div style={{ padding: '0.875rem 1rem 0.25rem 1rem' }}>
@@ -301,7 +459,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Item Ativo Principal: Dashboard de Pacientes */}
             <button
               type="button"
-              onClick={() => onSelectItem('dashboard_pacientes')}
+              onClick={() => handleSelectItem('dashboard_pacientes')}
               title={collapsed ? 'Dashboard de Pacientes' : undefined}
               style={{
                 display: 'flex',
@@ -335,154 +493,59 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {!collapsed && <span>Dashboard de Pacientes</span>}
             </button>
 
-            {/* Accordion Vertical: Rotina */}
-            <div style={{ marginTop: '0.25rem' }}>
-              <button
-                type="button"
-                onClick={() => setExpandedRotina(!expandedRotina)}
-                title={collapsed ? 'Rotina' : undefined}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: collapsed ? 'center' : 'space-between',
-                  width: '100%',
-                  padding: collapsed ? '0.65rem 0' : '0.5rem 0.75rem',
-                  background: 'transparent',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  color: '#334155',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                  <Calendar size={16} color="#64748b" style={{ flexShrink: 0 }} />
-                  {!collapsed && <span>Rotina</span>}
-                </div>
-                {!collapsed && (
-                  <div>{expandedRotina ? <ChevronDown size={14} color="#94a3b8" /> : <ChevronRight size={14} color="#94a3b8" />}</div>
-                )}
-              </button>
+            {/* ========================================================
+                NOVOS MENUS PRINCIPAIS EXIGIDOS PELO USUÁRIO
+               ======================================================== */}
 
-              {/* Sub-itens de Rotina (Expandíveis/Contráteis Verticalmente) */}
-              {expandedRotina && !collapsed && (
-                <div style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.15rem' }}>
-                  {rotinaItems.map((item) => {
-                    const isActive = activeItem === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => onSelectItem(item.id)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          padding: '0.4rem 0.65rem',
-                          borderRadius: '0.375rem',
-                          border: 'none',
-                          background: isActive ? 'var(--primary-light)' : 'transparent',
-                          color: isActive ? primaryColor : '#64748b',
-                          fontSize: '0.75rem',
-                          fontWeight: isActive ? 700 : 500,
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          width: '100%',
-                        }}
-                        onMouseOver={(e) => {
-                          if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                        }}
-                        onMouseOut={(e) => {
-                          if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                        }}
-                      >
-                        <span>{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            {/* Menu 1: Cadastros */}
+            {renderAccordionGroup(
+              'Cadastros',
+              FolderPlus,
+              expandedCadastros,
+              () => setExpandedCadastros(!expandedCadastros),
+              cadastrosItems,
+            )}
+
+            {/* Menu 2: Nutrição */}
+            {renderAccordionGroup(
+              'Nutrição',
+              Apple,
+              expandedNutricao,
+              () => setExpandedNutricao(!expandedNutricao),
+              nutricaoItems,
+            )}
+
+            {/* Menu 3: Treinamento */}
+            {renderAccordionGroup(
+              'Treinamento',
+              Dumbbell,
+              expandedTreinamento,
+              () => setExpandedTreinamento(!expandedTreinamento),
+              treinamentoItems,
+            )}
+
+            {/* Accordion Vertical: Rotina */}
+            {renderAccordionGroup(
+              'Rotina',
+              Calendar,
+              expandedRotina,
+              () => setExpandedRotina(!expandedRotina),
+              rotinaItems,
+            )}
 
             {/* Accordion Vertical: Atendimento */}
-            <div style={{ marginTop: '0.25rem' }}>
-              <button
-                type="button"
-                onClick={() => setExpandedAtendimento(!expandedAtendimento)}
-                title={collapsed ? 'Atendimento' : undefined}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: collapsed ? 'center' : 'space-between',
-                  width: '100%',
-                  padding: collapsed ? '0.65rem 0' : '0.5rem 0.75rem',
-                  background: 'transparent',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  color: '#334155',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                  <FileText size={16} color="#64748b" style={{ flexShrink: 0 }} />
-                  {!collapsed && <span>Atendimento</span>}
-                </div>
-                {!collapsed && (
-                  <div>{expandedAtendimento ? <ChevronDown size={14} color="#94a3b8" /> : <ChevronRight size={14} color="#94a3b8" />}</div>
-                )}
-              </button>
-
-              {/* Sub-itens de Atendimento */}
-              {expandedAtendimento && !collapsed && (
-                <div style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.15rem' }}>
-                  {atendimentoItems.map((item) => {
-                    const isActive = activeItem === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => onSelectItem(item.id)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          padding: '0.4rem 0.65rem',
-                          borderRadius: '0.375rem',
-                          border: 'none',
-                          background: isActive ? 'var(--primary-light)' : 'transparent',
-                          color: isActive ? primaryColor : '#64748b',
-                          fontSize: '0.75rem',
-                          fontWeight: isActive ? 700 : 500,
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          width: '100%',
-                        }}
-                        onMouseOver={(e) => {
-                          if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                        }}
-                        onMouseOut={(e) => {
-                          if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                        }}
-                      >
-                        <span>{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            {renderAccordionGroup(
+              'Atendimento',
+              FileText,
+              expandedAtendimento,
+              () => setExpandedAtendimento(!expandedAtendimento),
+              atendimentoItems,
+            )}
 
             {/* Linha Divisória */}
             <div style={{ height: '1px', backgroundColor: '#f1f5f9', margin: '0.5rem 0.25rem' }} />
 
-            {/* Itens Diretos (Gestão de Contas, Clube, Treino, Configurações, Minha Conta) */}
+            {/* Itens Diretos (Gestão de Contas, Clube, Configurações, Minha Conta) */}
             {directItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeItem === item.id;
@@ -490,7 +553,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => onSelectItem(item.id)}
+                  onClick={() => handleSelectItem(item.id)}
                   title={collapsed ? item.label : undefined}
                   style={{
                     display: 'flex',
@@ -531,7 +594,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => onSelectItem(item.id)}
+                onClick={() => handleSelectItem(item.id)}
                 title={collapsed ? item.label : undefined}
                 style={{
                   display: 'flex',
@@ -583,7 +646,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               padding: '0 0.25rem',
             }}
           >
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--primary)' }} />
             <span>Versão v0.58.0</span>
           </div>
         )}
@@ -602,15 +665,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               style={{
                 width: '32px',
                 height: '32px',
-                borderRadius: '50%',
-                backgroundColor: '#f1f5f9',
-                color: '#334155',
+                borderRadius: '8px',
+                backgroundColor: '#0f172a',
+                color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontWeight: 700,
                 fontSize: '0.75rem',
-                border: '1px solid #e2e8f0',
+                fontWeight: 800,
                 flexShrink: 0,
               }}
             >
@@ -618,16 +680,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ? user.fullName
                     .split(' ')
                     .map((n) => n[0])
-                    .slice(0, 2)
                     .join('')
-                : 'BF'}
+                    .slice(0, 2)
+                    .toUpperCase()
+                : 'AH'}
             </div>
-
             {!collapsed && (
               <div style={{ overflow: 'hidden' }}>
                 <div
                   style={{
-                    fontSize: '0.75rem',
+                    fontSize: '0.8125rem',
                     fontWeight: 700,
                     color: '#0f172a',
                     whiteSpace: 'nowrap',
@@ -635,20 +697,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     overflow: 'hidden',
                   }}
                 >
-                  {user?.fullName || 'Bruno Ferreira'}
+                  {user?.fullName || 'Administrador Geral'}
                 </div>
                 <div style={{ fontSize: '0.6875rem', color: '#64748b' }}>
-                  Administrador • ADMIN
+                  {mode === 'professional' ? 'Administrador • ADMIN' : 'Paciente • VIP'}
                 </div>
               </div>
             )}
           </div>
 
+          {/* Botão Sair */}
           {!collapsed && (
             <button
               type="button"
               onClick={handleLogoutAction}
-              title="Encerrar sessão"
+              title="Encerrar Sessão"
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -659,12 +722,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'color 0.15s ease',
               }}
-              onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = '#dc2626')}
+              onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = '#ef4444')}
               onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#94a3b8')}
             >
-              <LogOut size={15} />
+              <LogOut size={16} />
             </button>
           )}
         </div>

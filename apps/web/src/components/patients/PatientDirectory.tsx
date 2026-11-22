@@ -222,14 +222,8 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
         </button>
       </div>
 
-      {/* 2. Top Metrics Cards (Grid 4 colunas) */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-          gap: '1rem',
-        }}
-      >
+      {/* 2. Top Metrics Cards (Grid Responsivo Mobile First) */}
+      <div className="ygeia-grid-metrics">
         {/* Card 1: Total Pacientes */}
         <div
           style={{

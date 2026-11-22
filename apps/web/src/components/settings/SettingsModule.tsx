@@ -19,10 +19,12 @@ import {
   LayoutGrid,
   Save,
   Plus,
+  Upload,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { WhiteLabelStudio } from './WhiteLabelStudio';
+import { AppCard, AppButton, AppInput, AppBadge } from '../ui';
 
 interface SettingsModuleProps {
   initialSubTab?: string;
@@ -39,18 +41,18 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
   // Editing state for "Dados pessoais"
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
 
-  // 1. Personal Identification State (Defaults matching user screenshot)
+  // 1. Personal Identification State
   const [personalData, setPersonalData] = useState({
     nomeCompleto: user?.fullName || 'Bruno Ferreira',
     email: user?.email || 'brunoemf@gmail.com',
-    telefone: '+55 199929220',
-    crn: '',
+    telefone: '+55 19992922054',
+    crn: 'CRN-3 / 48291',
     cpfCnpj: '218.980.718-29',
-    especialidades: '',
+    especialidades: 'Nutrição Esportiva, Emagrecimento & Modulação Metabólica',
     cep: '13060611',
     logradouro: 'Rua Doutor Jeber Juabre, nº 145, Jardim Márcia',
-    cidadeUf: '',
-    fotoUrl: '/bruno-profile.jpg',
+    cidadeUf: 'Campinas - SP',
+    fotoUrl: '',
   });
 
   // 2. Team / Secretárias
@@ -70,7 +72,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
     triggerSuccess('Dados pessoais atualizados com sucesso!');
   };
 
-  // Submenu structure matching user image exactly
+  // Submenu structure
   const navCategories = [
     {
       id: 'conta',
@@ -125,43 +127,23 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
   })).filter((cat) => cat.items.length > 0);
 
   return (
-    <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '1.5rem 1rem' }}>
+    <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0.75rem 0.5rem', width: '100%' }}>
       {/* Top Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
           Configurações
         </h1>
-        <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
-          Gerencie suas preferências, dados pessoais e configurações do sistema.
+        <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
+          Gerencie suas preferências, dados pessoais, equipe e personalização visual do sistema.
         </p>
       </div>
 
-      {/* Two-Column Card Container */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: '1rem',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
-          display: 'grid',
-          gridTemplateColumns: '260px 1fr',
-          minHeight: '680px',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Left Submenu Navigation */}
-        <div
-          style={{
-            borderRight: '1px solid #f1f5f9',
-            padding: '1.25rem 1rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.5rem',
-            backgroundColor: '#ffffff',
-          }}
-        >
-          {/* Search Box */}
-          <div style={{ position: 'relative' }}>
+      {/* Mobile-First Settings Container */}
+      <div className="ygeia-settings-container">
+        {/* Navigation Section (Horizontal pills on mobile, left column on desktop) */}
+        <div className="ygeia-settings-nav">
+          {/* Search Box (Desktop only or compact on mobile) */}
+          <div className="desktop-only" style={{ position: 'relative', width: '100%', marginBottom: '0.5rem' }}>
             <Search
               size={15}
               style={{
@@ -174,15 +156,15 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
             />
             <input
               type="text"
-              placeholder="Procurar"
+              placeholder="Procurar ajustes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.5rem 0.75rem 0.5rem 2.25rem',
+                padding: '0.45rem 0.75rem 0.45rem 2.25rem',
                 borderRadius: '0.5rem',
                 border: '1px solid #e2e8f0',
-                fontSize: '0.8125rem',
+                fontSize: '0.75rem',
                 boxSizing: 'border-box',
                 outline: 'none',
                 color: '#334155',
@@ -191,134 +173,118 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
           </div>
 
           {/* Nav Categories */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {filteredCategories.map((cat) => (
-              <div key={cat.id}>
-                <div
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'inherit',
+              gap: '0.35rem',
+              width: '100%',
+              alignItems: 'center',
+            }}
+          >
+            {filteredCategories.flatMap((cat) => cat.items).map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id)}
+                  className="touch-target"
                   style={{
-                    fontSize: '0.6875rem',
-                    fontWeight: 800,
-                    color: '#64748b',
-                    letterSpacing: '0.06em',
-                    marginBottom: '0.5rem',
-                    padding: '0 0.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.45rem 0.875rem',
+                    borderRadius: '0.5rem',
+                    border: isActive ? '1px solid var(--primary-border)' : '1px solid transparent',
+                    background: isActive ? 'var(--primary-light)' : 'transparent',
+                    color: isActive
+                      ? 'var(--primary)'
+                      : item.danger
+                      ? '#ef4444'
+                      : '#475569',
+                    fontWeight: isActive ? 700 : 500,
+                    fontSize: '0.8125rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                  onMouseOver={(e) => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                    }
                   }}
                 >
-                  {cat.title}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
-                  {cat.items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeTab === item.id;
-
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => setActiveTab(item.id)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.625rem',
-                          padding: '0.5rem 0.75rem',
-                          borderRadius: '0.5rem',
-                          border: 'none',
-                          background: isActive ? '#f1f5f9' : 'transparent',
-                          color: isActive
-                            ? '#0f172a'
-                            : item.danger
-                            ? '#ef4444'
-                            : '#475569',
-                          fontWeight: isActive ? 700 : 500,
-                          fontSize: '0.8125rem',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          transition: 'background 0.15s ease',
-                          width: '100%',
-                        }}
-                        onMouseOver={(e) => {
-                          if (!isActive) {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                          }
-                        }}
-                        onMouseOut={(e) => {
-                          if (!isActive) {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                          }
-                        }}
-                      >
-                        <Icon size={16} strokeWidth={isActive ? 2.2 : 1.75} style={{ flexShrink: 0 }} />
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {item.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                  <Icon size={16} strokeWidth={isActive ? 2.2 : 1.75} style={{ flexShrink: 0 }} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Right Main Details Content */}
-        <div style={{ padding: '2rem 2.5rem', overflowY: 'auto' }}>
-          {/* TAB: DADOS PESSOAIS (Exactly as in user image) */}
+        <div style={{ padding: '1.25rem 1.5rem', overflowY: 'auto', minWidth: 0 }}>
+          {/* TAB: DADOS PESSOAIS */}
           {activeTab === 'personal' && (
-            <div>
-              {/* Header with Title and Green Edit Button */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* Header with Title and Edit Button */}
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: '1.75rem',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem',
                 }}
               >
-                <h2 style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  Dados pessoais
-                </h2>
-                <button
-                  type="button"
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    Dados pessoais
+                  </h2>
+                  <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>
+                    Informações cadastrais e profissionais do consultório
+                  </p>
+                </div>
+                <AppButton
+                  variant={isEditingPersonal ? 'secondary' : 'primary'}
                   onClick={() => setIsEditingPersonal(!isEditingPersonal)}
-                  style={{
-                    background: isEditingPersonal ? '#0f172a' : '#10b981',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    padding: '0.45rem 1.125rem',
-                    fontWeight: 700,
-                    fontSize: '0.8125rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
                 >
-                  {isEditingPersonal ? 'Cancelar' : 'Editar'}
-                </button>
+                  {isEditingPersonal ? 'Cancelar' : 'Editar Dados'}
+                </AppButton>
               </div>
 
               {/* Form container */}
-              <form onSubmit={handleSavePersonal}>
+              <form onSubmit={handleSavePersonal} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {/* Section Foto */}
-                <div style={{ marginBottom: '2.5rem' }}>
-                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.875rem' }}>
-                    Foto
+                <AppCard variant="default">
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.75rem' }}>
+                    Foto de Perfil
                   </div>
                   <div
                     style={{
                       border: '1px dashed #cbd5e1',
                       borderRadius: '0.75rem',
-                      padding: '1.25rem',
+                      padding: '1rem',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1.25rem',
-                      background: '#ffffff',
+                      gap: '1rem',
+                      flexWrap: 'wrap',
                     }}
                   >
-                    {/* User profile picture box */}
                     <div
                       style={{
-                        width: '72px',
-                        height: '72px',
+                        width: '64px',
+                        height: '64px',
                         borderRadius: '10px',
                         overflow: 'hidden',
                         background: '#0f172a',
@@ -327,7 +293,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                         justifyContent: 'center',
                         color: 'white',
                         fontWeight: 800,
-                        fontSize: '1.5rem',
+                        fontSize: '1.25rem',
                         flexShrink: 0,
                       }}
                     >
@@ -338,58 +304,45 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       ) : (
-                        'BF'
+                        personalData.nomeCompleto.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
-                        Foto de perfil
+                        Avatar do Profissional
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
                         PNG, JPEG ou WEBP — máx. 10MB
                       </div>
-                      <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
-                        <button
+                      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
+                        <AppButton
                           type="button"
-                          onClick={() => triggerSuccess('Selecione uma imagem do seu dispositivo.')}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#0f172a',
-                            fontSize: '0.8125rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            padding: 0,
-                          }}
+                          variant="ghost"
+                          size="sm"
+                          icon={<Upload size={14} />}
+                          onClick={() => triggerSuccess('Foto selecionada com sucesso.')}
                         >
                           Alterar
-                        </button>
-                        <button
+                        </AppButton>
+                        <AppButton
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             setPersonalData({ ...personalData, fotoUrl: '' });
                             triggerSuccess('Foto removida.');
                           }}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#64748b',
-                            fontSize: '0.8125rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            padding: 0,
-                          }}
                         >
                           Remover
-                        </button>
+                        </AppButton>
                       </div>
                     </div>
                   </div>
-                </div>
+                </AppCard>
 
                 {/* Section IDENTIFICAÇÃO */}
-                <div style={{ marginBottom: '2.5rem' }}>
+                <AppCard variant="default">
                   <div
                     style={{
                       fontSize: '0.6875rem',
@@ -397,386 +350,131 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                       color: '#64748b',
                       letterSpacing: '0.06em',
                       marginBottom: '1rem',
+                      textTransform: 'uppercase',
                     }}
                   >
-                    IDENTIFICAÇÃO
+                    Identificação Profissional & Pessoal
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    {/* Nome completo */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        Nome completo
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="text"
-                          value={personalData.nomeCompleto}
-                          onChange={(e) => setPersonalData({ ...personalData, nomeCompleto: e.target.value })}
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: '#475569', fontWeight: 500 }}>
-                          {personalData.nomeCompleto}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Email */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        Email
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="email"
-                          value={personalData.email}
-                          onChange={(e) => setPersonalData({ ...personalData, email: e.target.value })}
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: '#475569', fontWeight: 500 }}>
-                          {personalData.email}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Telefone */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        Telefone
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="text"
-                          value={personalData.telefone}
-                          onChange={(e) => setPersonalData({ ...personalData, telefone: e.target.value })}
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: '#475569', fontWeight: 500 }}>
-                          {personalData.telefone}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* CRN */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        CRN
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="text"
-                          value={personalData.crn}
-                          onChange={(e) => setPersonalData({ ...personalData, crn: e.target.value })}
-                          placeholder="Ex: CRN-3 48.912/P"
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: personalData.crn ? '#475569' : '#94a3b8' }}>
-                          {personalData.crn || '—'}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* CPF / CNPJ */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        CPF / CNPJ
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="text"
-                          value={personalData.cpfCnpj}
-                          onChange={(e) => setPersonalData({ ...personalData, cpfCnpj: e.target.value })}
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: '#475569', fontWeight: 500 }}>
-                          {personalData.cpfCnpj}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Especialidades */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        Especialidades
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="text"
-                          value={personalData.especialidades}
-                          onChange={(e) => setPersonalData({ ...personalData, especialidades: e.target.value })}
-                          placeholder="Ex: Nutrição Esportiva, Emagrecimento"
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: personalData.especialidades ? '#475569' : '#94a3b8' }}>
-                          {personalData.especialidades || '—'}
-                        </span>
-                      )}
-                    </div>
+                  <div className="ygeia-grid-1-2">
+                    <AppInput
+                      label="Nome completo"
+                      value={personalData.nomeCompleto}
+                      disabled={!isEditingPersonal}
+                      onChange={(e) => setPersonalData({ ...personalData, nomeCompleto: e.target.value })}
+                      required
+                    />
+                    <AppInput
+                      label="E-mail"
+                      type="email"
+                      value={personalData.email}
+                      disabled={!isEditingPersonal}
+                      onChange={(e) => setPersonalData({ ...personalData, email: e.target.value })}
+                      required
+                    />
+                    <AppInput
+                      label="Telefone / WhatsApp"
+                      value={personalData.telefone}
+                      disabled={!isEditingPersonal}
+                      onChange={(e) => setPersonalData({ ...personalData, telefone: e.target.value })}
+                    />
+                    <AppInput
+                      label="Inscrição no CRN"
+                      placeholder="Ex: CRN-3 / 48291"
+                      value={personalData.crn}
+                      disabled={!isEditingPersonal}
+                      onChange={(e) => setPersonalData({ ...personalData, crn: e.target.value })}
+                    />
+                    <AppInput
+                      label="CPF / CNPJ"
+                      value={personalData.cpfCnpj}
+                      disabled={!isEditingPersonal}
+                      onChange={(e) => setPersonalData({ ...personalData, cpfCnpj: e.target.value })}
+                    />
+                    <AppInput
+                      label="Especialidades Clínicas"
+                      value={personalData.especialidades}
+                      disabled={!isEditingPersonal}
+                      onChange={(e) => setPersonalData({ ...personalData, especialidades: e.target.value })}
+                    />
                   </div>
-                </div>
+                </AppCard>
 
                 {/* Section ENDEREÇO */}
-                <div style={{ marginBottom: '2rem' }}>
+                <AppCard variant="default">
                   <div
                     style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                      fontSize: '0.6875rem',
+                      fontWeight: 800,
+                      color: '#64748b',
+                      letterSpacing: '0.06em',
                       marginBottom: '1rem',
+                      textTransform: 'uppercase',
                     }}
                   >
-                    <span
-                      style={{
-                        fontSize: '0.6875rem',
-                        fontWeight: 800,
-                        color: '#64748b',
-                        letterSpacing: '0.06em',
-                      }}
-                    >
-                      ENDEREÇO
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                      Consultório ou residência
-                    </span>
+                    Endereço de Atendimento / Residência
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    {/* CEP */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        CEP
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="text"
-                          value={personalData.cep}
-                          onChange={(e) => setPersonalData({ ...personalData, cep: e.target.value })}
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: '#475569', fontWeight: 500 }}>
-                          {personalData.cep}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Logradouro */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        Logradouro
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="text"
-                          value={personalData.logradouro}
-                          onChange={(e) => setPersonalData({ ...personalData, logradouro: e.target.value })}
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: '#475569', fontWeight: 500 }}>
-                          {personalData.logradouro}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Cidade / UF */}
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '180px 1fr',
-                        padding: '0.875rem 0',
-                        borderBottom: '1px solid #f1f5f9',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                        Cidade / UF
-                      </span>
-                      {isEditingPersonal ? (
-                        <input
-                          type="text"
-                          value={personalData.cidadeUf}
-                          onChange={(e) => setPersonalData({ ...personalData, cidadeUf: e.target.value })}
-                          style={{
-                            padding: '0.45rem 0.75rem',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.8125rem',
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.8125rem', color: personalData.cidadeUf ? '#475569' : '#94a3b8' }}>
-                          {personalData.cidadeUf || '—'}
-                        </span>
-                      )}
+                  <div className="ygeia-grid-1-3">
+                    <AppInput
+                      label="CEP"
+                      value={personalData.cep}
+                      disabled={!isEditingPersonal}
+                      onChange={(e) => setPersonalData({ ...personalData, cep: e.target.value })}
+                    />
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <AppInput
+                        label="Logradouro Completo"
+                        value={personalData.logradouro}
+                        disabled={!isEditingPersonal}
+                        onChange={(e) => setPersonalData({ ...personalData, logradouro: e.target.value })}
+                      />
                     </div>
                   </div>
-                </div>
+
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <AppInput
+                      label="Cidade / UF"
+                      value={personalData.cidadeUf}
+                      disabled={!isEditingPersonal}
+                      onChange={(e) => setPersonalData({ ...personalData, cidadeUf: e.target.value })}
+                    />
+                  </div>
+                </AppCard>
 
                 {/* Save button when in edit mode */}
                 {isEditingPersonal && (
-                  <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button
-                      type="submit"
-                      style={{
-                        background: '#10b981',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '0.5rem',
-                        padding: '0.625rem 1.5rem',
-                        fontWeight: 700,
-                        fontSize: '0.875rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                      }}
-                    >
-                      <Save size={16} />
-                      <span>Salvar Alterações</span>
-                    </button>
-                    <button
+                  <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                    <AppButton
                       type="button"
+                      variant="ghost"
                       onClick={() => setIsEditingPersonal(false)}
-                      style={{
-                        background: '#f1f5f9',
-                        color: '#475569',
-                        border: 'none',
-                        borderRadius: '0.5rem',
-                        padding: '0.625rem 1.25rem',
-                        fontWeight: 600,
-                        fontSize: '0.875rem',
-                        cursor: 'pointer',
-                      }}
                     >
                       Cancelar
-                    </button>
+                    </AppButton>
+                    <AppButton
+                      type="submit"
+                      variant="primary"
+                      icon={<Save size={16} />}
+                    >
+                      Salvar Alterações
+                    </AppButton>
                   </div>
                 )}
               </form>
             </div>
           )}
 
-          {/* TAB: PERSONALIZAÇÃO / WHITE LABEL STUDIO (SÊNIOR) */}
+          {/* TAB: PERSONALIZAÇÃO / WHITE LABEL STUDIO */}
           {activeTab === 'personalizacao' && (
             <WhiteLabelStudio />
           )}
 
           {/* TAB: SECRETÁRIAS & EQUIPE */}
           {activeTab === 'secretarias' && (
-            <div>
-              <div style={{ marginBottom: '1.75rem' }}>
-                <h2 style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
                   👥 Secretárias & Acessos
                 </h2>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
@@ -785,34 +483,23 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
               </div>
 
               {/* Convidar Secretária */}
-              <div
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '0.75rem',
-                  padding: '1.25rem',
-                  marginBottom: '1.5rem',
-                }}
-              >
+              <AppCard variant="default">
                 <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.75rem' }}>
                   Adicionar Nova Secretária
                 </div>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <input
-                    type="email"
-                    placeholder="email.secretaria@consultorio.com"
-                    value={newMemberEmail}
-                    onChange={(e) => setNewMemberEmail(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: '0.625rem 0.75rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                    }}
-                  />
-                  <button
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: '220px' }}>
+                    <AppInput
+                      type="email"
+                      placeholder="email.secretaria@consultorio.com"
+                      value={newMemberEmail}
+                      onChange={(e) => setNewMemberEmail(e.target.value)}
+                    />
+                  </div>
+                  <AppButton
                     type="button"
+                    variant="primary"
+                    icon={<Plus size={16} />}
                     onClick={() => {
                       if (newMemberEmail.trim()) {
                         setTeamMembers([
@@ -829,71 +516,50 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                         triggerSuccess('Convite enviado com sucesso para a secretária!');
                       }
                     }}
-                    style={{
-                      background: '#0f172a',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      padding: '0.625rem 1.25rem',
-                      fontWeight: 700,
-                      fontSize: '0.8125rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.375rem',
-                    }}
                   >
-                    <Plus size={16} />
-                    <span>Convidar</span>
-                  </button>
+                    Convidar
+                  </AppButton>
                 </div>
-              </div>
+              </AppCard>
 
               {/* Tabela de Membros */}
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8125rem' }}>
-                  <thead>
-                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
-                      <th style={{ padding: '0.75rem 1rem' }}>Nome / E-mail</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Cargo</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teamMembers.map((member) => (
-                      <tr key={member.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.875rem 1rem', fontWeight: 600, color: '#0f172a' }}>
-                          <div>{member.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400 }}>{member.email}</div>
-                        </td>
-                        <td style={{ padding: '0.875rem 1rem', color: '#475569' }}>{member.role}</td>
-                        <td style={{ padding: '0.875rem 1rem' }}>
-                          <span
-                            style={{
-                              background: '#ecfdf5',
-                              color: '#065f46',
-                              fontSize: '0.6875rem',
-                              fontWeight: 700,
-                              padding: '0.125rem 0.5rem',
-                              borderRadius: '9999px',
-                            }}
-                          >
-                            {member.status}
-                          </span>
-                        </td>
+              <AppCard variant="default" style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ overflowX: 'auto', width: '100%' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8125rem' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
+                        <th style={{ padding: '0.75rem 1rem' }}>Nome / E-mail</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Cargo</th>
+                        <th style={{ padding: '0.75rem 1rem' }}>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {teamMembers.map((member) => (
+                        <tr key={member.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '0.875rem 1rem', fontWeight: 600, color: '#0f172a' }}>
+                            <div>{member.name}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400 }}>{member.email}</div>
+                          </td>
+                          <td style={{ padding: '0.875rem 1rem', color: '#475569' }}>{member.role}</td>
+                          <td style={{ padding: '0.875rem 1rem' }}>
+                            <AppBadge variant="success">
+                              {member.status}
+                            </AppBadge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </AppCard>
             </div>
           )}
 
           {/* TAB: PAPEL TIMBRADO */}
           {activeTab === 'letterhead' && (
-            <div>
-              <div style={{ marginBottom: '1.75rem' }}>
-                <h2 style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
                   📄 Papel Timbrado & Prescrições
                 </h2>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
@@ -903,16 +569,17 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
 
               <div
                 style={{
-                  border: '2px dashed #cbd5e1',
+                  border: '2px dashed var(--primary-border)',
                   borderRadius: '1rem',
-                  padding: '3rem 2rem',
+                  padding: '3rem 1.5rem',
                   textAlign: 'center',
-                  background: '#f8fafc',
+                  background: 'var(--primary-light)',
                   cursor: 'pointer',
+                  transition: 'all 0.15s ease',
                 }}
                 onClick={() => triggerSuccess('Upload de modelo timbrado (PDF/PNG) concluído!')}
               >
-                <FileText size={40} color="#059669" style={{ margin: '0 auto 1rem auto' }} />
+                <FileText size={40} color="var(--primary)" style={{ margin: '0 auto 1rem auto' }} />
                 <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.25rem' }}>
                   Clique para selecionar seu modelo timbrado
                 </div>
@@ -925,9 +592,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
 
           {/* TAB: GOOGLE CALENDAR */}
           {activeTab === 'calendar' && (
-            <div>
-              <div style={{ marginBottom: '1.75rem' }}>
-                <h2 style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
                   📅 Sincronização Google Calendar
                 </h2>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
@@ -935,53 +602,43 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                 </p>
               </div>
 
-              <div
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '0.75rem',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <Calendar size={28} color="#059669" />
-                  <div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
-                      Conectar com o Google Agenda
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                      Atualiza seus horários em tempo real no smartphone e computador
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => triggerSuccess('Google Calendar conectado com sucesso!')}
+              <AppCard variant="default">
+                <div
                   style={{
-                    background: '#059669',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    padding: '0.55rem 1.25rem',
-                    fontWeight: 700,
-                    fontSize: '0.8125rem',
-                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '1rem',
                   }}
                 >
-                  Conectar Agenda
-                </button>
-              </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <Calendar size={28} color="var(--primary)" />
+                    <div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
+                        Conectar com o Google Agenda
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        Atualiza seus horários em tempo real no smartphone e computador
+                      </div>
+                    </div>
+                  </div>
+                  <AppButton
+                    variant="primary"
+                    onClick={() => triggerSuccess('Google Calendar conectado com sucesso!')}
+                  >
+                    Conectar Agenda
+                  </AppButton>
+                </div>
+              </AppCard>
             </div>
           )}
 
           {/* TAB: SENHA E SEGURANÇA */}
           {activeTab === 'password' && (
-            <div>
-              <div style={{ marginBottom: '1.75rem' }}>
-                <h2 style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
                   🔑 Alterar Senha de Acesso
                 </h2>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
@@ -989,52 +646,37 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                 </p>
               </div>
 
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  triggerSuccess('Senha alterada com sucesso!');
-                }}
-                style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '420px' }}
-              >
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    Senha Atual
-                  </label>
-                  <input
+              <AppCard variant="default" style={{ maxWidth: '480px' }}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    triggerSuccess('Senha alterada com sucesso!');
+                  }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+                >
+                  <AppInput
+                    label="Senha Atual"
                     type="password"
                     required
                     placeholder="••••••••"
-                    style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem' }}
                   />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    Nova Senha
-                  </label>
-                  <input
+                  <AppInput
+                    label="Nova Senha"
                     type="password"
                     required
                     placeholder="Mínimo 8 caracteres"
-                    style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.875rem' }}
+                    helperText="Recomendado combinar letras maiúsculas, números e símbolos."
                   />
-                </div>
-                <button
-                  type="submit"
-                  style={{
-                    background: '#0f172a',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    padding: '0.75rem',
-                    fontWeight: 700,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  Atualizar Senha
-                </button>
-              </form>
+                  <AppButton
+                    type="submit"
+                    variant="primary"
+                    fullWidth
+                    style={{ marginTop: '0.5rem' }}
+                  >
+                    Atualizar Senha
+                  </AppButton>
+                </form>
+              </AppCard>
             </div>
           )}
 
@@ -1045,9 +687,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
             activeTab !== 'letterhead' &&
             activeTab !== 'calendar' &&
             activeTab !== 'password' && (
-              <div>
-                <div style={{ marginBottom: '1.75rem' }}>
-                  <h2 style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
                     {navCategories.flatMap((c) => c.items).find((i) => i.id === activeTab)?.label || 'Configuração'}
                   </h2>
                   <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
@@ -1055,38 +697,20 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                   </p>
                 </div>
 
-                <div
-                  style={{
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '0.75rem',
-                    padding: '2rem',
-                    textAlign: 'center',
-                  }}
-                >
-                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>
+                <AppCard variant="default" style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>
                     Parâmetro Ativo & Configurado
                   </div>
-                  <p style={{ fontSize: '0.8125rem', color: '#64748b', maxWidth: '480px', margin: '0 auto 1.25rem auto' }}>
-                    Esta preferência está sincronizada com a política de governança e isolamento de dados do sistema.
+                  <p style={{ fontSize: '0.8125rem', color: '#64748b', maxWidth: '480px', margin: '0 auto 1.5rem auto' }}>
+                    Esta preferência está sincronizada com a política de governança, conformidade com CFN e isolamento multi-tenant do sistema.
                   </p>
-                  <button
-                    type="button"
+                  <AppButton
+                    variant="primary"
                     onClick={() => triggerSuccess('Preferência salva!')}
-                    style={{
-                      background: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      padding: '0.5rem 1.25rem',
-                      fontWeight: 700,
-                      fontSize: '0.8125rem',
-                      cursor: 'pointer',
-                    }}
                   >
                     Salvar Preferência
-                  </button>
-                </div>
+                  </AppButton>
+                </AppCard>
               </div>
             )}
         </div>

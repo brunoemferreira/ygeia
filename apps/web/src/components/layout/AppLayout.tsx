@@ -26,6 +26,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 }) => {
   const [mode, setMode] = useState<UserRoleMode>(initialMode);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(
     initialMode === 'patient' ? 'patient_diet' : 'dashboard_pacientes',
   );
@@ -71,6 +72,37 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     switch (activeItem) {
       case 'dashboard_pacientes':
         return 'Governança Clínica / Dashboard de Pacientes';
+      // Cadastros
+      case 'cadastros_pacientes':
+        return 'Cadastros / Pacientes';
+      case 'cadastros_alimentos':
+        return 'Cadastros / Alimentos (TACO)';
+      case 'cadastros_suplementos':
+        return 'Cadastros / Suplementos & Fitoterápicos';
+      case 'cadastros_modelos':
+        return 'Cadastros / Modelos de Prescrição';
+      case 'cadastros_locais':
+        return 'Cadastros / Locais de Atendimento';
+      // Nutrição
+      case 'nutricao_tmb':
+        return 'Nutrição / Cálculo TMB & GET';
+      case 'nutricao_cardapio':
+        return 'Nutrição / Planejador de Cardápios';
+      case 'nutricao_antropometria':
+        return 'Nutrição / Avaliação Antropométrica';
+      case 'nutricao_exames':
+        return 'Nutrição / Exames Laboratoriais';
+      // Treinamento
+      case 'treino_prescricao':
+      case 'treino_modulo':
+        return 'Treinamento / Prescrição de Treinos';
+      case 'treino_exercicios':
+        return 'Treinamento / Exercícios & Bi-Sets';
+      case 'treino_divisao':
+        return 'Treinamento / Divisão Semanal ABCD';
+      case 'treino_volume':
+        return 'Treinamento / Volume & Sobrecarga';
+      // Rotina
       case 'rotina_agenda':
         return 'Rotina / Agenda';
       case 'rotina_pacientes':
@@ -83,16 +115,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         return 'Rotina / Chat com pacientes';
       case 'rotina_tarefas':
         return 'Rotina / Tarefas';
+      // Atendimento
       case 'atendimento_pre':
         return 'Atendimento / Formulário pré-consulta';
       case 'atendimento_pos':
         return 'Atendimento / Formulário pós-consulta';
+      // Diretoria
       case 'gestao_contas':
         return 'Governança / Gestão de Contas';
       case 'clube_vantagens':
         return 'Benefícios / Clube de Vantagens';
-      case 'treino_modulo':
-        return 'Treinamento / Módulo de Treino';
       case 'configuracoes':
       case 'config_perfil':
       case 'config_whitelabel':
@@ -106,8 +138,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f8f7' }}>
-      {/* Retractable Left Sidebar */}
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f8f7', position: 'relative' }}>
+      {/* Mobile Drawer Backdrop */}
+      <div
+        className={`ygeia-mobile-backdrop ${mobileSidebarOpen ? 'active' : ''}`}
+        onClick={() => setMobileSidebarOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Retractable Left Sidebar & Mobile Drawer */}
       <Sidebar
         mode={mode}
         collapsed={sidebarCollapsed}
@@ -116,6 +155,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         onSelectItem={(item) => setActiveItem(item)}
         clinicBranding={clinicBranding}
         activeModules={activeModules}
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
       {/* Main Workspace Frame */}
@@ -126,9 +167,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           breadcrumbs={getBreadcrumbs()}
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
         />
 
-        <main style={{ flex: 1 }}>
+        <main style={{ flex: 1, padding: '0.75rem 1rem' }}>
           {children({ mode, activeItem, activeModules, onNavigate: (item: string) => setActiveItem(item) })}
         </main>
       </div>
