@@ -1,4 +1,4 @@
-import React, { useState, forwardRef } from 'react';
+import React, { useState, forwardRef, useId } from 'react';
 import { getStoredBranding } from '../../utils/branding';
 
 export interface AppTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -20,11 +20,16 @@ export const AppTextarea = forwardRef<HTMLTextAreaElement, AppTextareaProps>(({
   required,
   disabled,
   style,
+  id: customId,
   ...props
 }, ref) => {
   const branding = getStoredBranding();
   const primaryColor = branding.primaryColor || '#059669';
   const [isFocused, setIsFocused] = useState(false);
+  const generatedId = useId();
+  const textareaId = customId || `ygeia-textarea-${generatedId}`;
+  const errorId = `${textareaId}-error`;
+  const helperId = `${textareaId}-helper`;
 
   const hasError = Boolean(error);
 
@@ -32,12 +37,14 @@ export const AppTextarea = forwardRef<HTMLTextAreaElement, AppTextareaProps>(({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', width: '100%' }}>
       {label && (
         <label
+          htmlFor={textareaId}
           style={{
             display: 'block',
             fontSize: '0.8125rem',
             fontWeight: 700,
             color: hasError ? '#ef4444' : '#0f172a',
             fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+            cursor: disabled ? 'not-allowed' : 'pointer',
           }}
         >
           {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
@@ -46,7 +53,11 @@ export const AppTextarea = forwardRef<HTMLTextAreaElement, AppTextareaProps>(({
 
       <textarea
         ref={ref}
+        id={textareaId}
         disabled={disabled}
+        aria-invalid={hasError}
+        aria-required={required}
+        aria-describedby={hasError ? errorId : helperText ? helperId : undefined}
         onFocus={(e) => {
           setIsFocused(true);
           props.onFocus?.(e);
@@ -75,11 +86,11 @@ export const AppTextarea = forwardRef<HTMLTextAreaElement, AppTextareaProps>(({
       />
 
       {hasError ? (
-        <span style={{ fontSize: '0.71875rem', color: '#ef4444', fontWeight: 500 }}>
+        <span id={errorId} style={{ fontSize: '0.71875rem', color: '#ef4444', fontWeight: 500 }}>
           {error}
         </span>
       ) : helperText ? (
-        <span style={{ fontSize: '0.71875rem', color: '#64748b', fontWeight: 400 }}>
+        <span id={helperId} style={{ fontSize: '0.71875rem', color: '#64748b', fontWeight: 400 }}>
           {helperText}
         </span>
       ) : null}

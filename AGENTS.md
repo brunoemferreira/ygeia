@@ -66,5 +66,32 @@ Este documento estabelece as regras e padrões de engenharia para qualquer agent
   - **Direitos do Titular (Art. 18)**: Garantir canais técnicos para exportação de dados (portabilidade JSON/PDF), retificação e cancelamento de comunicações, observando a obrigatoriedade legal de guarda do prontuário por 20 anos (Art. 16, I da LGPD c/c Resoluções CFN/CFM).
   - **Auditoria Obrigatória LGPD Pré-Entrega**: Todo PR ou funcionalidade entregue deve passar pelo Checklist Obrigatório de Desenvolvimento constante em `docs/LGPD_GUIDELINES.md`.
 
+## 8. Regra Estrita de Engenharia Front-End & Desenvolvedor Front-End Sênior Obrigatório
+- **Atuação Obrigatória como Dev Front-End Sênior**: Toda arquitetura, componentes, layouts, hooks, fluxos de estado, renderização e estilização no front-end (`apps/web` e `apps/mobile`) DEVEM ser rigorosamente revisados sob a ótica de um Desenvolvedor Front-End Sênior, avaliando performance, componentização limpa, usabilidade, acessibilidade e conformidade com os mais altos padrões da indústria.
+  - **Revisão Sistemática de Melhorias e Otimizações**:
+    - Após a criação ou alteração de qualquer tela, componente ou fluxo, realizar auditoria crítica em busca de oportunidades de refatoração, simplificação de estado, eliminação de re-renderizações inúteis (`useMemo`, `useCallback`, `React.memo` quando aplicável) e separação de responsabilidades (Single Responsibility Principle).
+  - **Mobile-First & Responsividade Real**:
+    - Toda tela deve ser funcional e ergonomicamente perfeita tanto em dispositivos móveis (375px+) quanto em telas ultralargas (1920px+).
+    - Touch targets mínimos de 44px a 48px para botões e links navegáveis em dispositivos móveis, sem sobreposições acidentais ou rolagem horizontal quebrada.
+  - **Acessibilidade Web (a11y - WCAG 2.1 AA/AAA)**:
+    - Uso de elementos semânticos HTML5 (`<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<aside>`, `<button>`).
+    - Vinculação obrigatória de `<label htmlFor={id}>` ao elemento de entrada (`id`), com atributos `aria-invalid`, `aria-required` e `aria-describedby` para erros e textos de apoio.
+    - Contraste cromático adequado entre texto e fundo (mínimo de 4.5:1 para texto normal e 3:1 para texto grande).
+    - Foco visível (`focus-visible`) e navegação completa por teclado.
+  - **Desempenho & Core Web Vitals**:
+    - **LCP (Largest Contentful Paint)**: Otimização de imagens, SVGs e carregamento de fontes.
+    - **CLS (Cumulative Layout Shift)**: Reserva explícita de dimensões (`width`, `height`, skeletons/spinners) para evitar pulos de layout durante o carregamento de dados.
+    - **INP (Interaction to Next Paint)**: Feedback tátil e visual imediato em cliques e transições de tela (< 100ms).
+    - **Code Splitting & Bundle Size**: Otimização de chunks (`manualChunks`) e lazy loading para módulos e editores pesados.
+  - **Tratamento Elegante de Estados de Interface**:
+    - Toda visualização que carrega ou processa dados DEVE obrigatoriamente contemplar os 4 estados de UI:
+      1. *Loading / Skeleton* (carregamento suave sem flicker).
+      2. *Success / Data* (exibição rica dos dados estruturados).
+      3. *Empty State* (ilustração ou ícone amigável, mensagem contextual e botão de ação direta para o usuário cadastrar o primeiro registro).
+      4. *Error State / Fallback* (mensagem clara com botão de tentar novamente / retry).
+  - **Auditoria Obrigatória Front-End Pré-Entrega**:
+    - O agente/desenvolvedor DEVE verificar se os componentes do Design System unificado (`AppInput`, `AppSelect`, `AppButton`, `AppModal`, `ClinicalDataGrid`) foram utilizados, se não há inline styles duplicados dispensáveis, se não há avisos no console e se a tela responde com fluidez em mobile e desktop.
+
+
 
 

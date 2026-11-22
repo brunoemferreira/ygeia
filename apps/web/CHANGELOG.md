@@ -6,6 +6,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Acessibilidade a11y & Otimização de Performance Front-End Sênior (`AppInput.tsx`, `AppSelect.tsx`, `AppTextarea.tsx`, `vite.config.ts`)**:
+  - Integração do hook `useId()` nos componentes `AppInput`, `AppSelect` e `AppTextarea` para conexão semântica estrita entre `<label htmlFor>` e elementos de formulário, melhorando toque em dispositivos móveis e suporte a tecnologias assistivas (WCAG 2.1 AA).
+  - Adição de `aria-invalid`, `aria-required` e IDs de `aria-describedby` para exibição de erros e orientações.
+  - Otimização do empacotamento Vite com divisão de chunks (`vendor-react`, `vendor-icons`), reduzindo o tamanho monolítico do bundle e acelerando o carregamento da aplicação.
+
+
+### Adicionado
 - **Componentes Padronizados `AppSelect` e `AppTextarea` (`apps/web/src/components/ui/`)**:
   - Implementação de `AppSelect.tsx` com altura rigorosa de 38px, borda de 0.5rem, tipografia de 13px, ícone chevron integrado e foco reativo conectado a `var(--primary)` e `var(--primary-light)`.
   - Implementação de `AppTextarea.tsx` para notas e evoluções clínicas com raio de borda e foco padronizados.

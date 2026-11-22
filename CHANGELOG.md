@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 💻 Regra Estrita de Engenharia Front-End & Dev Front-End Sênior (AGENTS.md)
+- **Regras Globais de Engenharia (`AGENTS.md`)**:
+  - **Inclusão da Seção 8**: Estabelecida regra obrigatória e permanente de atuação como Desenvolvedor Front-End Sênior em toda a camada de interface (`apps/web` e `apps/mobile`).
+  - Auditoria contínua de componentização, eliminação de re-renderizações desnecessárias, mobile-first real (touch targets de 44-48px), acessibilidade completa (WCAG 2.1 AA/AAA com labels semânticos vinculados por `htmlFor`/`id`, `aria-invalid` e `aria-describedby`), otimização de Core Web Vitals (LCP, CLS, INP) e tratamento obrigatório dos 4 estados de UI (*Loading/Skeleton*, *Success/Data*, *Empty State*, *Error/Fallback*).
+- **Frontend Web (`apps/web`)**:
+  - `components/ui/AppInput.tsx`, `AppSelect.tsx`, `AppTextarea.tsx`: Inclusão de `useId()` do React para amarração semântica automática de `htmlFor` e `id`, atributos `aria-invalid`, `aria-required` e IDs de erro/ajuda para leitores de tela e acessibilidade móvel por toque.
+  - `vite.config.ts`: Configuração avançada de code-splitting (`manualChunks`) separando os blocos de fornecedores `vendor-react` e `vendor-icons`, otimizando a velocidade de carregamento inicial (LCP) e tempo de cache do navegador.
+
+
 ### ⚖️ Diretrizes Oficiais de Desenvolvimento de Software para a LGPD (Lei 13.709/2018)
 - **Governança e Diretrizes de Engenharia (`docs/LGPD_GUIDELINES.md`, `AGENTS.md`)**:
   - **Criação do Documento Mestre de Desenvolvimento LGPD**: Compilação de diretrizes técnicas e legais baseadas diretamente nas fontes oficiais da **Autoridade Nacional de Proteção de Dados (ANPD — gov.br/anpd)**, no **Framework PPSI (Programa de Privacidade e Segurança da Informação)** do Governo Federal e nas resoluções sanitárias e éticas do **CFN (nº 600/2018)** e **CFM (nº 1.821/2007)**.

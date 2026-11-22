@@ -1,4 +1,4 @@
-import React, { useState, forwardRef } from 'react';
+import React, { useState, forwardRef, useId } from 'react';
 import { getStoredBranding } from '../../utils/branding';
 
 export interface AppSelectOption {
@@ -34,11 +34,16 @@ export const AppSelect = forwardRef<HTMLSelectElement, AppSelectProps>(({
   children,
   style,
   value,
+  id: customId,
   ...props
 }, ref) => {
   const branding = getStoredBranding();
   const primaryColor = branding.primaryColor || '#059669';
   const [isFocused, setIsFocused] = useState(false);
+  const generatedId = useId();
+  const selectId = customId || `ygeia-select-${generatedId}`;
+  const errorId = `${selectId}-error`;
+  const helperId = `${selectId}-helper`;
 
   const hasError = Boolean(error);
 
@@ -46,12 +51,14 @@ export const AppSelect = forwardRef<HTMLSelectElement, AppSelectProps>(({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', width: '100%' }}>
       {label && (
         <label
+          htmlFor={selectId}
           style={{
             display: 'block',
             fontSize: '0.8125rem',
             fontWeight: 700,
             color: hasError ? '#ef4444' : '#0f172a',
             fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+            cursor: disabled ? 'not-allowed' : 'pointer',
           }}
         >
           {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
@@ -81,8 +88,12 @@ export const AppSelect = forwardRef<HTMLSelectElement, AppSelectProps>(({
 
         <select
           ref={ref}
+          id={selectId}
           disabled={disabled}
           value={value}
+          aria-invalid={hasError}
+          aria-required={required}
+          aria-describedby={hasError ? errorId : helperText ? helperId : undefined}
           onFocus={(e) => {
             setIsFocused(true);
             props.onFocus?.(e);
@@ -143,11 +154,11 @@ export const AppSelect = forwardRef<HTMLSelectElement, AppSelectProps>(({
       </div>
 
       {hasError ? (
-        <span style={{ fontSize: '0.71875rem', color: '#ef4444', fontWeight: 500 }}>
+        <span id={errorId} style={{ fontSize: '0.71875rem', color: '#ef4444', fontWeight: 500 }}>
           {error}
         </span>
       ) : helperText ? (
-        <span style={{ fontSize: '0.71875rem', color: '#64748b', fontWeight: 400 }}>
+        <span id={helperId} style={{ fontSize: '0.71875rem', color: '#64748b', fontWeight: 400 }}>
           {helperText}
         </span>
       ) : null}
