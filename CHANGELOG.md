@@ -9,6 +9,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📝 Tela Completa de Preenchimento de Anamneses Múltiplas (Layout 1:1)
+- **Frontend Web (`apps/web`)**:
+  - `AnamneseEditor.tsx`:
+    - Nova tela de preenchimento clínico estruturado construída 1:1 com a imagem de referência do DietSystem:
+      - **Header**: Botão voltar (`<`), avatar com iniciais do paciente, nome, idade em anos e meses, pill interativo de *Sugestões* com switch, botão *Ver tutorial* e botão de ação *Salvar dados* respeitando o tema dinâmico (`var(--primary)`).
+      - **Abas Clínicas**: Alternância entre *Anamnese* estruturada e *Transcrição* por voz com IA, acompanhadas de seletor de templates (*Seções padrão*, *Anamnese Esportiva*, *Infantil*, etc.).
+      - **Toolbar de Edição Rica**: Seletor de cabeçalho *H3 Título 3* em pill suave, botões de formatação (negrito, itálico, marcadores, numeração, alinhamento, cores, links, tabelas), menu suspenso de *Escalas* clínicas (Bristol, Sono, etc.) e ícone de favoritar modelo.
+      - **Canvas da Anamnese**: 6 seções padronizadas conforme imagem de referência:
+        1. *Queixa principal e objetivo*
+        2. *História clínica e medicamentos*
+        3. *Hábito intestinal*
+        4. *Hidratação*
+        5. *Rotina alimentar*
+        6. *Sono e atividade física*
+  - `PatientProfileView.tsx`:
+    - Integração de suporte a **múltiplas anamneses por paciente**:
+      - Ao clicar em *+ Adicionar anamnese* (ou no `+` da sidebar), abre a tela do editor de anamnese.
+      - Ao salvar, os dados são persistidos na lista do paciente, exibindo cards com título, data/hora, tipo de modelo e resumo do preenchimento.
+      - Cada anamnese salva pode ser reaberta para edição completa ou excluída.
+
 ### 🧹 Limpeza de Seções na Visualização do Paciente
 - **Frontend Web (`apps/web`)**:
   - `PatientProfileView.tsx`:

@@ -5,6 +5,15 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Tela de Preenchimento de Anamnese & Gestão de Múltiplas Anamneses (`AnamneseEditor.tsx`, `PatientProfileView.tsx`)**:
+  - Implementação da tela de preenchimento exibida ao clicar em "+ Adicionar anamnese", idêntica à imagem de referência:
+    - Top bar com dados do paciente, toggle switch de "Sugestões", botão "Ver tutorial" e botão "Salvar dados" com tema dinâmico.
+    - Alternador de abas "Anamnese" e "Transcrição" (com gravação por voz) e dropdown de modelos ("Seções padrão").
+    - Barra de ferramentas rica com pill "H3 Título 3", botões de formatação e menu dropdown de "Escalas" clínicas.
+    - Seções padrão do canvas clínico: Queixa principal e objetivo, História clínica e medicamentos, Hábito intestinal, Hidratação, Rotina alimentar e Sono e atividade física.
+    - Suporte a múltiplas anamneses por paciente com visualização, edição, exclusão e resumo dos dados.
+
 ### Removido
 - **Itens de Menu na Ficha do Paciente (`PatientProfileView.tsx`)**:
   - Remoção dos menus e páginas *"Perfil nutricional integrado"* e *"Teia de interconexões"*, tornando o menu de avaliação nutricional mais conciso e focado nas rotinas práticas de consulta.

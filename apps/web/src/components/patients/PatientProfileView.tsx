@@ -24,6 +24,7 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
+import { AnamneseEditor, AnamneseData } from './AnamneseEditor';
 import { useToast } from '../../context/ToastContext';
 
 export interface PatientProfileViewProps {
@@ -61,11 +62,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Lista dinâmica de anamneses adicionadas
-  const [anamneses, setAnamneses] = useState<Array<{ id: string; date: string; title: string; notes: string }>>([]);
-  const [showAddAnamneseModal, setShowAddAnamneseModal] = useState(false);
-  const [newAnamneseTitle, setNewAnamneseTitle] = useState('');
-  const [newAnamneseNotes, setNewAnamneseNotes] = useState('');
+  // Múltiplas anamneses por paciente & tela de edição
+  const [isEditingAnamnese, setIsEditingAnamnese] = useState(false);
+  const [editingAnamneseData, setEditingAnamneseData] = useState<AnamneseData | null>(null);
+  const [anamnesesList, setAnamnesesList] = useState<AnamneseData[]>([]);
 
   // Cálculo de idade amigável a partir da data de nascimento
   const patientAgeString = useMemo(() => {
@@ -117,24 +117,6 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     }));
   };
 
-  const handleSaveAnamnese = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newAnamneseTitle.trim()) return;
-
-    const entry = {
-      id: String(Date.now()),
-      date: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      title: newAnamneseTitle.trim(),
-      notes: newAnamneseNotes.trim() || 'Consulta clínica geral e avaliação de recordatório.',
-    };
-
-    setAnamneses([entry, ...anamneses]);
-    setNewAnamneseTitle('');
-    setNewAnamneseNotes('');
-    setShowAddAnamneseModal(false);
-    toast.success('Anamnese registrada com sucesso!');
-  };
-
   // Extrair telefone para WhatsApp
   const phoneClean = (patient.phone || '').replace(/\D/g, '');
   const whatsappUrl = phoneClean
@@ -142,6 +124,34 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         `Olá, ${patient.name}! Aqui é do seu consultório de nutrição.`
       )}`
     : null;
+
+  // Se o usuário estiver preenchendo/editando uma anamnese, exibe a tela do editor completa (imagem de referência)
+  if (isEditingAnamnese) {
+    return (
+      <AnamneseEditor
+        patient={patient}
+        patientAgeString={patientAgeString}
+        initialData={editingAnamneseData}
+        onBack={() => {
+          setIsEditingAnamnese(false);
+          setEditingAnamneseData(null);
+        }}
+        onSave={(saved) => {
+          setAnamnesesList((prev) => {
+            const index = prev.findIndex((a) => a.id === saved.id);
+            if (index >= 0) {
+              const updated = [...prev];
+              updated[index] = saved;
+              return updated;
+            }
+            return [saved, ...prev];
+          });
+          setIsEditingAnamnese(false);
+          setEditingAnamneseData(null);
+        }}
+      />
+    );
+  }
 
   // Definição das seções do menu lateral
   const menuGroups = [
@@ -801,7 +811,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                                   e.stopPropagation();
                                   setActiveSection(sub.id);
                                   if (sub.id === 'anamnese_transcricao') {
-                                    setShowAddAnamneseModal(true);
+                                    setEditingAnamneseData(null);
+                                    setIsEditingAnamnese(true);
                                   } else {
                                     toast.info(`Adicionar novo item em: ${sub.label}`);
                                   }
@@ -893,7 +904,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
                   <button
                     type="button"
-                    onClick={() => setShowAddAnamneseModal(true)}
+                    onClick={() => {
+                      setEditingAnamneseData(null);
+                      setIsEditingAnamnese(true);
+                    }}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -920,7 +934,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
               </div>
 
               {/* Lista ou Empty State da Imagem do DietSystem */}
-              {anamneses.length === 0 ? (
+              {anamnesesList.length === 0 ? (
                 <div
                   style={{
                     display: 'flex',
@@ -953,25 +967,120 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {anamneses.map((item) => (
+                  {anamnesesList.map((item) => (
                     <div
                       key={item.id}
                       style={{
                         borderRadius: '0.625rem',
                         border: '1px solid #e2e8f0',
-                        backgroundColor: '#f8fafc',
-                        padding: '1rem 1.25rem',
+                        backgroundColor: '#ffffff',
+                        padding: '1.15rem 1.25rem',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>
-                          {item.title}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{item.date}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <span style={{ fontWeight: 800, fontSize: '0.9375rem', color: '#0f172a' }}>
+                            {item.title}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '0.6875rem',
+                              fontWeight: 600,
+                              color: 'var(--primary)',
+                              backgroundColor: 'var(--primary-light)',
+                              padding: '0.15rem 0.5rem',
+                              borderRadius: '0.25rem',
+                            }}
+                          >
+                            {item.templateType}
+                          </span>
+                          {item.hasAudioRecording && (
+                            <span
+                              style={{
+                                fontSize: '0.6875rem',
+                                fontWeight: 600,
+                                color: '#0284c7',
+                                backgroundColor: '#f0f9ff',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: '0.25rem',
+                              }}
+                            >
+                              🎙️ Áudio/Transcrição
+                            </span>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{item.date}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingAnamneseData(item);
+                              setIsEditingAnamnese(true);
+                            }}
+                            title="Editar anamnese"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              borderRadius: '0.375rem',
+                              border: '1px solid #e2e8f0',
+                              backgroundColor: '#ffffff',
+                              padding: '0.35rem 0.65rem',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              color: '#334155',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <Edit2 size={13} />
+                            <span>Editar</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAnamnesesList((prev) => prev.filter((a) => a.id !== item.id));
+                              toast.success('Anamnese excluída.');
+                            }}
+                            title="Excluir anamnese"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: '0.375rem',
+                              border: '1px solid #fee2e2',
+                              backgroundColor: '#fff1f2',
+                              color: '#e11d48',
+                              padding: '0.35rem',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
                       </div>
-                      <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.8125rem', color: '#475569', lineHeight: 1.5 }}>
-                        {item.notes}
-                      </p>
+
+                      {/* Resumo do Conteúdo */}
+                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8125rem', color: '#475569' }}>
+                        {item.sections.queixaPrincipal && (
+                          <div>
+                            <strong style={{ color: '#0f172a' }}>Queixa: </strong>
+                            <span>{item.sections.queixaPrincipal}</span>
+                          </div>
+                        )}
+                        {item.sections.rotinaAlimentar && (
+                          <div>
+                            <strong style={{ color: '#0f172a' }}>Rotina: </strong>
+                            <span>{item.sections.rotinaAlimentar}</span>
+                          </div>
+                        )}
+                        {item.transcriptionText && (
+                          <div style={{ fontStyle: 'italic', color: '#64748b', fontSize: '0.75rem', marginTop: '0.2rem' }}>
+                            "{item.transcriptionText.slice(0, 160)}..."
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1194,124 +1303,6 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             )}
         </main>
       </div>
-
-      {/* ========================================================
-          MODAL: ADICIONAR ANAMNESE (POPUP)
-         ======================================================== */}
-      {showAddAnamneseModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.4)',
-            backdropFilter: 'blur(2px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '0.75rem',
-              maxWidth: '520px',
-              width: '100%',
-              padding: '1.5rem',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
-              Nova Anamnese ou Gravação
-            </h3>
-            <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0 0 1rem 0' }}>
-              Registre uma nova transcrição ou anotação de consulta para {patient.name}.
-            </p>
-
-            <form onSubmit={handleSaveAnamnese}>
-              <div style={{ marginBottom: '0.85rem' }}>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.25rem' }}>
-                  Título da Anamnese *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Primeira Consulta Nutricional, Retorno de 30 dias..."
-                  value={newAnamneseTitle}
-                  onChange={(e) => setNewAnamneseTitle(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.8125rem',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.25rem' }}>
-                  Anotações / Transcrição Clínica
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder="Descreva o histórico, hábitos, queixas ou transcrição de áudio..."
-                  value={newAnamneseNotes}
-                  onChange={(e) => setNewAnamneseNotes(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.8125rem',
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit',
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowAddAnamneseModal(false)}
-                  style={{
-                    borderRadius: '0.375rem',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    padding: '0.45rem 0.85rem',
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: '#64748b',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    borderRadius: '0.375rem',
-                    border: 'none',
-                    backgroundColor: 'var(--primary)',
-                    padding: '0.45rem 1rem',
-                    fontSize: '0.8125rem',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.15s ease',
-                  }}
-                  onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
-                  onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
-                >
-                  Salvar Anamnese
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
       {confirmDelete && (
