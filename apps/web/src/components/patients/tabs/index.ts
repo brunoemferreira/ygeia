@@ -5,3 +5,4 @@ export * from './PatientRecallsTab';
 export * from './PatientMedicalRecordsTab';
 export * from './PatientRestrictionsTab';
 export * from './PatientAnthropometryTab';
+export * from './PatientMealPlanTab';

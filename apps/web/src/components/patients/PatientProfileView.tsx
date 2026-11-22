@@ -8,7 +8,6 @@ import {
   CheckSquare,
   Smartphone,
   Folder,
-  Download,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
 import { AnamneseData } from './AnamneseEditor';
@@ -25,6 +24,7 @@ import {
   PatientRestrictionsTab,
   FoodRestriction,
   PatientAnthropometryTab,
+  PatientMealPlanTab,
   MenuGroup,
 } from './tabs';
 
@@ -575,60 +575,9 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             <PatientAnthropometryTab patientName={patientName} />
           )}
 
-          {/* ABA: PLANO ALIMENTAR & GASTO CALÓRICO */}
+          {/* ABA: PLANO ALIMENTAR & GASTO CALÓRICO (DUAL ADAPTATIVA CLÍNICA & ESPORTIVA) */}
           {(activeSection === 'plano_alimentar' || activeSection === 'gasto_calorico') && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                    Plano Alimentar & Prescrição Dietética
-                  </h2>
-                  <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
-                    Metas calóricas diárias, distribuição de macronutrientes e refeições
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => toast.success('Gerando PDF do plano alimentar...')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #e2e8f0',
-                    backgroundColor: '#ffffff',
-                    padding: '0.45rem 0.85rem',
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: '#334155',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <Download size={14} />
-                  <span>Baixar PDF</span>
-                </button>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
-                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#166534' }}>Meta Diária</span>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#14532d', marginTop: '0.15rem' }}>2.150 kcal</div>
-                </div>
-                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#1e40af' }}>Carboidratos</span>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a', marginTop: '0.15rem' }}>242g (45%)</div>
-                </div>
-                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#166534' }}>Proteínas</span>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#14532d', marginTop: '0.15rem' }}>162g (30%)</div>
-                </div>
-                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a' }}>
-                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#92400e' }}>Lipídios</span>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#78350f', marginTop: '0.15rem' }}>60g (25%)</div>
-                </div>
-              </div>
-            </div>
+            <PatientMealPlanTab patientName={patientName} />
           )}
 
           {/* DEMAIS SEÇÕES (FALLBACK LIMPO) */}

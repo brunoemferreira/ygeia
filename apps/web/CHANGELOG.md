@@ -6,6 +6,16 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Módulo de Prescrição Dietética & Gasto Calórico Dual Adaptativo (`PatientMealPlanTab.tsx`)**:
+  - Implementação da aba de planejamento nutricional integrada ao `packages/domain-core`:
+    - Alternância em 1 clique entre **🍏 Modo Clínico Geral** (Mifflin, Harris, OMS, % calórico) e **⚡ Modo Esportivo / Alta Performance** (Cunningham, Katch-McArdle, Tinsley, g/kg/dia padrão ISSN).
+    - Distribuição bidirecional de macronutrientes: conversão e visualização simultânea em % e `g/kg/dia`.
+    - Módulo de *Nutrient Timing* peri-treino (Pré-treino, Intra-treino com eletrólitos e Pós-treino imediato).
+    - Periodização nutricional com modulação programada de carboidratos para Dias de Treino (ON) vs. Dias de Descanso (OFF).
+    - Prescrição estruturada de suplementação ergogênica e fitoterápicos.
+    - Exportação em PDF e salvamento no prontuário eletrônico.
+
+### Adicionado
 - **Integração com API Clínica e Arquitetura Resiliente Offline-First (`services/clinicalService.ts`, `PatientProfileView.tsx`)**:
   - Implementação de `ClinicalApiService` com métodos assíncronos para sincronização de dados de anamneses, recordatórios alimentares, prontuário e restrições.
   - Conexão do `PatientProfileView.tsx` à API com sincronização transparente e fallback local seguro no `localStorage` em caso de indisponibilidade momentânea de rede.

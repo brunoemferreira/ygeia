@@ -9,6 +9,24 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🥗🏋️‍♂️ Conclusão da Fase 3: Nutrição Clínica Geral & Esportiva Balanceada (Abordagem Dual Adaptativa)
+- **Pacote de Domínio Puro (`@ygeia/domain-core`)**:
+  - Implementação das fórmulas preditivas padrão-ouro de atletas baseadas em Massa Livre de Gordura (MLG):
+    - `CunninghamStrategy` (1980): $TMB = 500 + 22 \times MLG$.
+    - `KatchMcArdleStrategy` (1996): $TMB = 370 + 21.6 \times MLG$.
+    - `TinsleyStrategy` (2018): $TMB = 25.9 \times MLG + 284$.
+  - Implementação da fórmula clínica internacional da Organização Mundial da Saúde (`OmsFaoStrategy`).
+  - Evolução do Value Object `Macronutrients`:
+    - Métodos de fábrica `fromGramsPerKg` e `fromCaloriesAndPercentages`.
+    - Normalização e equivalência bidirecional contínua de `g/kg/dia` em função do peso corporal.
+  - Expansão da suíte de testes com 13 testes unitários aprovados com 100% de sucesso.
+- **Frontend Web (`apps/web`)**:
+  - Criação da aba `PatientMealPlanTab.tsx` com alternância fluida entre **🍏 Modo Clínico Geral** (emagrecimento, reeducação e déficit calórico sustentável) e **⚡ Modo Esportivo & Alta Performance** (atendendo praticantes assíduos e atletas com precisão ISSN).
+  - Módulo Peri-Treino (*Nutrient Timing*): refeições estruturadas de pré-treino, intra-treino (carboidratos em pó e eletrólitos) e pós-treino imediato.
+  - Periodização Nutricional: modulação automatizada de carboidratos em Dias de Treino Alto (ON) vs. Dias de Descanso (OFF).
+  - Prescrição estruturada de suplementação ergogênica (creatina, cafeína, beta-alanina, proteínas e eletrólitos).
+  - Substituição da visualização estática anterior em `PatientProfileView.tsx` pela nova aba adaptativa.
+
 ### 🗄️ Conclusão da Fase 2: Migração Relacional dos Módulos Clínicos para PostgreSQL com RLS
 - **Banco de Dados & DBA Sênior (`0006_clinical_records_and_recalls.sql`)**:
   - Criação de 4 tabelas relacionais no PostgreSQL com `TIMESTAMPTZ` e isolamento estrito via Row-Level Security:
