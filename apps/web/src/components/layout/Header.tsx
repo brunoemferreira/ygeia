@@ -28,6 +28,9 @@ export const Header: React.FC<HeaderProps> = ({
     if (breadcrumbs.includes('Dashboard de Pacientes')) {
       return 'Visão executiva da carteira de pacientes, perfil de IMC (OMS), adesão e alertas de retorno';
     }
+    if (breadcrumbs.includes('Pacientes')) {
+      return 'Acesso rápido à carteira ativa de pacientes e histórico clínico';
+    }
     if (breadcrumbs.includes('Agenda')) {
       return 'Controle de agendamentos, sessões confirmadas e horários disponíveis';
     }
@@ -94,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Linha 2: Título em destaque + Descrição detalhada */}
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.625rem', flexWrap: 'wrap' }}>
             <h1 style={{ fontSize: '1.0625rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
-              {mainTitle}
+              {parentCategory && parentCategory !== mainTitle ? `${parentCategory} • ${mainTitle}` : mainTitle}
             </h1>
             <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
               {getSubDescription()}

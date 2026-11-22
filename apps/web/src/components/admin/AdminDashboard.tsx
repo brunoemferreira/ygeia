@@ -9,41 +9,174 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { SettingsModule } from '../settings/SettingsModule';
-import { NewPatientModal } from '../patients/NewPatientModal';
+import { NewPatientView } from '../patients/NewPatientView';
+import { PatientDirectory, PatientRecord } from '../patients/PatientDirectory';
 import { getStoredBranding } from '../../utils/branding';
 
 export interface AdminDashboardProps {
   onBackToHome?: () => void;
   activeItem?: string;
+  onNavigateToItem?: (item: string) => void;
   hideHeader?: boolean;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   activeItem = 'dashboard_pacientes',
+  onNavigateToItem,
 }) => {
   const { user, token } = useAuth();
   const { toast } = useToast();
   const branding = getStoredBranding();
   const primaryColor = branding.primaryColor || '#059669';
 
-  // Modal de Cadastro de Pacientes (Conforme Mockup Novo Paciente)
-  const [isNewPatientModalOpen, setIsNewPatientModalOpen] = useState(false);
+  // Modo de visualização na tela de Pacientes: 'grid' (Tabela Paginada) ou 'create' (Tela Novo Paciente)
+  const [patientViewMode, setPatientViewMode] = useState<'grid' | 'create'>('grid');
 
-  // State de busca de paciente
+  // State de busca de paciente no card 1
   const [patientSearch, setPatientSearch] = useState('');
   const [selectedDay, setSelectedDay] = useState(21);
 
-  // Lista de pacientes
-  const [patients, setPatients] = useState([
+  // Lista de pacientes da clínica com suporte a paginação e busca
+  const [patients, setPatients] = useState<PatientRecord[]>([
     {
       id: '1',
       name: user?.fullName || 'Bruno Eduardo de Moura Ferreira',
       initials: 'BF',
       email: user?.email || 'brunoemf@gmail.com',
       phone: '(19) 99292-2000',
+      cpf: '218.980.718-29',
+      birthDate: '15/04/1988',
+      sex: 'Masculino',
       goal: 'Performance & Modulação Metabólica',
       status: 'Ativo',
       lastConsult: '21/11/2026',
+      insurancePlan: 'Particular',
+    },
+    {
+      id: '2',
+      name: 'Maria Clara Silva de Oliveira',
+      initials: 'MO',
+      email: 'mariaclara.silva@email.com',
+      phone: '(19) 98112-3344',
+      cpf: '342.119.808-11',
+      birthDate: '22/07/1995',
+      sex: 'Feminino',
+      goal: 'Emagrecimento & Reeducação Alimentar',
+      status: 'Ativo',
+      lastConsult: '19/11/2026',
+      insurancePlan: 'Bradesco Saúde',
+    },
+    {
+      id: '3',
+      name: 'Lucas Gabriel Albuquerque',
+      initials: 'LA',
+      email: 'lucas.albuquerque@email.com',
+      phone: '(11) 97233-4455',
+      cpf: '419.002.398-44',
+      birthDate: '10/11/1992',
+      sex: 'Masculino',
+      goal: 'Hipertrofia & Ganho de Massa Magra',
+      status: 'Ativo',
+      lastConsult: '17/11/2026',
+      insurancePlan: 'SulAmérica',
+    },
+    {
+      id: '4',
+      name: 'Camila Fernandes Ribeiro',
+      initials: 'CR',
+      email: 'camila.ribeiro@email.com',
+      phone: '(19) 99344-5566',
+      cpf: '288.765.432-10',
+      birthDate: '05/03/1990',
+      sex: 'Feminino',
+      goal: 'Manejo de Síndrome Metabólica & Insulina',
+      status: 'Ativo',
+      lastConsult: '14/11/2026',
+      insurancePlan: 'Unimed',
+    },
+    {
+      id: '5',
+      name: 'Rodrigo Medeiros Fontes',
+      initials: 'RF',
+      email: 'rodrigo.fontes@email.com',
+      phone: '(19) 99122-8899',
+      cpf: '195.443.221-88',
+      birthDate: '18/09/1985',
+      sex: 'Masculino',
+      goal: 'Performance Esportiva & Maratona',
+      status: 'Ativo',
+      lastConsult: '11/11/2026',
+      insurancePlan: 'Particular',
+    },
+    {
+      id: '6',
+      name: 'Juliana Beatriz Santos',
+      initials: 'JS',
+      email: 'juliana.santos@email.com',
+      phone: '(19) 98877-6655',
+      cpf: '332.665.998-00',
+      birthDate: '30/12/1997',
+      sex: 'Feminino',
+      goal: 'Nutrição na Gestação & Aleitamento',
+      status: 'Ativo',
+      lastConsult: '08/11/2026',
+      insurancePlan: 'Amil',
+    },
+    {
+      id: '7',
+      name: 'Felipe Augusto Nogueira',
+      initials: 'FN',
+      email: 'felipe.nogueira@email.com',
+      phone: '(11) 98455-1122',
+      cpf: '450.123.789-55',
+      birthDate: '12/01/1993',
+      sex: 'Masculino',
+      goal: 'Controle de Dislipidemia & Esteatose',
+      status: 'Ativo',
+      lastConsult: '02/11/2026',
+      insurancePlan: 'Porto Seguro',
+    },
+    {
+      id: '8',
+      name: 'Beatriz Vasconcelos Lima',
+      initials: 'BL',
+      email: 'beatriz.lima@email.com',
+      phone: '(19) 99655-4433',
+      cpf: '390.876.543-21',
+      birthDate: '25/06/1999',
+      sex: 'Feminino',
+      goal: 'Saúde Intestinal & Microbiota',
+      status: 'Ativo',
+      lastConsult: '28/10/2026',
+      insurancePlan: 'Particular',
+    },
+    {
+      id: '9',
+      name: 'Thiago Henrique Carvalho',
+      initials: 'TC',
+      email: 'thiago.carvalho@email.com',
+      phone: '(19) 98123-9900',
+      cpf: '412.334.556-77',
+      birthDate: '14/08/1987',
+      sex: 'Masculino',
+      goal: 'Recuperação Pós-Bariátrica',
+      status: 'Inativo',
+      lastConsult: '15/09/2026',
+      insurancePlan: 'Unimed',
+    },
+    {
+      id: '10',
+      name: 'Renata Albuquerque Dias',
+      initials: 'RD',
+      email: 'renata.dias@email.com',
+      phone: '(19) 99888-7711',
+      cpf: '277.665.443-99',
+      birthDate: '03/04/1994',
+      sex: 'Feminino',
+      goal: 'Dieta Anti-inflamatória & Autoimune',
+      status: 'Ativo',
+      lastConsult: '10/10/2026',
+      insurancePlan: 'Bradesco Saúde',
     },
   ]);
 
@@ -58,16 +191,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            setPatients(data.map((p: any) => ({
+            const apiPatients: PatientRecord[] = data.map((p: any) => ({
               id: p.id,
               name: p.fullName,
               initials: p.initials || 'PA',
               email: p.email || '',
               phone: p.phone || '',
+              cpf: p.cpf || '',
+              birthDate: p.birthDate || '',
+              sex: p.biologicalSex === 'FEMALE' ? 'Feminino' : 'Masculino',
               goal: p.treatmentGoals || 'Performance & Modulação Metabólica',
-              status: p.status === 'ACTIVE' ? 'Ativo' : p.status,
+              status: p.status === 'ACTIVE' ? 'Ativo' : 'Inativo',
               lastConsult: 'Recente',
-            })));
+              insurancePlan: p.insurancePlan || 'Particular',
+            }));
+
+            // Une pacientes da API preservando únicos por id
+            setPatients((prev) => {
+              const map = new Map<string, PatientRecord>();
+              apiPatients.forEach((ap) => map.set(ap.id, ap));
+              prev.forEach((pr) => {
+                if (!map.has(pr.id)) map.set(pr.id, pr);
+              });
+              return Array.from(map.values());
+            });
           }
         }
       } catch {}
@@ -250,7 +397,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <button
                   type="button"
-                  onClick={() => toast.info('Carregando base completa de pacientes...')}
+                  onClick={() => {
+                    if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                    setPatientViewMode('grid');
+                  }}
                   style={{
                     background: 'none',
                     border: 'none',
@@ -270,7 +420,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => setIsNewPatientModalOpen(true)}
+                  onClick={() => {
+                    if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                    setPatientViewMode('create');
+                  }}
                   style={{
                     backgroundColor: primaryColor,
                     color: '#ffffff',
@@ -486,108 +639,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {activeItem === 'rotina_pacientes' && (
-        <div style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-                👥 Carteira de Pacientes
-              </h2>
-              <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>
-                {patients.length} pacientes cadastrados no consultório
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsNewPatientModalOpen(true)}
-              style={{
-                backgroundColor: primaryColor,
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '0.5rem',
-                padding: '0.6rem 1.25rem',
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                boxShadow: `0 2px 8px ${primaryColor}35`,
+        <>
+          {patientViewMode === 'create' ? (
+            <NewPatientView
+              onBackToGrid={() => setPatientViewMode('grid')}
+              onPatientCreated={(newP) => {
+                const newRecord: PatientRecord = {
+                  id: newP.id,
+                  name: newP.fullName,
+                  initials: newP.initials || 'PA',
+                  email: newP.email || '',
+                  phone: newP.phone || '',
+                  cpf: newP.cpf || '',
+                  birthDate: newP.birthDate || '',
+                  sex: newP.biologicalSex === 'FEMALE' ? 'Feminino' : 'Masculino',
+                  goal: newP.treatmentGoals || 'Performance & Modulação Metabólica',
+                  status: 'Ativo',
+                  lastConsult: 'Hoje',
+                  insurancePlan: newP.insurancePlan || 'Particular',
+                };
+                setPatients((prev) => [newRecord, ...prev]);
+                setPatientViewMode('grid');
               }}
-            >
-              <Plus size={16} />
-              <span>Novo paciente</span>
-            </button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
-            {patients.map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '0.75rem',
-                  padding: '1.25rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
-                  backgroundColor: '#ffffff',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div
-                    style={{
-                      width: '42px',
-                      height: '42px',
-                      borderRadius: '50%',
-                      backgroundColor: '#f1f5f9',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 700,
-                      fontSize: '0.875rem',
-                      color: '#475569',
-                    }}
-                  >
-                    {p.initials}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a' }}>{p.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{p.email || p.phone || 'Sem contato cadastrado'}</div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid #f8fafc' }}>
-                  <span style={{ color: '#059669', backgroundColor: '#ecfdf5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
-                    {p.status}
-                  </span>
-                  <span style={{ color: '#94a3b8' }}>{p.goal}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+            />
+          ) : (
+            <PatientDirectory
+              patients={patients}
+              onNewPatient={() => setPatientViewMode('create')}
+              onSelectPatient={(p) => toast.info(`Paciente selecionado: ${p.name}`)}
+            />
+          )}
+        </>
       )}
-
-      {/* Modal de Cadastro de Paciente (Fidelidade ao Mockup Novo Paciente) */}
-      <NewPatientModal
-        isOpen={isNewPatientModalOpen}
-        onClose={() => setIsNewPatientModalOpen(false)}
-        onPatientCreated={(newP) => {
-          setPatients((prev) => [
-            {
-              id: newP.id,
-              name: newP.fullName,
-              initials: newP.initials || 'PA',
-              email: newP.email || '',
-              phone: newP.phone || '',
-              goal: newP.treatmentGoals || 'Performance & Modulação Metabólica',
-              status: 'Ativo',
-              lastConsult: 'Hoje',
-            },
-            ...prev,
-          ]);
-        }}
-      />
     </div>
   );
 };

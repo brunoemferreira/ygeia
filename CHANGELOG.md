@@ -9,6 +9,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 📑 Grid Paginado de Pacientes & Tela Integrada de Novo Paciente
+- **Frontend Web (`apps/web`)**:
+  - **Grid Paginado de Pacientes (`PatientDirectory.tsx`)**:
+    - Tela principal do menu `Rotina -> Pacientes` contendo cabeçalho com contagem, busca por nome, CPF e e-mail, filtros de status (*Todos*, *Ativo*, *Inativo*) e exportação.
+    - Tabela completa com seleção de linha, avatar com iniciais, CPF, telefone formatado, objetivo clínico, badge de status e ação de acesso direto ao prontuário.
+    - Controles de paginação completos (*Anterior*, *Próxima*, seleção de itens por página de 8/15/30 e numeração de páginas).
+  - **Tela Integrada de Cadastro de Paciente (`NewPatientView.tsx`)**:
+    - Renderizada diretamente na área de trabalho da aplicação com Sidebar e Header preservados, correspondendo com precisão ao layout de `media_1795311187219_22060d3a.jpg`.
+    - Badge `PACIENTES`, título, subtítulo, botão `Fechar` no canto superior direito para retorno imediato ao grid.
+    - Formulário em 2 colunas com stepper vertical e botões de ação `Cancelar`, `Continuar` e `Cadastrar`.
+  - **Conexão Dinâmica no Dashboard (`AdminDashboard.tsx`)**:
+    - Transição entre Card 1, Grid Paginado e Formulário de Cadastro via botões `Ver todos os pacientes →` e `+ Cadastrar paciente`.
+
 ### 👥 Módulo de Cadastro de Pacientes & Stepper Clínico
 - **Frontend Web (`apps/web`)**:
   - **Componente Modal `NewPatientModal.tsx`**:

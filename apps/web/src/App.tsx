@@ -83,13 +83,14 @@ const MainAppContent: React.FC = () => {
           onLogout={handleLogout}
           clinicBranding={clinicBranding}
         >
-          {({ mode, activeItem }) => {
+          {({ mode, activeItem, onNavigate }) => {
             if (mode === 'patient') {
               return <PatientPortal />;
             }
             return (
               <AdminDashboard
                 activeItem={activeItem}
+                onNavigateToItem={onNavigate}
                 hideHeader={true}
               />
             );

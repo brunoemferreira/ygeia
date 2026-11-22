@@ -6,6 +6,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-21
 
 ### Adicionado
+- **Grid Paginado de Pacientes (`PatientDirectory.tsx`)**:
+  - Tabela paginada completa sob o menu `Rotina -> Pacientes` com busca por nome/CPF/e-mail, filtro por status (Todos/Ativo/Inativo), paginação customizável e seleção de prontuários.
+- **Tela Integrada de Novo Paciente (`NewPatientView.tsx`)**:
+  - Layout inline no workspace idêntico ao modelo visual com Sidebar e Header ativos.
+  - Stepper de 8 etapas, badge de categoria `PACIENTES`, botão `Fechar`, e ações `Cancelar`, `Continuar` e `Cadastrar`.
+
+### Adicionado
 - **Modal de Cadastro de Novos Pacientes (`NewPatientModal.tsx`)**:
   - Layout modal split com stepper de 8 etapas (*Dados pessoais*, *Tratamento e protocolos*, *Convênio*, *Local de atendimento*, *Foto*, *Endereço*, *Observações*, *Atestados*).
   - Formulário completo de dados pessoais com máscaras de data, CPF e telefone, sexo biológico para cálculos e dados de responsáveis.

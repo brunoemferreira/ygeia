@@ -7,6 +7,7 @@ interface AppLayoutProps {
     mode: UserRoleMode;
     activeItem: string;
     activeModules: { nutrition: boolean; training: boolean };
+    onNavigate: (item: string) => void;
   }) => React.ReactNode;
   onLogout: () => void;
   clinicBranding: {
@@ -128,7 +129,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         />
 
         <main style={{ flex: 1 }}>
-          {children({ mode, activeItem, activeModules })}
+          {children({ mode, activeItem, activeModules, onNavigate: (item: string) => setActiveItem(item) })}
         </main>
       </div>
     </div>
