@@ -1,21 +1,40 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft,
-  PlayCircle,
-  Sparkles,
-  FileText,
-  ChevronDown,
   Bold,
   Italic,
+  Underline,
+  Strikethrough,
+  Subscript,
+  Superscript,
   List,
   ListOrdered,
   AlignLeft,
-  Type,
-  Highlighter,
-  Link2,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Indent,
+  Outdent,
   Table,
-  Paperclip,
-  Star,
+  Link2,
+  Unlink,
+  Minus,
+  Printer,
+  Maximize2,
+  Minimize2,
+  Undo,
+  Redo,
+  Eraser,
+  Clock,
+  Check,
+  ChevronDown,
+  Sparkles,
+  Palette,
+  Highlighter,
+  ZoomIn,
+  ZoomOut,
+  Sliders,
+  Type,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
 import { useToast } from '../../context/ToastContext';
@@ -106,6 +125,47 @@ const extractSectionsFromText = (text: string) => {
   return result;
 };
 
+const TEXT_COLORS = [
+  { label: 'Automático (Preto)', color: '#0f172a' },
+  { label: 'Cinza Escuro', color: '#475569' },
+  { label: 'Verde Clínico (Ygeía)', color: '#059669' },
+  { label: 'Azul Médico', color: '#2563eb' },
+  { label: 'Vermelho Alerta', color: '#dc2626' },
+  { label: 'Laranja / Âmbar', color: '#d97706' },
+  { label: 'Roxo / Magenta', color: '#9333ea' },
+  { label: 'Verde Musgo', color: '#15803d' },
+];
+
+const HIGHLIGHT_COLORS = [
+  { label: 'Sem realce', color: 'transparent' },
+  { label: 'Amarelo Canário', color: '#fef08a' },
+  { label: 'Verde Menta', color: '#bbf7d0' },
+  { label: 'Ciano Claro', color: '#bae6fd' },
+  { label: 'Rosa Suave', color: '#fbcfe8' },
+  { label: 'Laranja Claro', color: '#fed7aa' },
+  { label: 'Cinza Realce', color: '#e2e8f0' },
+];
+
+const FONT_FAMILIES = [
+  { label: 'Inter (Padrão)', value: "'Inter', sans-serif" },
+  { label: 'Arial', value: 'Arial, sans-serif' },
+  { label: 'Calibri', value: "'Calibri', 'Segoe UI', sans-serif" },
+  { label: 'Times New Roman', value: "'Times New Roman', serif" },
+  { label: 'Georgia', value: 'Georgia, serif' },
+  { label: 'Roboto', value: "'Roboto', sans-serif" },
+  { label: 'Courier New (Mono)', value: "'Courier New', monospace" },
+];
+
+const FONT_SIZES = [
+  { label: '10 pt', value: '1' },
+  { label: '11 pt', value: '2' },
+  { label: '12 pt', value: '3' },
+  { label: '14 pt', value: '4' },
+  { label: '18 pt', value: '5' },
+  { label: '24 pt', value: '6' },
+  { label: '32 pt', value: '7' },
+];
+
 const generateDocumentHtml = (data?: AnamneseData | null, template: string = 'Seções padrão') => {
   if (data?.contentHtml && data.contentHtml.trim() !== '') {
     return data.contentHtml;
@@ -122,29 +182,25 @@ const generateDocumentHtml = (data?: AnamneseData | null, template: string = 'Se
   const ra = data?.sections?.rotinaAlimentar || '';
   const sf = data?.sections?.sonoAtividadeFisica || '';
 
-  return `<h3 style="font-size: 0.9375rem; font-weight: 700; color: #0f172a; margin: 0 0 0.4rem 0;">Queixa principal e objetivo</h3>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;">${qp ? escapeHtml(qp) : '<br>'}</p>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;"><br></p>
+  return `
+    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0 0 0.4rem 0; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.25rem;">Queixa principal e objetivo</h3>
+    <p style="margin: 0.35rem 0 1.25rem 0; min-height: 1.75rem; color: #334155; line-height: 1.6;">${qp ? escapeHtml(qp) : '<br>'}</p>
 
-<h3 style="font-size: 0.9375rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0;">História clínica e medicamentos</h3>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;">${hc ? escapeHtml(hc) : '<br>'}</p>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;"><br></p>
+    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.25rem;">História clínica e medicamentos</h3>
+    <p style="margin: 0.35rem 0 1.25rem 0; min-height: 1.75rem; color: #334155; line-height: 1.6;">${hc ? escapeHtml(hc) : '<br>'}</p>
 
-<h3 style="font-size: 0.9375rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0;">Hábito intestinal</h3>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;">${hi ? escapeHtml(hi) : '<br>'}</p>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;"><br></p>
+    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.25rem;">Hábito intestinal</h3>
+    <p style="margin: 0.35rem 0 1.25rem 0; min-height: 1.75rem; color: #334155; line-height: 1.6;">${hi ? escapeHtml(hi) : '<br>'}</p>
 
-<h3 style="font-size: 0.9375rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0;">Hidratação</h3>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;">${hd ? escapeHtml(hd) : '<br>'}</p>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;"><br></p>
+    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.25rem;">Hidratação</h3>
+    <p style="margin: 0.35rem 0 1.25rem 0; min-height: 1.75rem; color: #334155; line-height: 1.6;">${hd ? escapeHtml(hd) : '<br>'}</p>
 
-<h3 style="font-size: 0.9375rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0;">Rotina alimentar</h3>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;">${ra ? escapeHtml(ra) : '<br>'}</p>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;"><br></p>
+    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.25rem;">Rotina alimentar</h3>
+    <p style="margin: 0.35rem 0 1.25rem 0; min-height: 1.75rem; color: #334155; line-height: 1.6;">${ra ? escapeHtml(ra) : '<br>'}</p>
 
-<h3 style="font-size: 0.9375rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0;">Sono e atividade física</h3>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;">${sf ? escapeHtml(sf) : '<br>'}</p>
-<p style="margin: 0 0 1.25rem 0; min-height: 1.5rem; color: #334155; line-height: 1.6;"><br></p>`;
+    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.4rem 0; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.25rem;">Sono e atividade física</h3>
+    <p style="margin: 0.35rem 0 1.25rem 0; min-height: 1.75rem; color: #334155; line-height: 1.6;">${sf ? escapeHtml(sf) : '<br>'}</p>
+  `;
 };
 
 export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
@@ -169,32 +225,175 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
       .toUpperCase() ||
     'PA';
 
-  // Toggle sugestões inteligentes
-  const [suggestionsActive, setSuggestionsActive] = useState(true);
-
-  // Template selecionado
+  // Estados principais
+  const [documentTitle, setDocumentTitle] = useState(
+    initialData?.title || `Anamnese Clínica - ${new Date().toLocaleDateString('pt-BR')}`
+  );
   const [selectedTemplate, setSelectedTemplate] = useState(initialData?.templateType || 'Seções padrão');
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [wordCount, setWordCount] = useState<number>(0);
+  const [charCount, setCharCount] = useState<number>(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
-  // Escalas clínicas dropdown
-  const [showEscalasDropdown, setShowEscalasDropdown] = useState(false);
-  const [isStarred, setIsStarred] = useState(false);
+  // Estados de dropdowns
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showHighlightPicker, setShowHighlightPicker] = useState(false);
+  const [showEscalasMenu, setShowEscalasMenu] = useState(false);
+  const [showHeadingMenu, setShowHeadingMenu] = useState(false);
+  const [showSpacingMenu, setShowSpacingMenu] = useState(false);
 
-  // Sincroniza o editor de texto quando initialData for montado ou alterado
+  // Inicializa o conteúdo do documento
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.innerHTML = generateDocumentHtml(initialData, initialData?.templateType || 'Seções padrão');
+      updateStats();
     }
   }, [initialData]);
 
-  // Aplicação de formatação na seleção
-  const applyFormat = (command: string, value: string | undefined = undefined) => {
+  // Atualiza contador de palavras e caracteres
+  const updateStats = useCallback(() => {
+    if (editorRef.current) {
+      const text = editorRef.current.innerText || '';
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      setWordCount(words);
+      setCharCount(text.length);
+      setHasUnsavedChanges(true);
+    }
+  }, []);
+
+  // Executa comandos de formatação com preservação de foco
+  const execCmd = (command: string, value: string | undefined = undefined) => {
     document.execCommand(command, false, value);
     if (editorRef.current) {
       editorRef.current.focus();
     }
+    updateStats();
   };
 
-  // Troca de modelo / template
+  // Aplica estilos de bloco (H1, H2, H3, P, Blockquote)
+  const applyBlockFormat = (tag: string) => {
+    execCmd('formatBlock', tag);
+    setShowHeadingMenu(false);
+  };
+
+  // Aplica cor de texto
+  const applyTextColor = (color: string) => {
+    execCmd('foreColor', color);
+    setShowColorPicker(false);
+  };
+
+  // Aplica realce/marca-texto
+  const applyHighlightColor = (color: string) => {
+    execCmd('hiliteColor', color);
+    setShowHighlightPicker(false);
+  };
+
+  // Aplica espaçamento entre linhas
+  const applyLineSpacing = (spacing: string) => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const parentBlock = range.commonAncestorContainer.parentElement;
+      if (parentBlock && editorRef.current?.contains(parentBlock)) {
+        parentBlock.style.lineHeight = spacing;
+      }
+    }
+    setShowSpacingMenu(false);
+  };
+
+  // Inserção de link seguro
+  const handleInsertLink = () => {
+    const url = prompt('Digite o endereço da URL (ex: https://exames.com.br):');
+    if (url) {
+      const formattedUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+      execCmd('createLink', formattedUrl);
+      toast.success('Link inserido com sucesso.');
+    }
+  };
+
+  // Inserção de data e hora atual
+  const handleInsertDateTime = () => {
+    const now = new Date();
+    const str = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+    execCmd('insertHTML', `<strong>${str}</strong> `);
+    toast.info('Data e hora inseridas.');
+  };
+
+  // Inserção de tabela médica Word-style
+  const handleInsertTable = (rows = 3, cols = 3) => {
+    let tableHtml = `
+      <table style="width: 100%; border-collapse: collapse; margin: 1.25rem 0; border: 1px solid #cbd5e1; font-size: 0.875rem;">
+        <thead>
+          <tr style="background-color: #f1f5f9; color: #0f172a;">
+    `;
+    for (let c = 0; c < cols; c++) {
+      tableHtml += `<th style="border: 1px solid #cbd5e1; padding: 0.6rem 0.85rem; text-align: left; font-weight: 700;">Coluna ${c + 1}</th>`;
+    }
+    tableHtml += `
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    for (let r = 0; r < rows; r++) {
+      tableHtml += `<tr>`;
+      for (let c = 0; c < cols; c++) {
+        tableHtml += `<td style="border: 1px solid #cbd5e1; padding: 0.6rem 0.85rem; color: #334155;">Dado ${r + 1}.${c + 1}</td>`;
+      }
+      tableHtml += `</tr>`;
+    }
+    tableHtml += `
+        </tbody>
+      </table>
+      <p><br></p>
+    `;
+    execCmd('insertHTML', tableHtml);
+    toast.success(`Tabela ${rows}x${cols} inserida com sucesso.`);
+  };
+
+  // Inserção de escalas clínicas com templates ricos
+  const handleInsertEscala = (tipo: string) => {
+    let escalaHtml = '';
+    if (tipo === 'bristol') {
+      escalaHtml = `
+        <div style="background-color: #f8fafc; border-left: 4px solid var(--primary); padding: 0.85rem 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.9375rem; color: #0f172a; font-weight: 700;">📋 Escala de Fezes de Bristol</h4>
+          <p style="margin: 0; font-size: 0.875rem; color: #334155; line-height: 1.5;">
+            <strong>Resultado:</strong> Tipo 4 (Em formato de salsicha ou cobra, suave e macio — considerado padrão ouro e normal).
+          </p>
+          <p style="margin: 0.35rem 0 0 0; font-size: 0.8125rem; color: #64748b;">
+            Frequência: 1x ao dia | Sem dor ou esforço evacuatório relatado.
+          </p>
+        </div>
+        <p><br></p>
+      `;
+    } else if (tipo === 'sono') {
+      escalaHtml = `
+        <div style="background-color: #f8fafc; border-left: 4px solid #6366f1; padding: 0.85rem 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.9375rem; color: #0f172a; font-weight: 700;">🌙 Avaliação de Qualidade do Sono</h4>
+          <p style="margin: 0; font-size: 0.875rem; color: #334155; line-height: 1.5;">
+            <strong>Duração média:</strong> 7 a 8 horas/noite | <strong>Latência:</strong> 15 minutos | <strong>Acordar:</strong> Disposto, sono reparador.
+          </p>
+        </div>
+        <p><br></p>
+      `;
+    } else if (tipo === 'eva') {
+      escalaHtml = `
+        <div style="background-color: #f8fafc; border-left: 4px solid #ef4444; padding: 0.85rem 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.9375rem; color: #0f172a; font-weight: 700;">⚡ Escala Visual Analógica de Dor (EVA)</h4>
+          <p style="margin: 0; font-size: 0.875rem; color: #334155;">
+            <strong>Nível de desconforto/dor:</strong> 0 de 10 (Ausência de dores articulares ou abdominais).
+          </p>
+        </div>
+        <p><br></p>
+      `;
+    }
+    execCmd('insertHTML', escalaHtml);
+    setShowEscalasMenu(false);
+    toast.success('Escala clínica inserida.');
+  };
+
+  // Troca de Modelo de Anamnese
   const handleTemplateChange = (tmpl: string) => {
     setSelectedTemplate(tmpl);
     if (editorRef.current) {
@@ -203,71 +402,36 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
         toast.info('Template em branco carregado.');
       } else {
         editorRef.current.innerHTML = generateDocumentHtml(null, tmpl);
-        toast.info(`Template "${tmpl}" carregado com sucesso.`);
+        toast.info(`Template "${tmpl}" carregado.`);
       }
+      updateStats();
     }
   };
 
-  // Inserção de link
-  const handleInsertLink = () => {
-    const url = prompt('Insira o endereço URL para o link:');
-    if (url) {
-      applyFormat('createLink', url);
+  // Tratamento de teclas especiais (Tab = indentação; Enter em título = parágrafo)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      execCmd('insertText', '    ');
     }
   };
 
-  // Inserção de tabela simples
-  const handleInsertTable = () => {
-    const tableHtml = `
-      <table style="width: 100%; border-collapse: collapse; margin: 1rem 0; border: 1px solid #cbd5e1;">
-        <thead>
-          <tr style="background-color: #f8fafc;">
-            <th style="border: 1px solid #cbd5e1; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.8125rem;">Parâmetro / Avaliação</th>
-            <th style="border: 1px solid #cbd5e1; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.8125rem;">Registro Clínico</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="border: 1px solid #cbd5e1; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">Meta / Diagnóstico</td>
-            <td style="border: 1px solid #cbd5e1; padding: 0.5rem 0.75rem; font-size: 0.8125rem;">Preencher observação</td>
-          </tr>
-        </tbody>
-      </table>
-      <p><br></p>
-    `;
-    applyFormat('insertHTML', tableHtml);
+  // Impressão / Exportação para PDF nativa
+  const handlePrint = () => {
+    window.print();
   };
 
-  // Inserção de escalas clínicas (Bristol, Sono, etc.)
-  const handleApplyEscala = (escalaName: string, text: string) => {
-    const block = `
-      <div style="background-color: #f8fafc; border-left: 3px solid var(--primary); padding: 0.6rem 0.85rem; margin: 0.75rem 0; font-size: 0.875rem; color: #1e293b;">
-        <strong>[${escalaName}]</strong>: ${escapeHtml(text)}
-      </div>
-      <p><br></p>
-    `;
-    applyFormat('insertHTML', block);
-    setShowEscalasDropdown(false);
-    toast.success(`Escala "${escalaName}" inserida no editor!`);
-  };
-
-  // Salvamento dos dados da Anamnese
+  // Salvamento do Documento
   const handleSave = () => {
     const rawHtml = editorRef.current?.innerHTML || '';
     const rawText = editorRef.current?.innerText || '';
     const extractedSections = extractSectionsFromText(rawText);
 
     const now = new Date();
-    const months = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
-    ];
-    const defaultTitle = `Anamnese criada em ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`;
-
     const anamneseRecord: AnamneseData = {
       id: initialData?.id || String(Date.now()),
       patientId: patient?.id || 'default',
-      title: initialData?.title || defaultTitle,
+      title: documentTitle.trim() || `Anamnese Clínica - ${now.toLocaleDateString('pt-BR')}`,
       date: initialData?.date || now.toISOString(),
       templateType: selectedTemplate,
       contentHtml: rawHtml,
@@ -275,6 +439,7 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
     };
 
     onSave(anamneseRecord);
+    setHasUnsavedChanges(false);
     toast.success('Anamnese salva com sucesso!');
   };
 
@@ -284,53 +449,60 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#f1f5f9',
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        position: isFullScreen ? 'fixed' : 'relative',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: isFullScreen ? 9999 : 1,
       }}
     >
       {/* ========================================================
-          1. CABEÇALHO SUPERIOR (VOLTAR, PACIENTE, TUTORIAL, SALVAR)
+          1. BARRA SUPERIOR DE AÇÃO (TÍTULO DO DOCUMENTO & BOTÕES)
          ======================================================== */}
       <header
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0.85rem 2rem',
-          borderBottom: '1px solid #f1f5f9',
+          padding: '0.625rem 1.5rem',
           backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e2e8f0',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '0.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
         }}
       >
-        {/* Identificação do Paciente */}
+        {/* Esquerda: Voltar + Título do Documento Editável + Paciente */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <button
             type="button"
             onClick={onBack}
             title="Voltar ao perfil do paciente"
             style={{
-              background: 'none',
-              border: 'none',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
               cursor: 'pointer',
-              color: '#64748b',
-              padding: '0.4rem',
-              borderRadius: '0.375rem',
+              color: '#475569',
+              padding: '0.45rem',
+              borderRadius: '0.5rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'background-color 0.15s ease',
+              transition: 'all 0.15s ease',
             }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
+            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={16} />
           </button>
 
           <div
             style={{
-              width: '36px',
-              height: '36px',
+              width: '34px',
+              height: '34px',
               borderRadius: '50%',
               backgroundColor: 'var(--primary-light)',
               color: 'var(--primary)',
@@ -338,96 +510,120 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 800,
-              fontSize: '0.8125rem',
+              fontSize: '0.75rem',
             }}
           >
             {patientInitials}
           </div>
 
-          <div>
-            <h1 style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-              {patientName}
-            </h1>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-              {patientAgeString}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <input
+              type="text"
+              value={documentTitle}
+              onChange={(e) => {
+                setDocumentTitle(e.target.value);
+                setHasUnsavedChanges(true);
+              }}
+              placeholder="Título da Anamnese..."
+              style={{
+                fontSize: '0.9375rem',
+                fontWeight: 700,
+                color: '#0f172a',
+                border: '1px solid transparent',
+                borderRadius: '0.375rem',
+                padding: '0.15rem 0.4rem',
+                backgroundColor: 'transparent',
+                outline: 'none',
+                maxWidth: '360px',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = 'var(--primary)';
+                e.target.style.backgroundColor = '#ffffff';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'transparent';
+                e.target.style.backgroundColor = 'transparent';
+              }}
+            />
+            <span style={{ fontSize: '0.6875rem', color: '#64748b', paddingLeft: '0.4rem' }}>
+              Paciente: <strong>{patientName}</strong> ({patientAgeString})
             </span>
           </div>
         </div>
 
-        {/* Controles da Direita */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {/* Pill Sugestões */}
-          <button
-            type="button"
-            onClick={() => {
-              setSuggestionsActive(!suggestionsActive);
-              toast.info(`Sugestões clínicas inteligentes ${!suggestionsActive ? 'ativadas' : 'desativadas'}.`);
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              borderRadius: '9999px',
-              border: '1px solid #d1fae5',
-              backgroundColor: '#ecfdf5',
-              padding: '0.35rem 0.75rem',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: 'var(--primary)',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <Sparkles size={14} color="var(--primary)" />
-            <span>Sugestões</span>
-            <div
+        {/* Direita: Modelo, Imprimir, Foco e Salvar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {/* Seletor de Modelo */}
+          <div style={{ position: 'relative' }}>
+            <select
+              value={selectedTemplate}
+              onChange={(e) => handleTemplateChange(e.target.value)}
               style={{
-                width: '32px',
-                height: '18px',
-                borderRadius: '9999px',
-                backgroundColor: suggestionsActive ? 'var(--primary)' : '#cbd5e1',
-                position: 'relative',
-                transition: 'background-color 0.2s ease',
+                borderRadius: '0.5rem',
+                border: '1px solid #cbd5e1',
+                padding: '0.45rem 2rem 0.45rem 0.75rem',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: '#334155',
+                backgroundColor: '#ffffff',
+                outline: 'none',
+                cursor: 'pointer',
+                appearance: 'none',
               }}
             >
-              <div
-                style={{
-                  width: '14px',
-                  height: '14px',
-                  borderRadius: '50%',
-                  backgroundColor: '#ffffff',
-                  position: 'absolute',
-                  top: '2px',
-                  left: suggestionsActive ? '16px' : '2px',
-                  transition: 'left 0.2s ease',
-                }}
-              />
-            </div>
-          </button>
+              <option value="Seções padrão">Modelo: Seções padrão</option>
+              <option value="Anamnese em Branco">Modelo: Em Branco</option>
+              <option value="Anamnese Esportiva">Modelo: Nutrição Esportiva</option>
+              <option value="Saúde Gastrointestinal">Modelo: Gastrointestinal</option>
+            </select>
+            <ChevronDown
+              size={13}
+              color="#94a3b8"
+              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+            />
+          </div>
 
-          {/* Botão Ver Tutorial */}
+          {/* Imprimir / Exportar PDF */}
           <button
             type="button"
-            onClick={() => toast.info('Tutorial do editor de anamnese interativo.')}
+            onClick={handlePrint}
+            title="Imprimir documento ou salvar como PDF (Ctrl+P)"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.4rem',
-              borderRadius: '0.375rem',
-              border: '1px solid #e2e8f0',
+              gap: '0.35rem',
+              borderRadius: '0.5rem',
+              border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
-              padding: '0.45rem 0.85rem',
+              padding: '0.45rem 0.75rem',
               fontSize: '0.8125rem',
               fontWeight: 600,
               color: '#334155',
               cursor: 'pointer',
-              transition: 'background-color 0.15s ease',
             }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
           >
-            <PlayCircle size={15} color="#64748b" />
-            <span>Ver tutorial</span>
+            <Printer size={15} color="#64748b" />
+            <span className="desktop-only">Imprimir</span>
+          </button>
+
+          {/* Modo Tela Cheia / Foco */}
+          <button
+            type="button"
+            onClick={() => setIsFullScreen(!isFullScreen)}
+            title={isFullScreen ? 'Sair da tela cheia' : 'Modo Foco em Tela Cheia'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '0.5rem',
+              border: '1px solid #cbd5e1',
+              backgroundColor: '#ffffff',
+              padding: '0.45rem',
+              color: '#334155',
+              cursor: 'pointer',
+            }}
+          >
+            {isFullScreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
 
           {/* Botão Salvar Dados */}
@@ -437,392 +633,788 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '0.375rem',
+              gap: '0.4rem',
+              borderRadius: '0.5rem',
               backgroundColor: 'var(--primary)',
               color: '#ffffff',
-              padding: '0.5rem 1.25rem',
+              padding: '0.45rem 1.15rem',
               fontSize: '0.8125rem',
               fontWeight: 700,
               border: 'none',
               cursor: 'pointer',
-              boxShadow: '0 1px 2px var(--primary-border)',
-              transition: 'background-color 0.15s ease',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
             }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
           >
-            Salvar dados
+            <Check size={16} />
+            <span>Salvar dados</span>
           </button>
         </div>
       </header>
 
       {/* ========================================================
-          2. LINHA DE SUB-CABEÇALHO (INDICADOR ANAMNESE + SEÇÕES PADRÃO)
+          2. BARRA DE FERRAMENTAS DO WORD (RIBBON COMPLETO)
          ======================================================== */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0.85rem 2.5rem 0.5rem 2.5rem',
+          padding: '0.35rem 1.25rem',
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e2e8f0',
+          gap: '0.25rem',
           flexWrap: 'wrap',
-          gap: '1rem',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+          userSelect: 'none',
+        }}
+        onMouseDown={(e) => {
+          // Previne que cliques na toolbar retirem a seleção do texto
+          if ((e.target as HTMLElement).tagName !== 'SELECT' && (e.target as HTMLElement).tagName !== 'INPUT') {
+            e.preventDefault();
+          }
         }}
       >
-        {/* Indicador Anamnese */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            borderRadius: '0.5rem',
-            backgroundColor: '#f1f5f9',
-            padding: '0.2rem',
-          }}
-        >
-          <div
+        {/* GRUPO 1: HISTÓRICO (UNDO / REDO) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
+          <button
+            type="button"
+            onClick={() => execCmd('undo')}
+            title="Desfazer (Ctrl+Z)"
+            style={toolbarBtnStyle}
+          >
+            <Undo size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('redo')}
+            title="Refazer (Ctrl+Y)"
+            style={toolbarBtnStyle}
+          >
+            <Redo size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('removeFormat')}
+            title="Limpar toda a formatação"
+            style={toolbarBtnStyle}
+          >
+            <Eraser size={14} />
+          </button>
+        </div>
+
+        <div style={separatorStyle} />
+
+        {/* GRUPO 2: TIPOGRAFIA (FONTE E TAMANHO) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          {/* Seletor de Família da Fonte */}
+          <select
+            onChange={(e) => execCmd('fontName', e.target.value)}
+            defaultValue="'Inter', sans-serif"
+            title="Fonte do texto"
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
               borderRadius: '0.375rem',
-              padding: '0.4rem 0.95rem',
-              fontSize: '0.8125rem',
-              fontWeight: 700,
+              border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
-              color: '#0f172a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+              padding: '0.25rem 0.5rem',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: '#334155',
+              cursor: 'pointer',
+              outline: 'none',
+              maxWidth: '120px',
             }}
           >
-            <FileText size={14} color="#0f172a" />
-            <span>Anamnese</span>
+            {FONT_FAMILIES.map((f, i) => (
+              <option key={i} value={f.value} style={{ fontFamily: f.value }}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+
+          {/* Seletor de Tamanho */}
+          <select
+            onChange={(e) => execCmd('fontSize', e.target.value)}
+            defaultValue="3"
+            title="Tamanho da fonte"
+            style={{
+              borderRadius: '0.375rem',
+              border: '1px solid #cbd5e1',
+              backgroundColor: '#ffffff',
+              padding: '0.25rem 0.4rem',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: '#334155',
+              cursor: 'pointer',
+              outline: 'none',
+              width: '65px',
+            }}
+          >
+            {FONT_SIZES.map((s, i) => (
+              <option key={i} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+
+          {/* Estilos de Bloco / Títulos (H1, H2, H3, P) */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setShowHeadingMenu(!showHeadingMenu)}
+              title="Estilo de título e parágrafo"
+              style={{
+                ...toolbarBtnStyle,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                padding: '0.25rem 0.5rem',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+              }}
+            >
+              <Type size={13} />
+              <span>Estilo</span>
+              <ChevronDown size={11} color="#94a3b8" />
+            </button>
+
+            {showHeadingMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                  padding: '0.35rem 0',
+                  zIndex: 100,
+                  minWidth: '170px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => applyBlockFormat('<p>')}
+                  style={dropdownItemStyle}
+                >
+                  <span style={{ fontSize: '0.875rem' }}>Texto Normal (P)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyBlockFormat('<h1>')}
+                  style={dropdownItemStyle}
+                >
+                  <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>Título 1 (H1)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyBlockFormat('<h2>')}
+                  style={dropdownItemStyle}
+                >
+                  <span style={{ fontSize: '1.05rem', fontWeight: 700 }}>Título 2 (H2)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyBlockFormat('<h3>')}
+                  style={dropdownItemStyle}
+                >
+                  <span style={{ fontSize: '0.9375rem', fontWeight: 700 }}>Título 3 (H3)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyBlockFormat('<blockquote>')}
+                  style={dropdownItemStyle}
+                >
+                  <span style={{ fontStyle: 'italic', color: '#64748b' }}>Citação / Destaque</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Dropdown Seções padrão */}
-        <div style={{ position: 'relative' }}>
-          <select
-            value={selectedTemplate}
-            onChange={(e) => handleTemplateChange(e.target.value)}
+        <div style={separatorStyle} />
+
+        {/* GRUPO 3: FORMATAÇÃO BÁSICA (B, I, U, S, Sub, Sup) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
+          <button
+            type="button"
+            onClick={() => execCmd('bold')}
+            title="Negrito (Ctrl+B)"
+            style={{ ...toolbarBtnStyle, fontWeight: 800 }}
+          >
+            <Bold size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('italic')}
+            title="Itálico (Ctrl+I)"
+            style={toolbarBtnStyle}
+          >
+            <Italic size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('underline')}
+            title="Sublinhado (Ctrl+U)"
+            style={toolbarBtnStyle}
+          >
+            <Underline size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('strikeThrough')}
+            title="Tachado"
+            style={toolbarBtnStyle}
+          >
+            <Strikethrough size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('subscript')}
+            title="Subscrito (ex: H₂O)"
+            style={toolbarBtnStyle}
+          >
+            <Subscript size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('superscript')}
+            title="Sobrescrito (ex: m²)"
+            style={toolbarBtnStyle}
+          >
+            <Superscript size={14} />
+          </button>
+        </div>
+
+        <div style={separatorStyle} />
+
+        {/* GRUPO 4: CORES DO WORD (COR DA FONTE & REALCE) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+          {/* Cor do Texto */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowColorPicker(!showColorPicker);
+                setShowHighlightPicker(false);
+              }}
+              title="Cor do Texto"
+              style={{ ...toolbarBtnStyle, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
+            >
+              <Palette size={14} color="#0f172a" />
+              <ChevronDown size={10} color="#94a3b8" />
+            </button>
+
+            {showColorPicker && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                  padding: '0.5rem',
+                  zIndex: 100,
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '0.35rem',
+                  width: '140px',
+                }}
+              >
+                {TEXT_COLORS.map((c, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => applyTextColor(c.color)}
+                    title={c.label}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '0.25rem',
+                      backgroundColor: c.color,
+                      border: '1px solid #cbd5e1',
+                      cursor: 'pointer',
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Realce / Marca-texto */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowHighlightPicker(!showHighlightPicker);
+                setShowColorPicker(false);
+              }}
+              title="Cor de Realce do Texto (Marca-texto)"
+              style={{ ...toolbarBtnStyle, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
+            >
+              <Highlighter size={14} color="#d97706" />
+              <ChevronDown size={10} color="#94a3b8" />
+            </button>
+
+            {showHighlightPicker && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                  padding: '0.5rem',
+                  zIndex: 100,
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '0.35rem',
+                  width: '140px',
+                }}
+              >
+                {HIGHLIGHT_COLORS.map((c, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => applyHighlightColor(c.color)}
+                    title={c.label}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '0.25rem',
+                      backgroundColor: c.color === 'transparent' ? '#ffffff' : c.color,
+                      border: '1px solid #cbd5e1',
+                      cursor: 'pointer',
+                      fontSize: '0.6rem',
+                    }}
+                  >
+                    {c.color === 'transparent' ? '✕' : ''}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={separatorStyle} />
+
+        {/* GRUPO 5: PARÁGRAFO & ALINHAMENTO */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
+          <button
+            type="button"
+            onClick={() => execCmd('justifyLeft')}
+            title="Alinhar à Esquerda (Ctrl+L)"
+            style={toolbarBtnStyle}
+          >
+            <AlignLeft size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('justifyCenter')}
+            title="Centralizar (Ctrl+E)"
+            style={toolbarBtnStyle}
+          >
+            <AlignCenter size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('justifyRight')}
+            title="Alinhar à Direita (Ctrl+R)"
+            style={toolbarBtnStyle}
+          >
+            <AlignRight size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('justifyFull')}
+            title="Justificar (Ctrl+J)"
+            style={toolbarBtnStyle}
+          >
+            <AlignJustify size={14} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => execCmd('insertUnorderedList')}
+            title="Lista com Marcadores"
+            style={toolbarBtnStyle}
+          >
+            <List size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('insertOrderedList')}
+            title="Lista Numerada"
+            style={toolbarBtnStyle}
+          >
+            <ListOrdered size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('outdent')}
+            title="Diminuir Recuo"
+            style={toolbarBtnStyle}
+          >
+            <Outdent size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('indent')}
+            title="Aumentar Recuo"
+            style={toolbarBtnStyle}
+          >
+            <Indent size={14} />
+          </button>
+
+          {/* Espaçamento entre Linhas */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setShowSpacingMenu(!showSpacingMenu)}
+              title="Espaçamento entre Linhas"
+              style={{ ...toolbarBtnStyle, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
+            >
+              <Sliders size={13} />
+              <ChevronDown size={10} color="#94a3b8" />
+            </button>
+
+            {showSpacingMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                  padding: '0.35rem 0',
+                  zIndex: 100,
+                  minWidth: '130px',
+                }}
+              >
+                {['1.0', '1.15', '1.5', '2.0'].map((sp) => (
+                  <button
+                    key={sp}
+                    type="button"
+                    onClick={() => applyLineSpacing(sp)}
+                    style={dropdownItemStyle}
+                  >
+                    <span>Espaço {sp}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={separatorStyle} />
+
+        {/* GRUPO 6: INSERÇÕES (TABELA, LINK, LINHA, DATA/HORA, ESCALAS) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
+          <button
+            type="button"
+            onClick={() => handleInsertTable(3, 3)}
+            title="Inserir Tabela 3x3"
+            style={toolbarBtnStyle}
+          >
+            <Table size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={handleInsertLink}
+            title="Inserir Link (Ctrl+K)"
+            style={toolbarBtnStyle}
+          >
+            <Link2 size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('unlink')}
+            title="Remover Link"
+            style={toolbarBtnStyle}
+          >
+            <Unlink size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => execCmd('insertHorizontalRule')}
+            title="Linha Horizontal Divisória"
+            style={toolbarBtnStyle}
+          >
+            <Minus size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={handleInsertDateTime}
+            title="Inserir Data e Hora Atual"
+            style={toolbarBtnStyle}
+          >
+            <Clock size={14} />
+          </button>
+
+          {/* Dropdown de Escalas Clínicas Prontas */}
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setShowEscalasMenu(!showEscalasMenu)}
+              title="Inserir Escalas Clínicas Prontas"
+              style={{
+                ...toolbarBtnStyle,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                border: '1px solid #cbd5e1',
+                padding: '0.25rem 0.5rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--primary)',
+              }}
+            >
+              <Sparkles size={13} color="var(--primary)" />
+              <span>Escalas</span>
+              <ChevronDown size={11} color="#94a3b8" />
+            </button>
+
+            {showEscalasMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                  padding: '0.4rem 0',
+                  zIndex: 100,
+                  minWidth: '220px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleInsertEscala('bristol')}
+                  style={dropdownItemStyle}
+                >
+                  <span>📋 Escala de Fezes de Bristol</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertEscala('sono')}
+                  style={dropdownItemStyle}
+                >
+                  <span>🌙 Qualidade do Sono</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertEscala('eva')}
+                  style={dropdownItemStyle}
+                >
+                  <span>⚡ Escala Visual de Dor (EVA)</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================
+          3. ÁREA DE TRABALHO DA FOLHA A4 (CANVAS WORD REALISTA)
+         ======================================================== */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          display: 'flex',
+          justifyContent: 'center',
+          padding: '2.5rem 1.5rem',
+          backgroundColor: '#e2e8f0',
+        }}
+        onClick={() => {
+          // Fecha menus ao clicar fora
+          if (showColorPicker) setShowColorPicker(false);
+          if (showHighlightPicker) setShowHighlightPicker(false);
+          if (showEscalasMenu) setShowEscalasMenu(false);
+          if (showHeadingMenu) setShowHeadingMenu(false);
+          if (showSpacingMenu) setShowSpacingMenu(false);
+        }}
+      >
+        {/* Folha A4 Centralizada com Sombra Realista */}
+        <div
+          className="print-page"
+          style={{
+            width: '100%',
+            maxWidth: '820px',
+            minHeight: '1050px',
+            backgroundColor: '#ffffff',
+            borderRadius: '4px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+            padding: '3.5rem 4rem',
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            transform: `scale(${zoomLevel / 100})`,
+            transformOrigin: 'top center',
+            transition: 'transform 0.15s ease',
+          }}
+        >
+          {/* Cabeçalho da Folha Clínica (Word Letterhead) */}
+          <div
             style={{
-              borderRadius: '0.375rem',
-              border: '1px solid #e2e8f0',
-              padding: '0.45rem 2rem 0.45rem 0.85rem',
-              fontSize: '0.8125rem',
-              color: '#334155',
-              backgroundColor: '#ffffff',
-              outline: 'none',
-              cursor: 'pointer',
-              appearance: 'none',
-              minWidth: '180px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              paddingBottom: '1.25rem',
+              marginBottom: '1.75rem',
+              borderBottom: '2px solid var(--primary)',
             }}
           >
-            <option value="Seções padrão">Seções padrão</option>
-            <option value="Anamnese Esportiva">Anamnese Esportiva</option>
-            <option value="Anamnese Infantil">Anamnese Infantil</option>
-            <option value="Saúde Gastrointestinal">Saúde Gastrointestinal</option>
-            <option value="Anamnese em Branco">Anamnese em Branco</option>
-          </select>
-          <ChevronDown
-            size={14}
-            color="#94a3b8"
+            <div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+                Prontuário Nutricional — Avaliação Clínica
+              </h2>
+              <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
+                Paciente: <strong>{patientName}</strong> | Idade: {patientAgeString} | CPF: {patient?.cpf || 'Não informado'}
+              </p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: 'var(--primary)',
+                  backgroundColor: 'var(--primary-light)',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '9999px',
+                }}
+              >
+                YGEÍA CLINICAL
+              </span>
+              <p style={{ fontSize: '0.6875rem', color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
+                {new Date().toLocaleDateString('pt-BR')}
+              </p>
+            </div>
+          </div>
+
+          {/* Área de Digitação Contínua Editável (Word Document Body) */}
+          <div
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            onInput={updateStats}
+            onKeyDown={handleKeyDown}
             style={{
-              position: 'absolute',
-              right: '10px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none',
+              flex: 1,
+              outline: 'none',
+              fontSize: '0.9375rem',
+              lineHeight: '1.7',
+              color: '#1e293b',
+              minHeight: '750px',
+              cursor: 'text',
+              fontFamily: "'Inter', sans-serif",
             }}
           />
         </div>
       </div>
 
       {/* ========================================================
-          3. BARRA DE FERRAMENTAS DO EDITOR (TOOLBAR RICA)
+          4. BARRA DE STATUS INFERIOR (WORD STATUS BAR)
          ======================================================== */}
-      <div
+      <footer
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0.5rem 2.5rem',
-          borderTop: '1px solid #f1f5f9',
-          borderBottom: '1px solid #f1f5f9',
+          padding: '0.4rem 1.5rem',
           backgroundColor: '#ffffff',
+          borderTop: '1px solid #e2e8f0',
+          fontSize: '0.75rem',
+          color: '#64748b',
           flexWrap: 'wrap',
           gap: '0.75rem',
+          userSelect: 'none',
         }}
       >
-        {/* Lado Esquerdo da Toolbar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-          {/* Seletor de Título H3 Título 3 */}
-          <button
-            type="button"
-            onClick={() => applyFormat('formatBlock', '<h3>')}
-            title="Formatar como H3 Título 3"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              backgroundColor: 'var(--primary-light)',
-              border: '1px solid var(--primary-border)',
-              color: 'var(--primary)',
-              borderRadius: '0.375rem',
-              padding: '0.3rem 0.65rem',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            <span>H3 Título 3</span>
-            <ChevronDown size={12} color="var(--primary)" />
-          </button>
-
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#e2e8f0', margin: '0 0.35rem' }} />
-
-          {/* Negrito B */}
-          <button
-            type="button"
-            onClick={() => applyFormat('bold')}
-            title="Negrito (Ctrl+B)"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#475569',
-              padding: '0.35rem',
-              borderRadius: '0.25rem',
-              cursor: 'pointer',
-              fontWeight: 800,
-              fontSize: '0.875rem',
-              fontFamily: 'serif',
-            }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <Bold size={15} />
-          </button>
-
-          {/* Itálico I */}
-          <button
-            type="button"
-            onClick={() => applyFormat('italic')}
-            title="Itálico (Ctrl+I)"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#475569',
-              padding: '0.35rem',
-              borderRadius: '0.25rem',
-              cursor: 'pointer',
-            }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <Italic size={15} />
-          </button>
-
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#e2e8f0', margin: '0 0.35rem' }} />
-
-          {/* Lista com Marcadores */}
-          <button
-            type="button"
-            onClick={() => applyFormat('insertUnorderedList')}
-            title="Lista com marcadores"
-            style={{ background: 'none', border: 'none', color: '#475569', padding: '0.35rem', borderRadius: '0.25rem', cursor: 'pointer' }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <List size={15} />
-          </button>
-
-          {/* Lista Numerada */}
-          <button
-            type="button"
-            onClick={() => applyFormat('insertOrderedList')}
-            title="Lista numerada"
-            style={{ background: 'none', border: 'none', color: '#475569', padding: '0.35rem', borderRadius: '0.25rem', cursor: 'pointer' }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <ListOrdered size={15} />
-          </button>
-
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#e2e8f0', margin: '0 0.35rem' }} />
-
-          {/* Alinhamento */}
-          <button
-            type="button"
-            onClick={() => applyFormat('justifyLeft')}
-            title="Alinhar à esquerda"
-            style={{ background: 'none', border: 'none', color: '#475569', padding: '0.35rem', borderRadius: '0.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <AlignLeft size={15} />
-            <ChevronDown size={11} color="#94a3b8" />
-          </button>
-
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#e2e8f0', margin: '0 0.35rem' }} />
-
-          {/* Sublinhado / Formatação */}
-          <button
-            type="button"
-            onClick={() => applyFormat('underline')}
-            title="Sublinhado (Ctrl+U)"
-            style={{ background: 'none', border: 'none', color: '#475569', padding: '0.35rem', borderRadius: '0.25rem', cursor: 'pointer' }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <Type size={15} />
-          </button>
-
-          {/* Destaque / Cor */}
-          <button
-            type="button"
-            onClick={() => applyFormat('foreColor', 'var(--primary)')}
-            title="Destaque em cor do tema"
-            style={{ background: 'none', border: 'none', color: '#475569', padding: '0.35rem', borderRadius: '0.25rem', cursor: 'pointer' }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <Highlighter size={15} />
-          </button>
-
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#e2e8f0', margin: '0 0.35rem' }} />
-
-          {/* Inserir Link */}
-          <button
-            type="button"
-            onClick={handleInsertLink}
-            title="Inserir link"
-            style={{ background: 'none', border: 'none', color: '#475569', padding: '0.35rem', borderRadius: '0.25rem', cursor: 'pointer' }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <Link2 size={15} />
-          </button>
-
-          {/* Inserir Tabela */}
-          <button
-            type="button"
-            onClick={handleInsertTable}
-            title="Inserir tabela clínica"
-            style={{ background: 'none', border: 'none', color: '#475569', padding: '0.35rem', borderRadius: '0.25rem', cursor: 'pointer' }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <Table size={15} />
-          </button>
-        </div>
-
-        {/* Lado Direito da Toolbar: Escalas + Estrela */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', position: 'relative' }}>
-          <button
-            type="button"
-            onClick={() => setShowEscalasDropdown(!showEscalasDropdown)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              background: 'none',
-              border: 'none',
-              fontSize: '0.8125rem',
-              color: '#334155',
-              cursor: 'pointer',
-              padding: '0.3rem 0.5rem',
-              borderRadius: '0.375rem',
-            }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-          >
-            <Paperclip size={14} color="#64748b" />
-            <span>Escalas</span>
-            <ChevronDown size={13} color="#94a3b8" />
-          </button>
-
-          {showEscalasDropdown && (
-            <div
+        {/* Esquerda: Status da Página e Palavras */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <span>Página 1 de 1</span>
+          <span>{wordCount} palavras</span>
+          <span>{charCount} caracteres</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: hasUnsavedChanges ? '#d97706' : '#16a34a' }}>
+            <span
               style={{
-                position: 'absolute',
-                right: '30px',
-                top: '100%',
-                backgroundColor: '#ffffff',
-                borderRadius: '0.5rem',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                padding: '0.4rem 0',
-                minWidth: '220px',
-                zIndex: 50,
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                backgroundColor: hasUnsavedChanges ? '#d97706' : '#16a34a',
               }}
-            >
-              <button
-                type="button"
-                onClick={() => handleApplyEscala('Bristol', 'Escala de Bristol: Tipo 4 (Em forma de salsicha ou cobra, suave e macio - normal).')}
-                style={{ width: '100%', textAlign: 'left', padding: '0.5rem 1rem', fontSize: '0.8125rem', border: 'none', background: 'transparent', cursor: 'pointer' }}
-                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-              >
-                Escala de Fezes de Bristol
-              </button>
-              <button
-                type="button"
-                onClick={() => handleApplyEscala('Qualidade do Sono', 'Escala de Sono: 8 horas/noite, acordar disposto sem fadiga residual.')}
-                style={{ width: '100%', textAlign: 'left', padding: '0.5rem 1rem', fontSize: '0.8125rem', border: 'none', background: 'transparent', cursor: 'pointer' }}
-                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-              >
-                Escala de Qualidade do Sono
-              </button>
-            </div>
-          )}
+            />
+            {hasUnsavedChanges ? 'Alterações não salvas' : 'Documento sincronizado'}
+          </span>
+        </div>
 
+        {/* Direita: Controle de Zoom Word-style */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button
             type="button"
-            onClick={() => setIsStarred(!isStarred)}
-            title={isStarred ? 'Remover dos favoritos' : 'Favoritar este modelo'}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: isStarred ? '#f59e0b' : '#94a3b8',
-              display: 'flex',
-              alignItems: 'center',
-            }}
+            onClick={() => setZoomLevel((z) => Math.max(z - 10, 70))}
+            title="Reduzir Zoom"
+            style={{ ...toolbarBtnStyle, padding: '0.2rem' }}
           >
-            <Star size={16} fill={isStarred ? '#f59e0b' : 'none'} />
+            <ZoomOut size={13} />
+          </button>
+          <span style={{ fontWeight: 600, minWidth: '40px', textAlign: 'center' }}>
+            {zoomLevel}%
+          </span>
+          <button
+            type="button"
+            onClick={() => setZoomLevel((z) => Math.min(z + 10, 150))}
+            title="Aumentar Zoom"
+            style={{ ...toolbarBtnStyle, padding: '0.2rem' }}
+          >
+            <ZoomIn size={13} />
           </button>
         </div>
-      </div>
-
-      {/* ========================================================
-          4. CANVAS DO EDITOR DE TEXTO (DOCUMENTO UNIFICADO)
-         ======================================================== */}
-      <main
-        style={{
-          flex: 1,
-          padding: '2rem 2.5rem',
-          backgroundColor: '#ffffff',
-          overflowY: 'auto',
-          maxWidth: '920px',
-          width: '100%',
-          boxSizing: 'border-box',
-        }}
-      >
-        <div
-          ref={editorRef}
-          contentEditable
-          suppressContentEditableWarning
-          style={{
-            minHeight: '650px',
-            outline: 'none',
-            fontSize: '0.9375rem',
-            lineHeight: '1.7',
-            color: '#334155',
-            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-            cursor: 'text',
-          }}
-        />
-      </main>
+      </footer>
     </div>
   );
+};
+
+// Estilos utilitários dos botões da Toolbar Word
+const toolbarBtnStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  color: '#475569',
+  padding: '0.35rem 0.45rem',
+  borderRadius: '0.375rem',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'all 0.15s ease',
+};
+
+const separatorStyle: React.CSSProperties = {
+  width: '1px',
+  height: '20px',
+  backgroundColor: '#e2e8f0',
+  margin: '0 0.35rem',
+};
+
+const dropdownItemStyle: React.CSSProperties = {
+  width: '100%',
+  textAlign: 'left',
+  padding: '0.45rem 1rem',
+  fontSize: '0.8125rem',
+  border: 'none',
+  background: 'transparent',
+  color: '#0f172a',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
 };

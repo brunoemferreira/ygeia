@@ -9,6 +9,30 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📄 Reformulação do Editor de Anamnese para Padrão Microsoft Word
+- **Frontend Web (`apps/web`)**:
+  - `AnamneseEditor.tsx`:
+    - **Área de Trabalho em Folha A4 Realista**:
+      - Substituição do campo simples por uma folha de documento A4 centralizada (`820px`, proporção e padding de documento `3.5rem 4rem`, cantos suaves e sombra de folha real) sobre uma mesa de trabalho cinza neutra (`#e2e8f0`).
+      - Cabeçalho timbrado oficial de prontuário nutricional (*YGEÍA CLINICAL*) com nome do paciente, idade, data e CPF.
+      - As 6 seções clínicas (*Queixa principal e objetivo*, *História clínica e medicamentos*, *Hábito intestinal*, *Hidratação*, *Rotina alimentar* e *Sono e atividade física*) pré-carregadas com títulos elegantes em azul escuro e linhas divisórias, com espaço de digitação fluído logo abaixo de cada uma.
+    - **Barra de Ferramentas Ribbon Estilo Word / Docs**:
+      - **Histórico**: Desfazer (`Undo`, Ctrl+Z), Refazer (`Redo`, Ctrl+Y) e Limpar Formatação (`Eraser`).
+      - **Tipografia**: Seletor de famílias de fonte (*Inter*, *Arial*, *Calibri*, *Times New Roman*, *Georgia*, *Roboto*, *Courier New*) e tamanhos de fonte (*10 pt* a *32 pt*).
+      - **Estilos de Bloco**: Menu de estilos de texto com Texto Normal (P), Título 1 (H1), Título 2 (H2), Título 3 (H3) e Citação/Destaque (`<blockquote>`).
+      - **Formatação**: Negrito (`Bold`), Itálico (`Italic`), Sublinhado (`Underline`), Tachado (`Strikethrough`), Subscrito (`Subscript`) e Sobrescrito (`Superscript`).
+      - **Cores & Marca-Texto**: Seletor de cores da fonte com 8 tonalidades clínicas e realce/marca-texto com 7 cores suaves.
+      - **Parágrafo**: Alinhamento à esquerda, centralizado, à direita e justificado, listas com marcadores e numeradas, controle de recuo/indentação e espaçamento entre linhas (1.0, 1.15, 1.5, 2.0).
+      - **Inserções Clínicas**: Tabela personalizada com cabeçalho colorido e células editáveis, linha horizontal divisória, links inline, inserção de data/hora atual e escalas médicas rápidas (*Bristol*, *Qualidade do Sono*, *Escala Visual de Dor EVA*).
+    - **Barra de Status Inferior do Word**:
+      - Contadores dinâmicos de palavras e caracteres em tempo real.
+      - Indicador de estado de sincronização e modificações pendentes.
+      - Controle de Zoom da folha A4 (75% a 150%) com atalhos de zoom in/zoom out.
+    - **Recursos Documentais**:
+      - Modo Foco em Tela Cheia (`Maximize2` / `Minimize2`).
+      - Suporte nativo à impressão e exportação em PDF limpo via `window.print()`.
+      - Título do documento customizável e atalhos completos de teclado (incluindo `Tab` para recuo de 4 espaços sem perder o foco).
+
 ### 👤 Revisão Completa dos Cadastros: Inserir, Editar e Excluir Pacientes com Persistência
 - **Frontend Web (`apps/web`)**:
   - `AdminDashboard.tsx`:

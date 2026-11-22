@@ -5,6 +5,15 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Editor de Anamnese Padrão Microsoft Word / Google Docs (`AnamneseEditor.tsx`)**:
+  - Transformação completa do editor de anamnese para uma experiência de processador de texto Word-Class.
+  - Visual em folha de documento A4 com proporção realista (`820px`), padding de página de 3.5rem x 4rem, cantos refinados e sombra de papel sobre mesa de trabalho cinza.
+  - Cabeçalho timbrado de prontuário com dados do paciente, idade, data e identificador do prontuário.
+  - Barra de ferramentas Ribbon completa: Undo/Redo, Limpeza de formatação, Seletor de fontes (Inter, Arial, Calibri, Times New Roman, Georgia, Roboto, Courier New), Tamanhos (10pt a 32pt), Estilos H1/H2/H3/P/Quote, Negrito, Itálico, Sublinhado, Tachado, Subscrito, Sobrescrito, Cores de texto e Realce com paleta do Word, Alinhamento (Esquerda, Centro, Direita, Justificado), Listas com marcadores/numeradas, Indentação, Espaçamento de linhas (1.0 a 2.0), Tabela formatada, Linha horizontal, Inserção de data/hora e Escalas clínicas (Bristol, Sono, EVA).
+  - Barra de status inferior no rodapé com contadores em tempo real de palavras e caracteres, indicador de sincronização e seletor de Zoom (70% a 150%).
+  - Modo tela cheia / foco e impressão nativa com suporte a exportação para PDF (`window.print()`).
+
 ### Corrigido
 - **Persistência e Correção no Salvamento de Edições de Paciente (`AdminDashboard.tsx`, `NewPatientView.tsx`, `PatientDirectory.tsx`)**:
   - Resolução do problema em que salvar alterações no cadastro de paciente não gravava os campos editados.
