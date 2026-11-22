@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🥗🏋️‍♂️ Balanceamento Obrigatório entre Nutrição Clínica Geral e Nutrição Esportiva (AGENTS.md & Plano Estratégico)
+- **Regras Globais de Engenharia (`AGENTS.md`)**:
+  - **Refinamento da Seção 5**: Estabelecido explicitamente o princípio de **Abordagem Dual Adaptativa**. O Ygeía atende com idêntico rigor e excelência:
+    1. **Público Clínico Geral / População Convencional**: Foco em reeducação alimentar, emagrecimento sustentável, controle de doenças crônicas (diabetes, hipertensão, dislipidemia, esteatose), qualidade de vida e hábitos saudáveis, com interface acolhedora, cálculos clássicos descomplicados (Mifflin, Harris, OMS) e listas práticas de substituição do dia a dia sem sobrecarga de jargões técnicos.
+    2. **Público Esportivo & Alta Performance**: Ferramentas analíticas avançadas baseadas em massa magra (Cunningham, Katch-McArdle, Tinsley), macronutrientes expressos em `g/kg/dia` (padrão ISSN), modulação peri-treino (*nutrient timing*), periodização de treinos e suplementação ergogênica.
+  - Imposição de alternância fluida entre perfis no prontuário/planejamento pelo nutricionista.
+- **Plano Estratégico de Auditoria & Melhorias (`plano_auditoria_completa_e_melhorias_ygeia.md`)**:
+  - Redefinição da **Fase 3** para contemplar a **Abordagem Dual Adaptativa**, especificando seletores de perfil clínico, calculadoras bidirecionais (% e g/kg) e antropometria adaptativa (básica de IMC/circunferências vs. avançada de dobras/bioimpedância).
+
 ### ⚙️ Regra Estrita de Engenharia Back-End & Arquiteto de Software Sênior (AGENTS.md)
 - **Regras Globais de Engenharia (`AGENTS.md`)**:
   - **Inclusão da Seção 9**: Estabelecida regra obrigatória e permanente de atuação como Engenheiro de Back-End Sênior e Arquiteto de Software em toda a camada de APIs e lógica de negócio (`apps/api`).

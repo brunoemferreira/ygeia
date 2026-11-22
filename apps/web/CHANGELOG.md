@@ -5,6 +5,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Alinhamento de UX/UI para Abordagem Dual Adaptativa (Clínico Geral & Alta Performance)**:
+  - Atualização dos padrões de design da aplicação web para atender tanto o público convencional (reeducação, emagrecimento saudável, dislipidemias, sem atrito ou jargões assustadores) quanto praticantes de exercícios e atletas de rendimento (g/kg/dia, nutrient timing e antropometria avançada).
+  - Especificação do seletor de perfil e visualização adaptativa no prontuário do paciente.
+
 ### Adicionado
 - **Acessibilidade a11y & Otimização de Performance Front-End Sênior (`AppInput.tsx`, `AppSelect.tsx`, `AppTextarea.tsx`, `vite.config.ts`)**:
   - Integração do hook `useId()` nos componentes `AppInput`, `AppSelect` e `AppTextarea` para conexão semântica estrita entre `<label htmlFor>` e elementos de formulário, melhorando toque em dispositivos móveis e suporte a tecnologias assistivas (WCAG 2.1 AA).
