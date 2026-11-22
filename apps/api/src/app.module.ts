@@ -13,9 +13,11 @@ import { AuthService } from './modules/iam/auth.service';
 import { AuthController } from './modules/iam/auth.controller';
 import { PatientsService } from './modules/patients/patients.service';
 import { PatientsController } from './modules/patients/patients.controller';
+import { ClinicalModule } from './modules/clinical/clinical.module';
 import { HealthController } from './health.controller';
 
 @Module({
+  imports: [ClinicalModule],
   controllers: [HealthController, TenantsController, AuthController, PatientsController],
   providers: [
     DatabaseService,

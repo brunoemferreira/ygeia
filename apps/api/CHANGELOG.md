@@ -6,6 +6,15 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Módulo Clínico Relacional com Isolamento Multi-Tenant por RLS (`ClinicalModule`, `clinical.service.ts`, `clinical.controller.ts`)**:
+  - Implementação de serviços e controllers para gestão de anamneses, recordatórios alimentares (24h/QFA), evoluções de prontuário e restrições alimentares com RLS no PostgreSQL.
+  - Projeção de colunas com nomenclatura camelCase e eliminação de `SELECT *`.
+- **Migração 0006 com Padrão DBA Sênior (`0006_clinical_records_and_recalls.sql`)**:
+  - Tabelas `patient_anamneses`, `patient_recalls`, `patient_medical_records` e `patient_restrictions`.
+  - Índices de Foreign Key para todas as relações filhas e índices compostos de RLS com `tenant_id` como primeira coluna.
+  - Habilitação compulsória de `FORCE ROW LEVEL SECURITY`.
+
+### Adicionado
 - **Validação Global de Payloads com Zod (`ZodValidationPipe`, `zod-validation.pipe.spec.ts`)**:
   - Implementação de pipe transformador com introspecção de schemas Zod e rejeição estruturada de campos maliciosos (HTTP 400).
   - Cobertura com testes unitários em `zod-validation.pipe.spec.ts`.

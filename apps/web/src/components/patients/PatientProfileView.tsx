@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   ClipboardList,
   User,
@@ -13,6 +13,7 @@ import {
 import { PatientRecord } from './PatientDirectory';
 import { AnamneseData } from './AnamneseEditor';
 import { useToast } from '../../context/ToastContext';
+import { ClinicalApiService } from '../../services/clinicalService';
 import {
   PatientHeaderCard,
   PatientSidebarNav,
@@ -284,6 +285,33 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     }
   };
 
+  // Carregamento inicial assíncrono dos módulos clínicos via API com fallback transparente
+  useEffect(() => {
+    let isMounted = true;
+    async function loadClinicalData() {
+      try {
+        const [anamneses, recalls, records, restrictions] = await Promise.all([
+          ClinicalApiService.getAnamneses(patientId),
+          ClinicalApiService.getRecalls(patientId),
+          ClinicalApiService.getMedicalRecords(patientId),
+          ClinicalApiService.getRestrictions(patientId),
+        ]);
+        if (isMounted) {
+          if (anamneses.length > 0) setAnamnesesList(anamneses);
+          if (recalls.length > 0) setRecallsList(recalls);
+          if (records.length > 0) setProntuarioList(records);
+          if (restrictions.length > 0) setRestrictionsList(restrictions);
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar dados clínicos da API:', err);
+      }
+    }
+    loadClinicalData();
+    return () => {
+      isMounted = false;
+    };
+  }, [patientId]);
+
   // Idade calculada
   const patientAgeString = useMemo(() => {
     if (!patient?.birthDate) return '45 anos e 7 meses';
@@ -479,7 +507,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
               anamnesesList={anamnesesList}
               onStartNewAnamnese={handleStartNewAnamnese}
               onOpenAnamneseForEdit={handleOpenAnamneseForEdit}
-              onSaveAnamnese={(updated) => {
+              onSaveAnamnese={async (updated) => {
                 const existingIndex = anamnesesList.findIndex((a) => a.id === updated.id);
                 let newList: AnamneseData[];
                 if (existingIndex >= 0) {
@@ -491,12 +519,14 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                 saveAnamnesesToStorage(newList);
                 setIsEditingAnamnese(false);
                 toast.success('Anamnese salva com sucesso!');
+                await ClinicalApiService.saveAnamnese(patientId, updated);
               }}
               onCancelAnamnese={() => setIsEditingAnamnese(false)}
-              onDeleteAnamnese={(id) => {
+              onDeleteAnamnese={async (id) => {
                 const updated = anamnesesList.filter((a) => a.id !== id);
                 saveAnamnesesToStorage(updated);
                 toast.success('Anamnese excluída com sucesso.');
+                await ClinicalApiService.deleteAnamnese(patientId, id);
               }}
             />
           )}
@@ -505,7 +535,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           {activeSection === 'recordatorio_alimentar' && (
             <PatientRecallsTab
               recallsList={recallsList}
-              onSaveRecalls={saveRecallsToStorage}
+              onSaveRecalls={async (updated) => {
+                saveRecallsToStorage(updated);
+                if (updated.length > 0) {
+                  await ClinicalApiService.saveRecall(patientId, updated[0]);
+                }
+              }}
             />
           )}
 
@@ -513,7 +548,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           {activeSection === 'prontuario' && (
             <PatientMedicalRecordsTab
               prontuarioList={prontuarioList}
-              onSaveProntuario={saveProntuarioToStorage}
+              onSaveProntuario={async (updated) => {
+                saveProntuarioToStorage(updated);
+                if (updated.length > 0) {
+                  await ClinicalApiService.saveMedicalRecord(patientId, updated[0]);
+                }
+              }}
             />
           )}
 
@@ -521,7 +561,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           {activeSection === 'restricoes_alimentares' && (
             <PatientRestrictionsTab
               restrictionsList={restrictionsList}
-              onSaveRestrictions={saveRestrictionsToStorage}
+              onSaveRestrictions={async (updated) => {
+                saveRestrictionsToStorage(updated);
+                if (updated.length > 0) {
+                  await ClinicalApiService.saveRestriction(patientId, updated[0]);
+                }
+              }}
             />
           )}
 

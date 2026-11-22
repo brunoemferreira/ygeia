@@ -84,3 +84,42 @@ export const createPatientSchema = z.object({
 });
 
 export type CreatePatientInput = z.infer<typeof createPatientSchema>;
+
+// Schemas dos Módulos Clínicos (Fase 2)
+export const createAnamneseSchema = z.object({
+  title: z.string().min(3, 'Título deve ter no mínimo 3 caracteres'),
+  templateType: z.string().default('Seções padrão'),
+  recordDate: z.string().optional(),
+  contentHtml: z.string().optional().nullable(),
+  sections: z.record(z.any()).default({}),
+});
+
+export type CreateAnamneseInput = z.infer<typeof createAnamneseSchema>;
+
+export const createRecallSchema = z.object({
+  title: z.string().min(3, 'Título deve ter no mínimo 3 caracteres'),
+  templateType: z.string().default('Recordatório 24 Horas'),
+  recordDate: z.string().optional(),
+  notes: z.string().optional().nullable(),
+});
+
+export type CreateRecallInput = z.infer<typeof createRecallSchema>;
+
+export const createMedicalRecordSchema = z.object({
+  title: z.string().min(3, 'Título deve ter no mínimo 3 caracteres'),
+  templateType: z.string().default('Evolução Clínica'),
+  recordDate: z.string().optional(),
+  notes: z.string().optional().nullable(),
+});
+
+export type CreateMedicalRecordInput = z.infer<typeof createMedicalRecordSchema>;
+
+export const createRestrictionSchema = z.object({
+  foodOrSubstance: z.string().min(2, 'Alimento ou substância é obrigatório'),
+  reason: z.enum(['Alergia', 'Intolerância', 'Não Gosta', 'Outra restrição']).default('Alergia'),
+  status: z.enum(['Ativa', 'Inativa']).default('Ativa'),
+  origin: z.string().optional().nullable(),
+  observation: z.string().optional().nullable(),
+});
+
+export type CreateRestrictionInput = z.infer<typeof createRestrictionSchema>;

@@ -9,6 +9,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🗄️ Conclusão da Fase 2: Migração Relacional dos Módulos Clínicos para PostgreSQL com RLS
+- **Banco de Dados & DBA Sênior (`0006_clinical_records_and_recalls.sql`)**:
+  - Criação de 4 tabelas relacionais no PostgreSQL com `TIMESTAMPTZ` e isolamento estrito via Row-Level Security:
+    - `patient_anamneses`: Anamneses completas, histórico e seções clínicas em `JSONB`.
+    - `patient_recalls`: Recordatórios de 24 horas, registros habituais e questionários de consumo.
+    - `patient_medical_records`: Prontuário eletrônico e linha do tempo de condutas e evoluções clínicas.
+    - `patient_restrictions`: Alergias, intolerâncias e recusas alimentares.
+  - Indexação obrigatória de 100% das Foreign Keys (`tenant_id`, `patient_id`) para eliminação de table locks e sequential scans.
+  - Índices compostos de RLS com `tenant_id` como primeira coluna: `(tenant_id, patient_id, record_date DESC)` e `(tenant_id, patient_id, status)`.
+  - Habilitação compulsória de `FORCE ROW LEVEL SECURITY` e concessão de privilégios para a role `ygeia_app`.
+- **Backend API (`apps/api`)**:
+  - Criação do `ClinicalModule`, `ClinicalService` e `ClinicalController` protegidos por `JwtAuthGuard`.
+  - Endpoints RESTful para anamneses, recordatórios, prontuários e restrições alimentares com projeção estrita de colunas (sem `SELECT *`).
+  - Schemas Zod em `@ygeia/validation-schemas`: `createAnamneseSchema`, `createRecallSchema`, `createMedicalRecordSchema` e `createRestrictionSchema`.
+- **Frontend Web (`apps/web`)**:
+  - Criação de `ClinicalApiService` (`services/clinicalService.ts`) com chamadas tipadas e arquitetura resiliente Offline-First (fallback seguro no `localStorage` caso a rede oscile).
+  - Conexão do `PatientProfileView.tsx` à API para carregamento e persistência instantânea de anamneses, recordatórios, evoluções e restrições.
+- **Governança de Segurança (`SECURITY.md`)**:
+  - Atualização do inventário de proteções com a migração 0006 e blindagem de prontuário eletrônico com RLS.
+
 ### 🚀 Conclusão da Fase 1: Modularização da UI de Pacientes & Validação Estrita com Zod e Auditoria LGPD
 - **Frontend Web (`apps/web`)**:
   - **Decomposição do Monólito `PatientProfileView.tsx`**:

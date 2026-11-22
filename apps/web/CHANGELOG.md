@@ -5,6 +5,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Integração com API Clínica e Arquitetura Resiliente Offline-First (`services/clinicalService.ts`, `PatientProfileView.tsx`)**:
+  - Implementação de `ClinicalApiService` com métodos assíncronos para sincronização de dados de anamneses, recordatórios alimentares, prontuário e restrições.
+  - Conexão do `PatientProfileView.tsx` à API com sincronização transparente e fallback local seguro no `localStorage` em caso de indisponibilidade momentânea de rede.
+
 ### Refatorado
 - **Modularização Arquitetural de `PatientProfileView.tsx` (`components/patients/tabs/`)**:
   - Desacoplamento do componente monolítico de pacientes (de 2.583 linhas para 498 linhas), criando submódulos dedicados:

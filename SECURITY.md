@@ -83,6 +83,13 @@ O backend foi construído sobre o framework NestJS utilizando o motor de alta ve
   - **Busca Textual Segura com Trigramas (`pg_trgm`)**: Criação de índices `GIN` (`idx_patients_trgm_name`, `idx_patients_trgm_email`) para busca rápida sem causar *Sequential Scans* abusivos em pesquisas parciais.
   - **Statement Timeout**: Pool de conexões do PostgreSQL configurado com `statement_timeout: 10000` (10 segundos) como mitigação ativa contra exaustão de conexões e ataques de Slowloris/Slow-Query DoS.
   - **Governança de Migrations**: Rastreabilidade formal via tabela `schema_migrations`, garantindo execução estritamente transacional e idempotente.
+- **Isolamento de Dados Clínicos e Tutela da Saúde (Migração 0006)**:
+  - Extensão do Row-Level Security no kernel para as 4 tabelas de dados de saúde:
+    - `patient_anamneses`: Anamneses completas, transcrições e seções clínicas em JSONB.
+    - `patient_recalls`: Recordatórios de 24h, registros habituais e questionários de consumo.
+    - `patient_medical_records`: Prontuário longitudinal e anotações de evolução/conduta.
+    - `patient_restrictions`: Alergias alimentares mediadas/não-mediadas, intolerâncias e recusas.
+  - Todas as tabelas possuem `FORCE ROW LEVEL SECURITY`, índices dedicados de Foreign Keys (`tenant_id`, `patient_id`) e índices compostos de RLS (`tenant_id, patient_id, record_date DESC`). Nenhuma informação clínica pode vazar ou ser acessada fora do tenant autenticado.
 
 ### 2.2. Autenticação Criptográfica com Argon2id
 - Em conformidade com o **RFC 9106** e as recomendações do OWASP Password Storage Cheat Sheet:
