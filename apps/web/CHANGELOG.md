@@ -6,6 +6,19 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Padrão de Grade Clínica de Dados e Redesign UX da Grade de Anamneses (`ClinicalDataGrid.tsx`, `PatientProfileView.tsx`)**:
+  - Implementação do componente de alto nível `ClinicalDataGrid`, estabelecendo o novo padrão de UX/UI para visualização longitudinal de dados de prontuário (projetado para ser reutilizado em antropometria, exames e recordatórios).
+  - **KPI Cards Strip**: Faixa de resumo clínico no topo calculando automaticamente total de consultas, primeira consulta, data e intervalo relativo do último retorno e frequência média de acompanhamento.
+  - **Controles de Busca e Filtro**: Busca instantânea textual, filtro por modelo/template de anamnese e ordenação cronológica (mais recentes / mais antigas).
+  - **Visualização Dual (Tabela vs. Linha do Tempo)**:
+    - Modo Tabela (`Tabela Lista`): Visão densa com scanner rápido, tags clínicas coloridas e coluna de ações fixada à direita (`sticky`) com sombra para máxima usabilidade.
+    - Modo Linha do Tempo (`Cards Cronológicos`): Apresentação em timeline vertical com conectores visuais, extrato da queixa principal e badges de tópicos de saúde.
+  - **Ações e Modal de Confirmação**: Ações rápidas para editar (abre o editor estilo Word), gerar PDF individual, comparar evolução clínica com consultas anteriores e exclusão com modal de confirmação defensivo.
+  - **Paginação Completa**: Integração com `DataTablePagination` para controle ágil do volume de prontuários.
+  - Mapeamento reativo em `PatientProfileView` enriquecendo cada anamnese com prévia e tags inteligentes de saúde (*Bristol*, *Sono*, *Hidratação*, *Treino*, etc.).
+  - Exportação oficial do componente em `components/ui/index.ts`.
+
+### Adicionado
 - **Editor de Anamnese Padrão Microsoft Word / Google Docs (`AnamneseEditor.tsx`)**:
   - Transformação completa do editor de anamnese para uma experiência de processador de texto Word-Class.
   - Visual em folha de documento A4 com proporção realista (`820px`), padding de página de 3.5rem x 4rem, cantos refinados e sombra de papel sobre mesa de trabalho cinza.

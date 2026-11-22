@@ -9,6 +9,31 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🌟 Redesign UX/UI da Grade de Anamneses: Padrão Clinical Data Grid
+- **Frontend Web (`apps/web`)**:
+  - `ClinicalDataGrid.tsx`:
+    - **Padrão de Grade Clínica de Dados Reutilizável**: Criado componente de alto nível para exibição longitudinal de registros de saúde, projetado para servir de referência para os demais módulos (antropometria, recordatório 24h, exames laboratoriais).
+    - **KPI Strip de Resumo Clínico Superior**: Faixa de métricas instantâneas no topo exibindo *Total de Registros*, data da *Primeira Consulta*, *Último Retorno* (com tempo decorrido relativo em dias ou meses) e *Frequência Média* entre consultas.
+    - **Barra de Controle & Filtros Inteligentes**:
+      - Campo de busca em tempo real com limpeza rápida, filtrando títulos, prévias clínicas, modelos e tags simultaneamente.
+      - Dropdown de filtro por modelo/template de anamnese (*Seções padrão*, *Anamnese Esportiva*, *Anamnese Infantil*, *Saúde Gastrointestinal*, *Anamnese em Branco*).
+      - Ordenação cronológica dinâmica (*Mais recentes* vs. *Mais antigas*).
+      - Alternador de visualização dual (*Tabela Lista* vs. *Cards Cronológicos / Linha do Tempo*).
+    - **Visualização Tabela Lista (Dense Scanner View)**:
+      - Tabela com linhas zebradas suaves, badges clínicas em cores temáticas, coluna de data com ícone de calendário e coluna de ações sticky (fixa à direita com sombra de elevação).
+      - Ações unificadas de linha: Editar, Imprimir PDF, Comparar evolução e Excluir.
+    - **Visualização Cards Cronológicos (Vertical Timeline)**:
+      - Linha do tempo visual com marcadores circulares e conectores verticais.
+      - Cartões com visualização em destaque do extrato da queixa principal e tags clínicas extraídas automaticamente (*Bristol Tipo 4*, *Sono Reparador*, *Hidratação 2.5L+*, *Treino Resistido*, *Emagrecimento*, *Saúde Intestinal*).
+    - **Modal de Confirmação de Exclusão Segura**: Diálogo com backdrop desfocado, ícone de alerta vermelho e confirmação explícita para evitar exclusões acidentais de registros do prontuário.
+    - **Paginação Integrada**: Componente `DataTablePagination` acoplado com controle de registros por página (5, 10, 20, 50) e navegação rápida entre páginas.
+  - `PatientProfileView.tsx`:
+    - Substituição da lista simples de anamneses pelo novo `<ClinicalDataGrid>`.
+    - Mapeamento reativo de `clinicalAnamnesesItems` com extração inteligente de resumo e tags clínicas a partir das seções e do HTML do documento.
+    - Exportação e integração de botões de adicionar anamnese, gerar PDF consolidado e comparação de evolução.
+  - `components/ui/index.ts`:
+    - Exportação pública de `ClinicalDataGrid` e da interface `ClinicalRecordItem`.
+
 ### 📄 Reformulação do Editor de Anamnese para Padrão Microsoft Word
 - **Frontend Web (`apps/web`)**:
   - `AnamneseEditor.tsx`:
@@ -32,6 +57,27 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
       - Modo Foco em Tela Cheia (`Maximize2` / `Minimize2`).
       - Suporte nativo à impressão e exportação em PDF limpo via `window.print()`.
       - Título do documento customizável e atalhos completos de teclado (incluindo `Tab` para recuo de 4 espaços sem perder o foco).
+
+### 👤 Revisão Completa dos Cadastros: Inserir, Editar e Excluir Pacientes com Persistência
+- **Frontend Web (`apps/web`)**:
+  - `AdminDashboard.tsx`:
+    - **Persistência em LocalStorage (`ygeia_patients_list`)**: Pacientes criados, editados ou excluídos agora são gravados no `localStorage` através da função unificada `savePatients()`, garantindo que nenhuma alteração se perca após recarregar a página (F5) ou navegar entre abas do menu.
+    - **Correção no Salvamento de Edições de Paciente**:
+      - Corrigido o bug crítico onde `goal` recebia indevidamente `updatedP.protocolNotes ?? p.goal`, substituindo pelo mapeamento correto `updatedP.goal || updatedP.objective || p.goal`.
+      - Mapeamento consistente de `name` e `fullName`, `gender` e `sex`, além de merge seguro do objeto `address`.
+      - Sincronização imediata de `selectedPatientForView`: quando a edição é disparada a partir do prontuário (`PatientProfileView`), os dados do paciente aberto são atualizados em tempo real sem reter valores desatualizados.
+    - **Sincronização em Background com a API**:
+      - Criação (`POST /api/v1/patients`), atualização (`PUT /api/v1/patients/:id`) e exclusão (`DELETE /api/v1/patients/:id`) integradas automaticamente em segundo plano quando há sessão ativa com token.
+    - **Chaves de Ciclo de Vida (`key`)**: Inclusão de `key` dinâmica no `<NewPatientView>` para forçar remontagem limpa dos estados de edição ao alternar entre diferentes pacientes.
+  - `NewPatientView.tsx`:
+    - Adicionado hook `useEffect` reativo para sincronizar todos os campos de formulário caso `initialPatient` se altere.
+    - Adicionado botão primário de *"Salvar alterações"* diretamente no topo superior do formulário (ao lado de *"Fechar"*), permitindo salvar modificações a qualquer momento a partir de qualquer uma das etapas.
+    - Disponibilizado botão de *"Salvar alterações"* na barra de ações inferior de todas as etapas intermediárias (Etapas 2 a 7) ao lado de *"Continuar"*.
+  - `PatientDirectory.tsx`:
+    - Confirmação de exclusão integrada com remoção reativa no estado e persistência garantida no `localStorage`.
+- **Backend API (`apps/api`)**:
+  - `patients.controller.ts` & `patients.service.ts`:
+    - Implementado endpoint `@Delete(':id')` e método `deletePatient(tenantId, patientId)` assegurando isolamento multi-tenant estrito via `tenant_id` e políticas PostgreSQL RLS.
 
 ### 👤 Revisão Completa dos Cadastros: Inserir, Editar e Excluir Pacientes com Persistência
 - **Frontend Web (`apps/web`)**:

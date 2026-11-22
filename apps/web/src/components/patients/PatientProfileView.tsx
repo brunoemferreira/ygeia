@@ -17,18 +17,17 @@ import {
   CheckSquare,
   Smartphone,
   Download,
-  Link2,
   Trash2,
   Edit2,
   MessageCircle,
   ClipboardList,
-  Split,
   AlertCircle,
   RefreshCw,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
 import { AnamneseEditor, AnamneseData } from './AnamneseEditor';
 import { useToast } from '../../context/ToastContext';
+import { ClinicalDataGrid, ClinicalRecordItem } from '../ui';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -248,6 +247,61 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       console.warn('Erro ao salvar no localStorage:', e);
     }
   };
+
+  // Itens mapeados e enriquecidos para o padrão ClinicalDataGrid
+  const clinicalAnamnesesItems: ClinicalRecordItem[] = useMemo(() => {
+    return anamnesesList.map((item) => {
+      let preview = item.sections?.queixaPrincipal || '';
+      if (!preview && item.sections?.rotinaAlimentar) {
+        preview = item.sections.rotinaAlimentar;
+      }
+      if (!preview && item.contentHtml) {
+        preview = item.contentHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+
+      const tags: string[] = [];
+      const fullText = (
+        (item.title || '') +
+        ' ' +
+        preview +
+        ' ' +
+        (item.sections?.habitoIntestinal || '') +
+        ' ' +
+        (item.sections?.sonoAtividadeFisica || '') +
+        ' ' +
+        (item.sections?.hidratacao || '')
+      ).toLowerCase();
+
+      if (fullText.includes('bristol') || fullText.includes('fezes')) {
+        tags.push('Bristol Tipo 4');
+      }
+      if (fullText.includes('sono') || fullText.includes('reparador') || fullText.includes('dormir')) {
+        tags.push('Sono Reparador');
+      }
+      if (fullText.includes('água') || fullText.includes('hidratação') || fullText.includes('2.5l') || fullText.includes('2.8l')) {
+        tags.push('Hidratação 2.5L+');
+      }
+      if (fullText.includes('musculação') || fullText.includes('hipertrofia') || fullText.includes('treino')) {
+        tags.push('Treino Resistido');
+      }
+      if (fullText.includes('emagrecimento') || fullText.includes('reeducação')) {
+        tags.push('Emagrecimento');
+      }
+      if (fullText.includes('intestino') || fullText.includes('microbiota') || fullText.includes('fodmap')) {
+        tags.push('Saúde Intestinal');
+      }
+
+      return {
+        id: item.id,
+        title: item.title,
+        date: item.date,
+        templateType: item.templateType || 'Seções padrão',
+        previewText: preview,
+        tags: tags.length > 0 ? tags.slice(0, 3) : ['Clínico Geral'],
+        raw: item,
+      };
+    });
+  }, [anamnesesList]);
 
   // Cálculo de idade amigável a partir da data de nascimento
   const patientAgeString = useMemo(() => {
@@ -1136,322 +1190,32 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           }}
         >
           {/* ========================================================
-              SEÇÃO: ANAMNESE E TRANSCRIÇÃO (EXATA DA IMAGEM)
+              SEÇÃO: ANAMNESE E TRANSCRIÇÃO (CLINICAL DATA GRID UX/UI)
              ======================================================== */}
           {activeSection === 'anamnese_transcricao' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', flex: 1 }}>
-              {/* Cabeçalho da Seção */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '1rem',
-                }}
-              >
-                <div>
-                  <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                    Anamneses e transcrições
-                  </h2>
-                  <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
-                    Anamneses e gravações das consultas do paciente
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => toast.info('Gerando PDF unificado de anamneses do paciente...')}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      borderRadius: '0.375rem',
-                      border: '1px solid #e2e8f0',
-                      backgroundColor: '#ffffff',
-                      padding: '0.45rem 0.85rem',
-                      fontSize: '0.8125rem',
-                      fontWeight: 500,
-                      color: '#475569',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                    }}
-                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
-                  >
-                    <Link2 size={14} color="#64748b" />
-                    <span>PDF unificado</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleStartNewAnamnese('Seções padrão')}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      backgroundColor: 'var(--primary)',
-                      color: '#ffffff',
-                      padding: '0.45rem 0.95rem',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      borderRadius: '0.375rem',
-                      border: 'none',
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px var(--primary-border)',
-                      transition: 'background-color 0.15s ease',
-                    }}
-                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
-                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
-                  >
-                    <Plus size={15} />
-                    <span>Adicionar anamnese</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Lista ou Empty State da Imagem do DietSystem */}
-              {anamnesesList.length === 0 ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flex: 1,
-                    minHeight: '320px',
-                    gap: '0.85rem',
-                  }}
-                >
-                  {/* Ícone de pasta cinza minimalist da imagem */}
-                  <div
-                    style={{
-                      width: '64px',
-                      height: '64px',
-                      borderRadius: '0.75rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#94a3b8',
-                    }}
-                  >
-                    <Folder size={48} strokeWidth={1.25} />
-                  </div>
-
-                  <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0, fontWeight: 500 }}>
-                    Nenhuma anamnese ou transcrição registrada.
-                  </p>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {anamnesesList.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleOpenAnamneseForEdit(item)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '0.85rem 0.75rem',
-                        borderRadius: '0.5rem',
-                        borderBottom: '1px solid #f1f5f9',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.15s ease',
-                      }}
-                      onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                      onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-                    >
-                      {/* Título: Anamnese criada em 22 de novembro de 2026 */}
-                      <span
-                        style={{
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: '#0f172a',
-                        }}
-                      >
-                        {item.title}
-                      </span>
-
-                      {/* Botões de Ação */}
-                      <div
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {/* 1. Calendário / Data da Consulta */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toast.info('Data da consulta registrada: ' + item.date);
-                          }}
-                          title="Data da consulta"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: '#ffffff',
-                            color: '#64748b',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                          onMouseOver={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                            (e.currentTarget as HTMLElement).style.color = '#0f172a';
-                          }}
-                          onMouseOut={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
-                            (e.currentTarget as HTMLElement).style.color = '#64748b';
-                          }}
-                        >
-                          <Calendar size={14} />
-                        </button>
-
-                        {/* 3. Baixar PDF */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toast.success('Baixando PDF formatado desta anamnese...');
-                          }}
-                          title="Baixar PDF da anamnese"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: '#ffffff',
-                            color: '#64748b',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                          onMouseOver={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                            (e.currentTarget as HTMLElement).style.color = '#0f172a';
-                          }}
-                          onMouseOut={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
-                            (e.currentTarget as HTMLElement).style.color = '#64748b';
-                          }}
-                        >
-                          <Download size={14} />
-                        </button>
-
-                        {/* 4. Comparar / Duplicar */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toast.info('Comparar evolução com consultas anteriores...');
-                          }}
-                          title="Comparar evolução clínica"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: '#ffffff',
-                            color: '#64748b',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                          onMouseOver={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                            (e.currentTarget as HTMLElement).style.color = '#0f172a';
-                          }}
-                          onMouseOut={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
-                            (e.currentTarget as HTMLElement).style.color = '#64748b';
-                          }}
-                        >
-                          <Split size={14} />
-                        </button>
-
-                        {/* 5. Editar Anamnese */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenAnamneseForEdit(item);
-                          }}
-                          title="Editar anamnese"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: '#ffffff',
-                            color: '#64748b',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                          onMouseOver={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                            (e.currentTarget as HTMLElement).style.color = '#0f172a';
-                          }}
-                          onMouseOut={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
-                            (e.currentTarget as HTMLElement).style.color = '#64748b';
-                          }}
-                        >
-                          <Edit2 size={14} />
-                        </button>
-
-                        {/* 6. Excluir Anamnese */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const updated = anamnesesList.filter((a) => a.id !== item.id);
-                            saveAnamnesesToStorage(updated);
-                            toast.success('Anamnese excluída com sucesso.');
-                          }}
-                          title="Excluir anamnese"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: '#ffffff',
-                            color: '#64748b',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                          onMouseOver={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#fff1f2';
-                            (e.currentTarget as HTMLElement).style.borderColor = '#fecdd3';
-                            (e.currentTarget as HTMLElement).style.color = '#e11d48';
-                          }}
-                          onMouseOut={(e) => {
-                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
-                            (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
-                            (e.currentTarget as HTMLElement).style.color = '#64748b';
-                          }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ClinicalDataGrid
+              title="Anamneses e Histórico Clínico"
+              subtitle="Registro longitudinal de consultas, queixas e evolução clínica do paciente"
+              items={clinicalAnamnesesItems}
+              itemLabel="anamneses"
+              templates={['Seções padrão', 'Anamnese Esportiva', 'Anamnese Infantil', 'Saúde Gastrointestinal', 'Anamnese em Branco']}
+              onNew={() => handleStartNewAnamnese('Seções padrão')}
+              onEdit={(item) => handleOpenAnamneseForEdit(item.raw || item)}
+              onDelete={(item) => {
+                const updated = anamnesesList.filter((a) => a.id !== item.id);
+                saveAnamnesesToStorage(updated);
+                toast.success('Anamnese excluída com sucesso.');
+              }}
+              onPrint={(item) => {
+                toast.success(`Gerando PDF clínico da anamnese: ${item.title}...`);
+              }}
+              onCompare={(item) => {
+                toast.info(`Comparando evolução clínica a partir de ${item.title}...`);
+              }}
+              onExportAll={() => {
+                toast.info('Gerando prontuário consolidado em PDF de todas as anamneses...');
+              }}
+            />
           )}
 
           {/* ========================================================

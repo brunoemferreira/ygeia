@@ -5,3 +5,4 @@ export * from './AppBadge';
 export * from './AppModal';
 export * from './AppTable';
 export * from './DataTablePagination';
+export * from './ClinicalDataGrid';
