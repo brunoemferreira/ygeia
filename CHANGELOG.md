@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 🌿 Identidade Visual Oficial Ygeía na Tela de Login & Sistema
+- **Frontend Web (`apps/web`)**:
+  - **Customização do Nome e Paleta Oficial**:
+    - Substituição do nome e textos herdados de mockups externos pelo nome oficial do produto: **Ygeía (Υγεία)** e slogan *"Nutrição Clínica & Governança Metabólica"*.
+    - Transição da paleta azul royal para a identidade verde esmeralda / floresta médica do Ygeía:
+      - Cor Primária: `#059669` (Verde Esmeralda).
+      - Cor Secundária: `#064e3b` (Verde Floresta Profundo).
+      - Cor de Destaque: `#10b981` (Menta Vibrante).
+    - Gradiente imersivo do painel Hero adaptado para o tom floresta/esmeralda com reflexos em menta.
+  - **Aprimoramento de Textos e Placeholders**:
+    - Texto explicativo atualizado para o contexto real de Nutricionista, Administrador e Paciente.
+    - Placeholder do campo de e-mail atualizado para `admin@ygeia.com.br`.
+    - Sanitização e migração transparente de valores legados em `localStorage` para a nova paleta e nome sem requerer limpeza manual de cache.
+
 ### 🔌 Reconfiguração e Isolamento das Portas de Desenvolvimento
 - **Monorepo & Infraestrutura (`docker-compose.yml`, `apps/api`, `apps/web`, `apps/mobile`)**:
   - **Prevenção de Colisões**: Migração completa das portas padrão para faixas exclusivas e desimpedidas, evitando conflitos com outros projetos locais:

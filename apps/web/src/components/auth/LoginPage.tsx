@@ -138,10 +138,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
           <div>
             <div style={{ fontSize: '1.1875rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-              {branding.clinicName || 'Better Health'}
+              {branding.clinicName || 'Ygeía'}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.75)', fontWeight: 500 }}>
-              {branding.slogan || 'Precision Nutrition & Clinical Care'}
+              {branding.slogan || 'Nutrição Clínica & Governança Metabólica'}
             </div>
           </div>
         </div>
@@ -192,9 +192,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               margin: '0 0 2rem 0',
             }}
           >
-            Ao autenticar como <strong>Usuário</strong>, você é direcionado ao seu Dashboard de
-            Calorias, Macronutrientes, Peso e Água. Ao autenticar como <strong>Administrador</strong>,
-            você acessa o console de gestão de contas.
+            Ao autenticar como <strong>Nutricionista ou Administrador</strong>, você acessa o console
+            executivo de governança clínica. Ao autenticar como <strong>Paciente</strong>, você é
+            direcionado ao seu portal metabólico com plano alimentar, hidratação e metas.
           </p>
 
           {/* Card Transtranslúcido: Curva histórica */}
@@ -321,7 +321,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <input
                   type="email"
                   required
-                  placeholder="admin@betterhealth.com"
+                  placeholder="admin@ygeia.com.br"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{

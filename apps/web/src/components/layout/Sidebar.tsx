@@ -169,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   lineHeight: 1.2,
                 }}
               >
-                {clinicBranding.clinicName || 'Better Health'}
+                {clinicBranding.clinicName || 'Ygeía'}
               </div>
               <div
                 style={{

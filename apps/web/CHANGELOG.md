@@ -6,6 +6,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-21
 
 ### Modificado
+- **Identidade Visual e Nome do Sistema (`LoginPage.tsx`, `Sidebar.tsx`, `branding.ts`)**:
+  - Substituído qualquer vestígio de nomes herdados de referências externas pela marca **Ygeía** e slogan *"Nutrição Clínica & Governança Metabólica"*.
+  - Paleta padrão alterada do azul genérico para o Verde Esmeralda (`#059669`), Verde Floresta (`#064e3b`) e Menta (`#10b981`), em perfeita consonância com o ecossistema clínico.
+  - Migração retrocompatível do `localStorage` para garantir aplicação imediata da identidade Ygeía no navegador.
+  - Placeholder de autenticação atualizado para `admin@ygeia.com.br`.
+
+### Modificado
 - **Isolamento de Portas Locais**:
   - Servidor Vite configurado na porta `5190` via `vite.config.ts` e script `dev`.
   - Conexão do cliente com a API reconfigurada para a porta `4333` via `VITE_API_URL`.
