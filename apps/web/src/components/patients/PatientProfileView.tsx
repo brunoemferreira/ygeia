@@ -22,7 +22,6 @@ import {
   Edit2,
   MessageCircle,
   ClipboardList,
-  Wand2,
   Split,
   AlertCircle,
   RefreshCw,
@@ -309,43 +308,43 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       )}`
     : null;
 
-  // Iniciar nova anamnese com template padrão garantido
+  // Iniciar nova anamnese com template padrão carregado (títulos para preenchimento)
   const handleStartNewAnamnese = (templateType: string = 'Seções padrão') => {
     let initialSections = {
-      queixaPrincipal: 'Acompanhamento nutricional periódico e modulação da composição corporal.',
-      historiaClinica: 'Sem comorbidades relatadas. Sem histórico de alergias ou intolerâncias alimentares conhecidas.',
-      habitoIntestinal: 'Hábito intestinal regular, fezes tipo 4 da escala de Bristol.',
-      hidratacao: 'Consumo habitual de aproximadamente 2,5 litros de água por dia.',
-      rotinaAlimentar: 'Café da manhã, almoço, lanche da tarde e jantar estruturados.',
-      sonoAtividadeFisica: '7 a 8 horas de sono reparador por noite. Pratica musculação ou aeróbico 4x/semana.',
+      queixaPrincipal: '',
+      historiaClinica: '',
+      habitoIntestinal: '',
+      hidratacao: '',
+      rotinaAlimentar: '',
+      sonoAtividadeFisica: '',
     };
 
     if (templateType === 'Anamnese Esportiva') {
       initialSections = {
-        queixaPrincipal: 'Objetivo atlético: aumento de VO2 máx, hipertrofia e rendimento competitivo.',
-        historiaClinica: 'Sem lesões osteoarticulares recentes. Uso prévio de pré-treino e creatina.',
-        habitoIntestinal: 'Hábito regular, Bristol tipo 4, sem desconforto durante provas ou treinos intensos.',
-        hidratacao: 'Consumo habitual de 3.5L de água/dia + repositor hidroeletrolítico intra-treino.',
-        rotinaAlimentar: 'Carboidratos complexos no pré-treino imediato; aporte proteico de 2.0g/kg distribuído em 5 refeições.',
-        sonoAtividadeFisica: 'Treino de corrida 4x/semana + musculação 3x/semana. Sono de 8 horas reparador.',
+        queixaPrincipal: '',
+        historiaClinica: '',
+        habitoIntestinal: '',
+        hidratacao: '',
+        rotinaAlimentar: '',
+        sonoAtividadeFisica: '',
       };
     } else if (templateType === 'Anamnese Infantil') {
       initialSections = {
-        queixaPrincipal: 'Acompanhamento do desenvolvimento pondero-estatural e seletividade alimentar infantil.',
-        historiaClinica: 'Histórico de aleitamento materno até os 6 meses. Sem alergias alimentares conhecidas.',
-        habitoIntestinal: 'Evacuação diária sem dor ou esforço; consistência pastosa / Bristol 4.',
-        hidratacao: 'Consumo de água em copo de transição (~1.2L ao dia) e sucos naturais ocasionais.',
-        rotinaAlimentar: 'Café da manhã, lanche escolar, almoço, lanche da tarde e jantar em família.',
-        sonoAtividadeFisica: 'Sono de 9 a 10 horas contínuas. Brincadeiras ativas e natação 2x/semana.',
+        queixaPrincipal: '',
+        historiaClinica: '',
+        habitoIntestinal: '',
+        hidratacao: '',
+        rotinaAlimentar: '',
+        sonoAtividadeFisica: '',
       };
     } else if (templateType === 'Saúde Gastrointestinal') {
       initialSections = {
-        queixaPrincipal: 'Sintomas gastrointestinais recorrentes: distensão abdominal pós-prandial e flatulência.',
-        historiaClinica: 'Histórico de gastrite leve; sem diagnóstico prévio de SII ou doença celíaca.',
-        habitoIntestinal: 'Alternância entre fezes Bristol 3 e 5; desconforto associado a laticínios.',
-        hidratacao: 'Ingestão de água fracionada de 2L/dia, redução voluntária de refrigerantes.',
-        rotinaAlimentar: 'Investigação inicial pelo protocolo Low-FODMAP; redução de alimentos fermentáveis.',
-        sonoAtividadeFisica: 'Sono fragmentado em noites com desconforto gástrico. Caminhadas leves.',
+        queixaPrincipal: '',
+        historiaClinica: '',
+        habitoIntestinal: '',
+        hidratacao: '',
+        rotinaAlimentar: '',
+        sonoAtividadeFisica: '',
       };
     } else if (templateType === 'Anamnese em Branco') {
       initialSections = {
@@ -369,6 +368,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       title: `Anamnese criada em ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`,
       date: now.toISOString(),
       templateType,
+      contentHtml: '',
       sections: initialSections,
     };
 
@@ -382,35 +382,18 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     const legacyNotes = (item as any)?.notes || '';
 
     const safeSections = {
-      queixaPrincipal:
-        typeof rawSections.queixaPrincipal === 'string' && rawSections.queixaPrincipal.trim() !== ''
-          ? rawSections.queixaPrincipal
-          : legacyNotes || 'Acompanhamento nutricional periódico e modulação da composição corporal.',
-      historiaClinica:
-        typeof rawSections.historiaClinica === 'string' && rawSections.historiaClinica.trim() !== ''
-          ? rawSections.historiaClinica
-          : 'Sem comorbidades relatadas. Sem histórico de alergias alimentares.',
-      habitoIntestinal:
-        typeof rawSections.habitoIntestinal === 'string' && rawSections.habitoIntestinal.trim() !== ''
-          ? rawSections.habitoIntestinal
-          : 'Hábito intestinal regular, fezes tipo 4 da escala de Bristol.',
-      hidratacao:
-        typeof rawSections.hidratacao === 'string' && rawSections.hidratacao.trim() !== ''
-          ? rawSections.hidratacao
-          : 'Consumo habitual de aproximadamente 2,5 litros de água por dia.',
-      rotinaAlimentar:
-        typeof rawSections.rotinaAlimentar === 'string' && rawSections.rotinaAlimentar.trim() !== ''
-          ? rawSections.rotinaAlimentar
-          : 'Refeições regulares: café da manhã, almoço, lanche da tarde e jantar.',
-      sonoAtividadeFisica:
-        typeof rawSections.sonoAtividadeFisica === 'string' && rawSections.sonoAtividadeFisica.trim() !== ''
-          ? rawSections.sonoAtividadeFisica
-          : '7 a 8 horas de sono de boa qualidade. Pratica atividade física regular.',
+      queixaPrincipal: typeof rawSections.queixaPrincipal === 'string' ? rawSections.queixaPrincipal : legacyNotes,
+      historiaClinica: typeof rawSections.historiaClinica === 'string' ? rawSections.historiaClinica : '',
+      habitoIntestinal: typeof rawSections.habitoIntestinal === 'string' ? rawSections.habitoIntestinal : '',
+      hidratacao: typeof rawSections.hidratacao === 'string' ? rawSections.hidratacao : '',
+      rotinaAlimentar: typeof rawSections.rotinaAlimentar === 'string' ? rawSections.rotinaAlimentar : '',
+      sonoAtividadeFisica: typeof rawSections.sonoAtividadeFisica === 'string' ? rawSections.sonoAtividadeFisica : '',
     };
 
     const sanitizedData: AnamneseData = {
       ...item,
       templateType: item?.templateType || 'Seções padrão',
+      contentHtml: item?.contentHtml || '',
       sections: safeSections,
     };
 
@@ -1290,39 +1273,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                         {item.title}
                       </span>
 
-                      {/* 6 Botões de Ação Idênticos à Imagem */}
+                      {/* Botões de Ação */}
                       <div
                         style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {/* 1. Assistente IA / Resumo (Roxo) */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toast.info('Gerando análise clínica e resumo de conduta com IA...');
-                          }}
-                          title="Análise com Inteligência Artificial"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '0.375rem',
-                            border: '1px solid #ddd6fe',
-                            backgroundColor: '#f5f3ff',
-                            color: '#8b5cf6',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ede9fe')}
-                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f5f3ff')}
-                        >
-                          <Wand2 size={14} />
-                        </button>
-
-                        {/* 2. Calendário / Data da Consulta */}
+                        {/* 1. Calendário / Data da Consulta */}
                         <button
                           type="button"
                           onClick={(e) => {

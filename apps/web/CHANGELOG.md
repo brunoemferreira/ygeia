@@ -5,6 +5,14 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Editor Unificado de Anamnese em Documento Contínuo (`AnamneseEditor.tsx`)**:
+  - Conversão do formulário de múltiplas caixas de texto em um editor de texto clínico contínuo e fluído (`contentEditable`), onde os tópicos clínicos (*Queixa principal e objetivo*, *História clínica e medicamentos*, *Hábito intestinal*, *Hidratação*, *Rotina alimentar* e *Sono e atividade física*) são carregados diretamente como títulos para digitação livre logo abaixo pelo profissional.
+  - Remoção da aba de transcrição de voz e microfone da tela de anamneses.
+  - Sincronização inteligente dos dados ao salvar, mantendo tanto o HTML integral quanto o mapeamento das seções para total retrocompatibilidade e exportações em PDF.
+- **Remoção do Botão de Inteligência Artificial no Grid de Anamnese (`PatientProfileView.tsx`)**:
+  - Remoção do botão de análise com IA (`Wand2`) nas ações do histórico de anamneses do paciente.
+
 ### Corrigido
 - **Eliminação de Exceção e Tela Branca ao Criar Anamnese (`PatientProfileView.tsx`, `AnamneseEditor.tsx`)**:
   - Correção da ordem dos React Hooks no `PatientProfileView`: o `if (isEditingAnamnese)` retornava antes da declaração de `filteredMenuGroups = useMemo(...)`, violando as Regras dos Hooks do React (`Rendered fewer hooks than expected`) e causando o desmonte da tela ao clicar em "+ Adicionar anamnese" ou em itens do grid.

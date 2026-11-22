@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📝 Transformação do Editor de Anamneses e Ajustes do Grid
+- **Frontend Web (`apps/web`)**:
+  - `AnamneseEditor.tsx`:
+    - Substituição das múltiplas caixas de texto isoladas por um editor de texto clínico contínuo e unificado (`contentEditable`), onde as 6 seções clínicas (*Queixa principal e objetivo*, *História clínica e medicamentos*, *Hábito intestinal*, *Hidratação*, *Rotina alimentar* e *Sono e atividade física*) já vêm pré-carregadas como títulos com espaçamento imediato para escrita do nutricionista.
+    - Remoção completa da aba de transcrição de voz, simplificando a interface para foco total no registro clínico.
+    - Suporte à formatação rica direta (Títulos H3, Negrito, Itálico, Listas com marcadores e numeradas, Alinhamento, Links, Tabelas e inserção de Escalas Clínicas como Bristol e Qualidade do Sono).
+    - Preservação da sincronização e retrocompatibilidade com salvamento de conteúdo HTML e extração estruturada de seções.
+  - `PatientProfileView.tsx`:
+    - Remoção do botão de análise com inteligência artificial (`Wand2`) das linhas do grid de histórico de anamneses do paciente.
+
 ### 🩹 Correção Definitiva da Tela Branca ao Criar ou Abrir Anamnese (React Hook Order)
 - **Frontend Web (`apps/web`)**:
   - `PatientProfileView.tsx`:
@@ -22,6 +32,22 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - `PatientProfileView.tsx`:
     - O botão **+ Adicionar anamnese** agora é um botão único e direto (removido o botão dividido, chevron e o menu suspenso de modelos que ficavam dentro dele).
     - O clique agora abre imediatamente o editor de anamnese com o template clínico completo carregado.
+
+### 🔘 Simplificação do Botão de Adicionar Anamnese
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - O botão **+ Adicionar anamnese** agora é um botão único e direto (removido o botão dividido, chevron e o menu suspenso de modelos que ficavam dentro dele).
+    - O clique agora abre imediatamente o editor de anamnese com o template clínico completo carregado.
+
+### 📱 Formatação Automática de Telefones no Grid de Pacientes
+- **Frontend Web (`apps/web`)**:
+  - `countryDialCodes.tsx`:
+    - Criação da função utilitária `formatPhoneDisplay(rawPhone)` capaz de reconhecer e formatar números gravados com DDI internacional (`+55`, `+1`, `+351`, etc.), prefixos sem sinal, ou números nacionais brutos de 10 e 11 dígitos no padrão brasileiro `(XX) XXXXX-XXXX` ou `(XX) XXXX-XXXX`.
+  - `PatientDirectory.tsx`:
+    - Aplicação de `formatPhoneDisplay` na coluna de contato do grid de pacientes, assegurando que nenhum telefone seja exibido como sequência crua de dígitos sem máscara.
+    - Suporte à busca inteligente de pacientes por telefone: a busca agora encontra o paciente seja digitando o telefone com máscara/formatação ou apenas os dígitos limpos.
+  - `AdminDashboard.tsx`:
+    - Atualização do número inicial mockado do paciente principal para o formato padrão mascarado.
 
 ### 📱 Formatação Automática de Telefones no Grid de Pacientes
 - **Frontend Web (`apps/web`)**:
