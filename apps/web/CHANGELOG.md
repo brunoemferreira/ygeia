@@ -5,6 +5,17 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Módulos de Avaliação Nutricional: Anamnese, Recordatório, Prontuário e Restrições Alimentares (`PatientProfileView.tsx`)**:
+  - Ajuste no menu lateral renomeando *"Anamnese e transcrição"* para exclusivamente *"Anamnese"*.
+  - Integração do padrão `ClinicalDataGrid` para a seção de **Recordatório Alimentar**, permitindo múltiplos inquéritos por paciente com persistência em `localStorage` e modal de inserção/edição.
+  - Integração do padrão `ClinicalDataGrid` para a seção de **Prontuário**, viabilizando múltiplos registros de evolução clínica, anotações de conduta e retornos.
+  - Implementação da **Grade de Restrições Alimentares**:
+    - Colunas: Alimento ou Substância, Tipo / Motivo, Situação, Origem, Observação e Ações Rápidas.
+    - Badges coloridos por motivo (*Alergia* em vermelho, *Intolerância* em laranja, *Não Gosta* em roxo, *Outra restrição* em cinza).
+    - Modal de cadastro com validação obrigatória dos campos *Alimento* e *Motivo*, além do texto orientativo *"Se a restrição depende do preparo, inclua essa informação no nome"*.
+    - Persistência reativa no `localStorage` por paciente (`ygeia_restrictions_${patientId}`).
+
 ### Modificado
 - **Simplificação e Otimização da Grade de Anamneses (`ClinicalDataGrid.tsx`, `PatientProfileView.tsx`)**:
   - Remoção da coluna de texto *"Principais Queixas & Objetivos"* e das *"Tags Clínicas"*, conforme diretriz de usabilidade.

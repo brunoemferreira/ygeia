@@ -9,6 +9,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🥗 Expansão da Avaliação Nutricional: Anamnese, Recordatório, Prontuário e Restrições Alimentares
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - **Menu Lateral**:
+      - Atualizado o rótulo do submenu de *"Anamnese e transcrição"* para exclusivamente *"Anamnese"*.
+      - Habilitado o botão de ação rápida (`+`) no submenu *"Restrições alimentares"*.
+    - **Grade de Recordatórios Alimentares**:
+      - Implementado suporte a múltiplos recordatórios por paciente com persistência em `localStorage` (`ygeia_recalls_${patientId}`).
+      - Adotado o padrão `ClinicalDataGrid` para exibição cronológica dos inquéritos alimentares (Recordatório 24 Horas, Registro Habitual, 3 Dias, QFA).
+      - Modal de cadastro e edição de recordatórios com campo de anotações e refeições.
+    - **Grade do Prontuário & Evolução Clínica**:
+      - Unificada a linha do tempo do prontuário no padrão `ClinicalDataGrid`.
+      - Múltiplas evoluções por paciente (`ygeia_prontuario_${patientId}`) com modal de anotação de conduta e retornos.
+    - **Módulo e Grade de Restrições Alimentares**:
+      - Criação da grade clínica completa de restrições com colunas: *Alimento ou Substância*, *Tipo / Motivo*, *Situação*, *Origem*, *Observação* e *Ações Rápidas*.
+      - Modal de inclusão e edição com validação obrigatória de *Alimento* e *Motivo*.
+      - Campo de texto para alimento acompanhado do texto de apoio: *"Se a restrição depende do preparo, inclua essa informação no nome"*.
+      - Seletor de motivo com opções: *Alergia*, *Intolerância*, *Não Gosta*, *Outra restrição*.
+      - Alternância de situação (Ativa / Inativa) em um clique e persistência individual por paciente (`ygeia_restrictions_${patientId}`).
+
 ### 📋 Simplificação da Grade de Anamneses: Foco em Data e Ações Rápidas
 - **Frontend Web (`apps/web`)**:
   - `ClinicalDataGrid.tsx`:

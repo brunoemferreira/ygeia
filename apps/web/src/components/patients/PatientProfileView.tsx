@@ -23,11 +23,13 @@ import {
   ClipboardList,
   AlertCircle,
   RefreshCw,
+  AlertTriangle,
+  Ban,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
 import { AnamneseEditor, AnamneseData } from './AnamneseEditor';
 import { useToast } from '../../context/ToastContext';
-import { ClinicalDataGrid, ClinicalRecordItem } from '../ui';
+import { ClinicalDataGrid, ClinicalRecordItem, AppModal } from '../ui';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -117,6 +119,88 @@ class AnamneseErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryS
     return this.props.children;
   }
 }
+
+export interface RecallItem {
+  id: string;
+  title: string;
+  date: string;
+  templateType: string;
+  notes?: string;
+}
+
+export interface ProntuarioItem {
+  id: string;
+  title: string;
+  date: string;
+  templateType: string;
+  notes?: string;
+}
+
+export interface FoodRestriction {
+  id: string;
+  foodOrSubstance: string;
+  reason: 'Alergia' | 'Intolerância' | 'Não Gosta' | 'Outra restrição';
+  status: 'Ativa' | 'Inativa';
+  origin: string;
+  observation?: string;
+  createdAt: string;
+}
+
+const getDefaultRecalls = (): RecallItem[] => {
+  const now = new Date();
+  return [
+    {
+      id: '1',
+      title: `Recordatório 24 Horas - ${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`,
+      date: now.toISOString(),
+      templateType: 'Recordatório 24 Horas',
+      notes: 'Consumo habitual com boa ingestão de água (2.2L). Café da manhã: Pão integral com queijo branco e café com leite. Almoço: Arroz, feijão, filé de frango e salada mista. Lanche da tarde: Iogurte com aveia. Jantar: Sopa de legumes com carne magra.',
+    },
+  ];
+};
+
+const getDefaultProntuario = (): ProntuarioItem[] => {
+  const now = new Date();
+  return [
+    {
+      id: '1',
+      title: `Evolução Clínica e Conduta - ${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`,
+      date: now.toISOString(),
+      templateType: 'Evolução Clínica',
+      notes: 'Primeira consulta de acolhimento. Paciente apresenta boa adesão e motivação para recomposição corporal e melhora gastrointestinal. Estabelecido plano inicial com déficit calórico moderado.',
+    },
+  ];
+};
+
+const getDefaultRestrictions = (): FoodRestriction[] => [
+  {
+    id: '1',
+    foodOrSubstance: 'Camarão e Frutos do Mar',
+    reason: 'Alergia',
+    status: 'Ativa',
+    origin: 'Relatado pelo paciente',
+    observation: 'Edema de glote e urticária imediata após contato.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '2',
+    foodOrSubstance: 'Leite de vaca / Lactose',
+    reason: 'Intolerância',
+    status: 'Ativa',
+    origin: 'Avaliação clínica',
+    observation: 'Distensão abdominal e desconforto digestivo moderado.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '3',
+    foodOrSubstance: 'Coentro',
+    reason: 'Não Gosta',
+    status: 'Ativa',
+    origin: 'Relatado pelo paciente',
+    observation: 'Aversão ao sabor característico.',
+    createdAt: new Date().toISOString(),
+  },
+];
 
 export interface PatientProfileViewProps {
   patient: PatientRecord;
@@ -258,6 +342,352 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       raw: item,
     }));
   }, [anamnesesList]);
+
+  // ========================================================
+  // RECURSOS LONGITUDINAIS: RECORDATÓRIO, PRONTUÁRIO & RESTRIÇÕES
+  // ========================================================
+  const recallStorageKey = `ygeia_recalls_${patientId}`;
+  const prontuarioStorageKey = `ygeia_prontuario_${patientId}`;
+  const restrictionStorageKey = `ygeia_restrictions_${patientId}`;
+
+  // Recordatórios Alimentares
+  const [recallsList, setRecallsList] = useState<RecallItem[]>(() => {
+    try {
+      const stored = localStorage.getItem(`ygeia_recalls_${patientId}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return getDefaultRecalls();
+  });
+  const [isRecallModalOpen, setIsRecallModalOpen] = useState(false);
+  const [editingRecall, setEditingRecall] = useState<RecallItem | null>(null);
+  const [recallForm, setRecallForm] = useState<{ title: string; templateType: string; date: string; notes: string }>({
+    title: '',
+    templateType: 'Recordatório 24 Horas',
+    date: new Date().toISOString().split('T')[0],
+    notes: '',
+  });
+
+  const saveRecallsToStorage = (updated: RecallItem[]) => {
+    setRecallsList(updated);
+    try {
+      localStorage.setItem(recallStorageKey, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Erro ao salvar recordatórios:', e);
+    }
+  };
+
+  const clinicalRecallsItems: ClinicalRecordItem[] = useMemo(() => {
+    return recallsList.map((item) => ({
+      id: item.id,
+      title: item.title,
+      date: item.date,
+      templateType: item.templateType || 'Recordatório 24 Horas',
+      raw: item,
+    }));
+  }, [recallsList]);
+
+  // Prontuário & Evolução Clínica
+  const [prontuarioList, setProntuarioList] = useState<ProntuarioItem[]>(() => {
+    try {
+      const stored = localStorage.getItem(`ygeia_prontuario_${patientId}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return getDefaultProntuario();
+  });
+  const [isProntuarioModalOpen, setIsProntuarioModalOpen] = useState(false);
+  const [editingProntuario, setEditingProntuario] = useState<ProntuarioItem | null>(null);
+  const [prontuarioForm, setProntuarioForm] = useState<{ title: string; templateType: string; date: string; notes: string }>({
+    title: '',
+    templateType: 'Evolução Clínica',
+    date: new Date().toISOString().split('T')[0],
+    notes: '',
+  });
+
+  const saveProntuarioToStorage = (updated: ProntuarioItem[]) => {
+    setProntuarioList(updated);
+    try {
+      localStorage.setItem(prontuarioStorageKey, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Erro ao salvar prontuário:', e);
+    }
+  };
+
+  const clinicalProntuarioItems: ClinicalRecordItem[] = useMemo(() => {
+    return prontuarioList.map((item) => ({
+      id: item.id,
+      title: item.title,
+      date: item.date,
+      templateType: item.templateType || 'Evolução Clínica',
+      raw: item,
+    }));
+  }, [prontuarioList]);
+
+  // Restrições Alimentares
+  const [restrictionsList, setRestrictionsList] = useState<FoodRestriction[]>(() => {
+    try {
+      const stored = localStorage.getItem(`ygeia_restrictions_${patientId}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return getDefaultRestrictions();
+  });
+  const [isRestrictionModalOpen, setIsRestrictionModalOpen] = useState(false);
+  const [editingRestriction, setEditingRestriction] = useState<FoodRestriction | null>(null);
+  const [restrictionForm, setRestrictionForm] = useState<{
+    foodOrSubstance: string;
+    reason: 'Alergia' | 'Intolerância' | 'Não Gosta' | 'Outra restrição';
+    status: 'Ativa' | 'Inativa';
+    origin: string;
+    observation: string;
+  }>({
+    foodOrSubstance: '',
+    reason: 'Alergia',
+    status: 'Ativa',
+    origin: 'Relatado pelo paciente',
+    observation: '',
+  });
+  const [restrictionSearchQuery, setRestrictionSearchQuery] = useState('');
+  const [restrictionFilterReason, setRestrictionFilterReason] = useState('ALL');
+  const [restrictionFilterStatus, setRestrictionFilterStatus] = useState('ALL');
+
+  const saveRestrictionsToStorage = (updated: FoodRestriction[]) => {
+    setRestrictionsList(updated);
+    try {
+      localStorage.setItem(restrictionStorageKey, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Erro ao salvar restrições:', e);
+    }
+  };
+
+  const filteredRestrictions = useMemo(() => {
+    return restrictionsList.filter((r) => {
+      const q = restrictionSearchQuery.trim().toLowerCase();
+      const matchesQuery =
+        !q ||
+        r.foodOrSubstance.toLowerCase().includes(q) ||
+        r.reason.toLowerCase().includes(q) ||
+        r.origin.toLowerCase().includes(q) ||
+        (r.observation && r.observation.toLowerCase().includes(q));
+
+      const matchesReason = restrictionFilterReason === 'ALL' || r.reason === restrictionFilterReason;
+      const matchesStatus = restrictionFilterStatus === 'ALL' || r.status === restrictionFilterStatus;
+
+      return matchesQuery && matchesReason && matchesStatus;
+    });
+  }, [restrictionsList, restrictionSearchQuery, restrictionFilterReason, restrictionFilterStatus]);
+
+  // Ações de Recordatório
+  const handleOpenNewRecallModal = () => {
+    const now = new Date();
+    setEditingRecall(null);
+    setRecallForm({
+      title: `Recordatório 24 Horas - ${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`,
+      templateType: 'Recordatório 24 Horas',
+      date: now.toISOString().split('T')[0],
+      notes: '',
+    });
+    setIsRecallModalOpen(true);
+  };
+
+  const handleEditRecall = (item: RecallItem) => {
+    setEditingRecall(item);
+    setRecallForm({
+      title: item.title,
+      templateType: item.templateType || 'Recordatório 24 Horas',
+      date: item.date ? item.date.split('T')[0] : new Date().toISOString().split('T')[0],
+      notes: item.notes || '',
+    });
+    setIsRecallModalOpen(true);
+  };
+
+  const handleSaveRecall = () => {
+    if (!recallForm.title.trim()) {
+      toast.error('Informe um título para o recordatório alimentar.');
+      return;
+    }
+    if (editingRecall) {
+      const updated = recallsList.map((r) =>
+        r.id === editingRecall.id
+          ? {
+              ...r,
+              title: recallForm.title.trim(),
+              templateType: recallForm.templateType,
+              date: new Date(recallForm.date).toISOString(),
+              notes: recallForm.notes,
+            }
+          : r
+      );
+      saveRecallsToStorage(updated);
+      toast.success('Recordatório alimentar atualizado com sucesso.');
+    } else {
+      const newRecall: RecallItem = {
+        id: String(Date.now()),
+        title: recallForm.title.trim(),
+        templateType: recallForm.templateType,
+        date: new Date(recallForm.date).toISOString(),
+        notes: recallForm.notes,
+      };
+      saveRecallsToStorage([newRecall, ...recallsList]);
+      toast.success('Novo recordatório alimentar registrado com sucesso.');
+    }
+    setIsRecallModalOpen(false);
+  };
+
+  const handleDeleteRecall = (id: string) => {
+    const updated = recallsList.filter((r) => r.id !== id);
+    saveRecallsToStorage(updated);
+    toast.success('Recordatório alimentar excluído.');
+  };
+
+  // Ações de Prontuário
+  const handleOpenNewProntuarioModal = () => {
+    const now = new Date();
+    setEditingProntuario(null);
+    setProntuarioForm({
+      title: `Evolução Clínica - ${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`,
+      templateType: 'Evolução Clínica',
+      date: now.toISOString().split('T')[0],
+      notes: '',
+    });
+    setIsProntuarioModalOpen(true);
+  };
+
+  const handleEditProntuario = (item: ProntuarioItem) => {
+    setEditingProntuario(item);
+    setProntuarioForm({
+      title: item.title,
+      templateType: item.templateType || 'Evolução Clínica',
+      date: item.date ? item.date.split('T')[0] : new Date().toISOString().split('T')[0],
+      notes: item.notes || '',
+    });
+    setIsProntuarioModalOpen(true);
+  };
+
+  const handleSaveProntuario = () => {
+    if (!prontuarioForm.title.trim()) {
+      toast.error('Informe o título da evolução clínica.');
+      return;
+    }
+    if (editingProntuario) {
+      const updated = prontuarioList.map((p) =>
+        p.id === editingProntuario.id
+          ? {
+              ...p,
+              title: prontuarioForm.title.trim(),
+              templateType: prontuarioForm.templateType,
+              date: new Date(prontuarioForm.date).toISOString(),
+              notes: prontuarioForm.notes,
+            }
+          : p
+      );
+      saveProntuarioToStorage(updated);
+      toast.success('Registro do prontuário atualizado com sucesso.');
+    } else {
+      const newProntuario: ProntuarioItem = {
+        id: String(Date.now()),
+        title: prontuarioForm.title.trim(),
+        templateType: prontuarioForm.templateType,
+        date: new Date(prontuarioForm.date).toISOString(),
+        notes: prontuarioForm.notes,
+      };
+      saveProntuarioToStorage([newProntuario, ...prontuarioList]);
+      toast.success('Evolução clínica adicionada ao prontuário.');
+    }
+    setIsProntuarioModalOpen(false);
+  };
+
+  const handleDeleteProntuario = (id: string) => {
+    const updated = prontuarioList.filter((p) => p.id !== id);
+    saveProntuarioToStorage(updated);
+    toast.success('Registro do prontuário excluído.');
+  };
+
+  // Ações de Restrições Alimentares
+  const handleOpenNewRestrictionModal = () => {
+    setEditingRestriction(null);
+    setRestrictionForm({
+      foodOrSubstance: '',
+      reason: 'Alergia',
+      status: 'Ativa',
+      origin: 'Relatado pelo paciente',
+      observation: '',
+    });
+    setIsRestrictionModalOpen(true);
+  };
+
+  const handleEditRestriction = (item: FoodRestriction) => {
+    setEditingRestriction(item);
+    setRestrictionForm({
+      foodOrSubstance: item.foodOrSubstance,
+      reason: item.reason,
+      status: item.status,
+      origin: item.origin || 'Relatado pelo paciente',
+      observation: item.observation || '',
+    });
+    setIsRestrictionModalOpen(true);
+  };
+
+  const handleSaveRestriction = () => {
+    if (!restrictionForm.foodOrSubstance.trim()) {
+      toast.error('O alimento ou substância é obrigatório.');
+      return;
+    }
+    if (!restrictionForm.reason) {
+      toast.error('O motivo da restrição é obrigatório.');
+      return;
+    }
+
+    if (editingRestriction) {
+      const updated = restrictionsList.map((r) =>
+        r.id === editingRestriction.id
+          ? {
+              ...r,
+              foodOrSubstance: restrictionForm.foodOrSubstance.trim(),
+              reason: restrictionForm.reason,
+              status: restrictionForm.status,
+              origin: restrictionForm.origin,
+              observation: restrictionForm.observation.trim() || undefined,
+            }
+          : r
+      );
+      saveRestrictionsToStorage(updated);
+      toast.success('Restrição alimentar atualizada com sucesso.');
+    } else {
+      const newRestriction: FoodRestriction = {
+        id: String(Date.now()),
+        foodOrSubstance: restrictionForm.foodOrSubstance.trim(),
+        reason: restrictionForm.reason,
+        status: restrictionForm.status,
+        origin: restrictionForm.origin,
+        observation: restrictionForm.observation.trim() || undefined,
+        createdAt: new Date().toISOString(),
+      };
+      saveRestrictionsToStorage([newRestriction, ...restrictionsList]);
+      toast.success('Restrição alimentar cadastrada com sucesso.');
+    }
+    setIsRestrictionModalOpen(false);
+  };
+
+  const handleDeleteRestriction = (id: string) => {
+    const updated = restrictionsList.filter((r) => r.id !== id);
+    saveRestrictionsToStorage(updated);
+    toast.success('Restrição alimentar removida com sucesso.');
+  };
+
+  const handleToggleRestrictionStatus = (item: FoodRestriction) => {
+    const newStatus: 'Ativa' | 'Inativa' = item.status === 'Ativa' ? 'Inativa' : 'Ativa';
+    const updated = restrictionsList.map((r) => (r.id === item.id ? { ...r, status: newStatus } : r));
+    saveRestrictionsToStorage(updated);
+    toast.info(`Situação de "${item.foodOrSubstance}" alterada para ${newStatus}.`);
+  };
 
   // Cálculo de idade amigável a partir da data de nascimento
   const patientAgeString = useMemo(() => {
@@ -419,10 +849,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       label: 'Avaliação nutricional',
       icon: ClipboardList,
       children: [
-        { id: 'anamnese_transcricao', label: 'Anamnese e transcrição', hasPlus: true },
+        { id: 'anamnese_transcricao', label: 'Anamnese', hasPlus: true },
         { id: 'recordatorio_alimentar', label: 'Recordatório alimentar', hasPlus: true },
         { id: 'prontuario', label: 'Prontuário', hasPlus: true },
-        { id: 'restricoes_alimentares', label: 'Restrições alimentares', hasPlus: false },
+        { id: 'restricoes_alimentares', label: 'Restrições alimentares', hasPlus: true },
         { id: 'medicamentos', label: 'Medicamentos', hasPlus: false, badge: 'Novidade' },
       ],
     },
@@ -1104,8 +1534,14 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                                   e.stopPropagation();
                                   setActiveSection(sub.id);
                                   if (sub.id === 'anamnese_transcricao') {
-                                  handleStartNewAnamnese('Seções padrão');
-                                } else {
+                                    handleStartNewAnamnese('Seções padrão');
+                                  } else if (sub.id === 'recordatorio_alimentar') {
+                                    handleOpenNewRecallModal();
+                                  } else if (sub.id === 'prontuario') {
+                                    handleOpenNewProntuarioModal();
+                                  } else if (sub.id === 'restricoes_alimentares') {
+                                    handleOpenNewRestrictionModal();
+                                  } else {
                                     toast.info(`Adicionar novo item em: ${sub.label}`);
                                   }
                                 }}
@@ -1146,12 +1582,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           }}
         >
           {/* ========================================================
-              SEÇÃO: ANAMNESE E TRANSCRIÇÃO (CLINICAL DATA GRID UX/UI)
+              SEÇÃO: ANAMNESE (CLINICAL DATA GRID)
              ======================================================== */}
           {activeSection === 'anamnese_transcricao' && (
             <ClinicalDataGrid
-              title="Anamneses e Histórico Clínico"
-              subtitle="Registro longitudinal de consultas, queixas e evolução clínica do paciente"
+              title="Anamnese"
+              subtitle="Registro de consultas, queixas e evolução clínica do paciente"
               items={clinicalAnamnesesItems}
               itemLabel="anamneses"
               templates={['Seções padrão', 'Anamnese Esportiva', 'Anamnese Infantil', 'Saúde Gastrointestinal', 'Anamnese em Branco']}
@@ -1175,65 +1611,466 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           )}
 
           {/* ========================================================
-              SEÇÃO: PRONTUÁRIO & EVOLUÇÃO CLÍNICA
+              SEÇÃO: RECORDATÓRIO ALIMENTAR (CLINICAL DATA GRID)
+             ======================================================== */}
+          {activeSection === 'recordatorio_alimentar' && (
+            <ClinicalDataGrid
+              title="Recordatório Alimentar"
+              subtitle="Inquéritos alimentares de 24h, hábitos e questionários de consumo do paciente"
+              items={clinicalRecallsItems}
+              itemLabel="recordatórios"
+              templates={['Recordatório 24 Horas', 'Registro Habitual', 'Registro de 3 Dias', 'QFA - Frequência']}
+              onNew={handleOpenNewRecallModal}
+              onEdit={(item) => handleEditRecall(item.raw || item)}
+              onDelete={(item) => handleDeleteRecall(item.id)}
+              onPrint={(item) => {
+                toast.success(`Gerando PDF do recordatório: ${item.title}...`);
+              }}
+              onCompare={() => {
+                toast.info('Comparando consumo alimentar com consultas anteriores...');
+              }}
+              onExportAll={() => {
+                toast.info('Gerando consolidado em PDF de todos os recordatórios...');
+              }}
+            />
+          )}
+
+          {/* ========================================================
+              SEÇÃO: PRONTUÁRIO & EVOLUÇÃO CLÍNICA (CLINICAL DATA GRID)
              ======================================================== */}
           {activeSection === 'prontuario' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div>
-                <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  Prontuário & Linha do Tempo Clínica
-                </h2>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
-                  Evoluções registradas, histórico de condutas e anotações clínicas
-                </p>
-              </div>
+            <ClinicalDataGrid
+              title="Prontuário & Linha do Tempo Clínica"
+              subtitle="Histórico longitudinal de condutas, anotações de evolução e intercorrências"
+              items={clinicalProntuarioItems}
+              itemLabel="evoluções"
+              templates={['Evolução Clínica', 'Consulta de Retorno', 'Ajuste de Conduta', 'Intercorrência']}
+              onNew={handleOpenNewProntuarioModal}
+              onEdit={(item) => handleEditProntuario(item.raw || item)}
+              onDelete={(item) => handleDeleteProntuario(item.id)}
+              onPrint={(item) => {
+                toast.success(`Imprimindo evolução do prontuário: ${item.title}...`);
+              }}
+              onCompare={() => {
+                toast.info('Comparando linha do tempo clínica...');
+              }}
+              onExportAll={() => {
+                toast.info('Exportando prontuário integral em PDF...');
+              }}
+            />
+          )}
 
+          {/* ========================================================
+              SEÇÃO: RESTRIÇÕES ALIMENTARES (GRADE CLÍNICA COMPLETA)
+             ======================================================== */}
+          {activeSection === 'restricoes_alimentares' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1 }}>
+              {/* Cabeçalho */}
               <div
                 style={{
-                  borderRadius: '0.625rem',
-                  border: '1px solid #e2e8f0',
-                  padding: '1.25rem',
-                  backgroundColor: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
                 }}
               >
-                <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
-                  ✍️ Registro de Evolução Clínica Rápida
-                </h3>
-                <textarea
-                  placeholder="Digite a evolução clínica do paciente hoje..."
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #cbd5e1',
-                    padding: '0.5rem',
-                    fontSize: '0.8125rem',
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit',
-                  }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    Restrições Alimentares
+                  </h2>
+                  <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                    Alergias, intolerâncias e aversões alimentares relatadas ou diagnosticadas
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                   <button
                     type="button"
-                    onClick={() => toast.success('Evolução clínica adicionada ao prontuário!')}
+                    onClick={handleOpenNewRestrictionModal}
                     style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
                       backgroundColor: 'var(--primary)',
                       color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '0.375rem',
-                      padding: '0.4rem 0.85rem',
-                      fontSize: '0.78125rem',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.8125rem',
                       fontWeight: 600,
+                      borderRadius: '0.375rem',
+                      border: 'none',
                       cursor: 'pointer',
+                      boxShadow: '0 1px 2px var(--primary-border)',
                       transition: 'background-color 0.15s ease',
                     }}
                     onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
                     onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
                   >
-                    Salvar no Prontuário
+                    <Plus size={15} />
+                    <span>Adicionar restrição</span>
                   </button>
                 </div>
               </div>
+
+              {/* Barra de Filtros e Busca */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.75rem',
+                  flexWrap: 'wrap',
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '0.625rem',
+                }}
+              >
+                {/* Campo de Busca */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '220px', position: 'relative' }}>
+                  <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '0.75rem' }} />
+                  <input
+                    type="text"
+                    value={restrictionSearchQuery}
+                    onChange={(e) => setRestrictionSearchQuery(e.target.value)}
+                    placeholder="Buscar alimento, motivo, origem..."
+                    style={{
+                      width: '100%',
+                      padding: '0.45rem 0.75rem 0.45rem 2.25rem',
+                      fontSize: '0.8125rem',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#ffffff',
+                      outline: 'none',
+                    }}
+                  />
+                  {restrictionSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setRestrictionSearchQuery('')}
+                      style={{
+                        position: 'absolute',
+                        right: '0.5rem',
+                        background: 'none',
+                        border: 'none',
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        padding: '0.2rem',
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                {/* Filtro por Motivo */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Motivo:</span>
+                  <select
+                    value={restrictionFilterReason}
+                    onChange={(e) => setRestrictionFilterReason(e.target.value)}
+                    style={{
+                      padding: '0.45rem 0.75rem',
+                      fontSize: '0.8125rem',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#ffffff',
+                      color: '#0f172a',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <option value="ALL">Todos os motivos</option>
+                    <option value="Alergia">Alergia</option>
+                    <option value="Intolerância">Intolerância</option>
+                    <option value="Não Gosta">Não Gosta</option>
+                    <option value="Outra restrição">Outra restrição</option>
+                  </select>
+                </div>
+
+                {/* Filtro por Situação */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Situação:</span>
+                  <select
+                    value={restrictionFilterStatus}
+                    onChange={(e) => setRestrictionFilterStatus(e.target.value)}
+                    style={{
+                      padding: '0.45rem 0.75rem',
+                      fontSize: '0.8125rem',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#ffffff',
+                      color: '#0f172a',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <option value="ALL">Todas</option>
+                    <option value="Ativa">Ativa</option>
+                    <option value="Inativa">Inativa</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Tabela de Restrições */}
+              {filteredRestrictions.length === 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '3.5rem 1rem',
+                    borderRadius: '0.75rem',
+                    border: '1px dashed #cbd5e1',
+                    backgroundColor: '#f8fafc',
+                    textAlign: 'center',
+                    gap: '0.75rem',
+                  }}
+                >
+                  <Ban size={40} color="#94a3b8" />
+                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#475569' }}>
+                    Nenhuma restrição alimentar encontrada.
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>
+                    Cadastre alimentos com alergia, intolerância ou recusa do paciente.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleOpenNewRestrictionModal}
+                    style={{
+                      marginTop: '0.5rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      backgroundColor: 'var(--primary)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      padding: '0.45rem 0.95rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Plus size={14} />
+                    <span>Adicionar primeira restrição</span>
+                  </button>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    borderRadius: '0.75rem',
+                    border: '1px solid #e2e8f0',
+                    overflow: 'hidden',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  }}
+                >
+                  <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8125rem' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.75rem', fontWeight: 600 }}>
+                          <th style={{ padding: '0.75rem 1.25rem' }}>Alimento ou Substância</th>
+                          <th style={{ padding: '0.75rem 1.25rem', width: '150px' }}>Tipo / Motivo</th>
+                          <th style={{ padding: '0.75rem 1.25rem', width: '110px' }}>Situação</th>
+                          <th style={{ padding: '0.75rem 1.25rem', width: '180px' }}>Origem</th>
+                          <th style={{ padding: '0.75rem 1.25rem' }}>Observação</th>
+                          <th style={{ padding: '0.75rem 1.25rem', textAlign: 'right', width: '120px' }}>Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredRestrictions.map((item) => {
+                          const getReasonBadgeStyle = (reason: string) => {
+                            switch (reason) {
+                              case 'Alergia':
+                                return {
+                                  bg: '#fee2e2',
+                                  color: '#dc2626',
+                                  border: '#fca5a5',
+                                  icon: AlertTriangle,
+                                };
+                              case 'Intolerância':
+                                return {
+                                  bg: '#ffedd5',
+                                  color: '#ea580c',
+                                  border: '#fdba74',
+                                  icon: AlertCircle,
+                                };
+                              case 'Não Gosta':
+                                return {
+                                  bg: '#ede9fe',
+                                  color: '#7c3aed',
+                                  border: '#c4b5fd',
+                                  icon: Ban,
+                                };
+                              default:
+                                return {
+                                  bg: '#f1f5f9',
+                                  color: '#475569',
+                                  border: '#cbd5e1',
+                                  icon: AlertCircle,
+                                };
+                            }
+                          };
+
+                          const badge = getReasonBadgeStyle(item.reason);
+                          const BadgeIcon = badge.icon;
+                          const isAtiva = item.status === 'Ativa';
+
+                          return (
+                            <tr
+                              key={item.id}
+                              style={{
+                                borderBottom: '1px solid #f1f5f9',
+                                transition: 'background-color 0.15s ease',
+                              }}
+                              onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                              onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
+                            >
+                              {/* 1. Alimento ou Substância */}
+                              <td style={{ padding: '0.85rem 1.25rem' }}>
+                                <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.875rem' }}>
+                                  {item.foodOrSubstance}
+                                </span>
+                              </td>
+
+                              {/* 2. Tipo / Motivo */}
+                              <td style={{ padding: '0.85rem 1.25rem' }}>
+                                <span
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    backgroundColor: badge.bg,
+                                    color: badge.color,
+                                    border: `1px solid ${badge.border}`,
+                                    borderRadius: '9999px',
+                                    padding: '0.15rem 0.6rem',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  <BadgeIcon size={12} />
+                                  <span>{item.reason}</span>
+                                </span>
+                              </td>
+
+                              {/* 3. Situação */}
+                              <td style={{ padding: '0.85rem 1.25rem' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleRestrictionStatus(item)}
+                                  title="Clique para alternar a situação"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.3rem',
+                                    backgroundColor: isAtiva ? 'var(--primary-light)' : '#f1f5f9',
+                                    color: isAtiva ? 'var(--primary)' : '#64748b',
+                                    border: `1px solid ${isAtiva ? 'var(--primary-border)' : '#cbd5e1'}`,
+                                    borderRadius: '0.375rem',
+                                    padding: '0.15rem 0.55rem',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease',
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      width: '6px',
+                                      height: '6px',
+                                      borderRadius: '50%',
+                                      backgroundColor: isAtiva ? 'var(--primary)' : '#94a3b8',
+                                    }}
+                                  />
+                                  <span>{item.status}</span>
+                                </button>
+                              </td>
+
+                              {/* 4. Origem */}
+                              <td style={{ padding: '0.85rem 1.25rem', color: '#475569', fontSize: '0.8125rem' }}>
+                                {item.origin}
+                              </td>
+
+                              {/* 5. Observação */}
+                              <td style={{ padding: '0.85rem 1.25rem', color: '#64748b', fontSize: '0.8125rem' }}>
+                                {item.observation || <span style={{ color: '#cbd5e1' }}>—</span>}
+                              </td>
+
+                              {/* 6. Ações */}
+                              <td style={{ padding: '0.85rem 1.25rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleEditRestriction(item)}
+                                    title="Editar restrição"
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: '30px',
+                                      height: '30px',
+                                      borderRadius: '0.375rem',
+                                      border: '1px solid #e2e8f0',
+                                      backgroundColor: '#ffffff',
+                                      color: '#64748b',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.15s ease',
+                                    }}
+                                    onMouseOver={(e) => {
+                                      (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-light)';
+                                      (e.currentTarget as HTMLElement).style.color = 'var(--primary)';
+                                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary-border)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                      (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                                      (e.currentTarget as HTMLElement).style.color = '#64748b';
+                                      (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
+                                    }}
+                                  >
+                                    <Edit2 size={13} />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteRestriction(item.id)}
+                                    title="Excluir restrição"
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: '30px',
+                                      height: '30px',
+                                      borderRadius: '0.375rem',
+                                      border: '1px solid #e2e8f0',
+                                      backgroundColor: '#ffffff',
+                                      color: '#64748b',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.15s ease',
+                                    }}
+                                    onMouseOver={(e) => {
+                                      (e.currentTarget as HTMLElement).style.backgroundColor = '#fff1f2';
+                                      (e.currentTarget as HTMLElement).style.color = '#e11d48';
+                                      (e.currentTarget as HTMLElement).style.borderColor = '#fecdd3';
+                                    }}
+                                    onMouseOut={(e) => {
+                                      (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                                      (e.currentTarget as HTMLElement).style.color = '#64748b';
+                                      (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
+                                    }}
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1333,7 +2170,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           {/* ========================================================
               QUALQUER OUTRA SEÇÃO SELECIONADA
              ======================================================== */}
-          {!['anamnese_transcricao', 'prontuario', 'plano_alimentar', 'gasto_calorico'].includes(activeSection) &&
+          {!['anamnese_transcricao', 'recordatorio_alimentar', 'prontuario', 'restricoes_alimentares', 'plano_alimentar', 'gasto_calorico'].includes(activeSection) &&
             !activeSection.startsWith('antropo_') && (
               <div
                 style={{
@@ -1389,6 +2226,441 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             )}
         </main>
       </div>
+
+      {/* MODAL: REGISTRAR / EDITAR RECORDATÓRIO ALIMENTAR */}
+      <AppModal
+        isOpen={isRecallModalOpen}
+        onClose={() => setIsRecallModalOpen(false)}
+        title={editingRecall ? 'Editar Recordatório Alimentar' : 'Novo Recordatório Alimentar'}
+        subtitle="Registro de consumo e hábitos alimentares do paciente"
+        maxWidth="540px"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', width: '100%' }}>
+            <button
+              type="button"
+              onClick={() => setIsRecallModalOpen(false)}
+              style={{
+                borderRadius: '0.375rem',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                padding: '0.45rem 0.85rem',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: '#64748b',
+                cursor: 'pointer',
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveRecall}
+              style={{
+                borderRadius: '0.375rem',
+                border: 'none',
+                backgroundColor: 'var(--primary)',
+                padding: '0.45rem 1rem',
+                fontSize: '0.8125rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                cursor: 'pointer',
+              }}
+            >
+              Salvar Recordatório
+            </button>
+          </div>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+              Título do Recordatório <span style={{ color: '#e11d48' }}>*</span>
+            </label>
+            <input
+              type="text"
+              value={recallForm.title}
+              onChange={(e) => setRecallForm({ ...recallForm, title: e.target.value })}
+              placeholder="Ex: Recordatório 24 Horas - Consulta Inicial"
+              style={{
+                width: '100%',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.8125rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '0.375rem',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                Modelo / Tipo
+              </label>
+              <select
+                value={recallForm.templateType}
+                onChange={(e) => setRecallForm({ ...recallForm, templateType: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.8125rem',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.375rem',
+                  backgroundColor: '#ffffff',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <option value="Recordatório 24 Horas">Recordatório 24 Horas</option>
+                <option value="Registro Habitual">Registro Habitual</option>
+                <option value="Registro de 3 Dias">Registro de 3 Dias</option>
+                <option value="QFA - Frequência">QFA - Frequência</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                Data da Coleta
+              </label>
+              <input
+                type="date"
+                value={recallForm.date}
+                onChange={(e) => setRecallForm({ ...recallForm, date: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '0.45rem 0.75rem',
+                  fontSize: '0.8125rem',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.375rem',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+              Refeições, Alimentos & Horários
+            </label>
+            <textarea
+              rows={4}
+              value={recallForm.notes}
+              onChange={(e) => setRecallForm({ ...recallForm, notes: e.target.value })}
+              placeholder="Descreva as refeições consumidas pelo paciente, horários aproximados, quantidades e marcas..."
+              style={{
+                width: '100%',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.8125rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '0.375rem',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit',
+              }}
+            />
+          </div>
+        </div>
+      </AppModal>
+
+      {/* MODAL: REGISTRAR / EDITAR EVOLUÇÃO DO PRONTUÁRIO */}
+      <AppModal
+        isOpen={isProntuarioModalOpen}
+        onClose={() => setIsProntuarioModalOpen(false)}
+        title={editingProntuario ? 'Editar Evolução Clínica' : 'Nova Evolução Clínica'}
+        subtitle="Registro no prontuário oficial e linha do tempo"
+        maxWidth="540px"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', width: '100%' }}>
+            <button
+              type="button"
+              onClick={() => setIsProntuarioModalOpen(false)}
+              style={{
+                borderRadius: '0.375rem',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                padding: '0.45rem 0.85rem',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: '#64748b',
+                cursor: 'pointer',
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveProntuario}
+              style={{
+                borderRadius: '0.375rem',
+                border: 'none',
+                backgroundColor: 'var(--primary)',
+                padding: '0.45rem 1rem',
+                fontSize: '0.8125rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                cursor: 'pointer',
+              }}
+            >
+              Salvar no Prontuário
+            </button>
+          </div>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+              Título da Evolução <span style={{ color: '#e11d48' }}>*</span>
+            </label>
+            <input
+              type="text"
+              value={prontuarioForm.title}
+              onChange={(e) => setProntuarioForm({ ...prontuarioForm, title: e.target.value })}
+              placeholder="Ex: Consulta de Retorno - Ajuste Calórico"
+              style={{
+                width: '100%',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.8125rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '0.375rem',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                Tipo / Categoria
+              </label>
+              <select
+                value={prontuarioForm.templateType}
+                onChange={(e) => setProntuarioForm({ ...prontuarioForm, templateType: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.8125rem',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.375rem',
+                  backgroundColor: '#ffffff',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <option value="Evolução Clínica">Evolução Clínica</option>
+                <option value="Consulta de Retorno">Consulta de Retorno</option>
+                <option value="Ajuste de Conduta">Ajuste de Conduta</option>
+                <option value="Intercorrência">Intercorrência</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                Data da Evolução
+              </label>
+              <input
+                type="date"
+                value={prontuarioForm.date}
+                onChange={(e) => setProntuarioForm({ ...prontuarioForm, date: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '0.45rem 0.75rem',
+                  fontSize: '0.8125rem',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.375rem',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+              Conduta Clínica e Anotações
+            </label>
+            <textarea
+              rows={4}
+              value={prontuarioForm.notes}
+              onChange={(e) => setProntuarioForm({ ...prontuarioForm, notes: e.target.value })}
+              placeholder="Descreva a avaliação do encontro, respostas aos protocolos e orientações fornecidas..."
+              style={{
+                width: '100%',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.8125rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '0.375rem',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit',
+              }}
+            />
+          </div>
+        </div>
+      </AppModal>
+
+      {/* MODAL: ADICIONAR / EDITAR RESTRIÇÃO ALIMENTAR */}
+      <AppModal
+        isOpen={isRestrictionModalOpen}
+        onClose={() => setIsRestrictionModalOpen(false)}
+        title={editingRestriction ? 'Editar Restrição Alimentar' : 'Adicionar Restrição Alimentar'}
+        subtitle="Mapeamento de alergias, intolerâncias e preferências alimentares"
+        maxWidth="500px"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', width: '100%' }}>
+            <button
+              type="button"
+              onClick={() => setIsRestrictionModalOpen(false)}
+              style={{
+                borderRadius: '0.375rem',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                padding: '0.45rem 0.85rem',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: '#64748b',
+                cursor: 'pointer',
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveRestriction}
+              style={{
+                borderRadius: '0.375rem',
+                border: 'none',
+                backgroundColor: 'var(--primary)',
+                padding: '0.45rem 1rem',
+                fontSize: '0.8125rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                cursor: 'pointer',
+              }}
+            >
+              Salvar restrição
+            </button>
+          </div>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Campo: Alimento ou Substância */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+              Alimento ou substância <span style={{ color: '#e11d48' }}>*</span>
+            </label>
+            <input
+              type="text"
+              value={restrictionForm.foodOrSubstance}
+              onChange={(e) => setRestrictionForm({ ...restrictionForm, foodOrSubstance: e.target.value })}
+              placeholder="Ex: Leite de vaca, Glúten, Camarão, Ovo..."
+              style={{
+                width: '100%',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.8125rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '0.375rem',
+                boxSizing: 'border-box',
+              }}
+            />
+            {/* Texto explicativo obrigatório solicitado pelo usuário */}
+            <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic' }}>
+              Se a restrição depende do preparo, inclua essa informação no nome
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            {/* Campo Selecionável: Motivo */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                Motivo <span style={{ color: '#e11d48' }}>*</span>
+              </label>
+              <select
+                value={restrictionForm.reason}
+                onChange={(e) => setRestrictionForm({ ...restrictionForm, reason: e.target.value as any })}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.8125rem',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.375rem',
+                  backgroundColor: '#ffffff',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <option value="Alergia">Alergia</option>
+                <option value="Intolerância">Intolerância</option>
+                <option value="Não Gosta">Não Gosta</option>
+                <option value="Outra restrição">Outra restrição</option>
+              </select>
+            </div>
+
+            {/* Campo: Situação */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                Situação
+              </label>
+              <select
+                value={restrictionForm.status}
+                onChange={(e) => setRestrictionForm({ ...restrictionForm, status: e.target.value as any })}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.8125rem',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0.375rem',
+                  backgroundColor: '#ffffff',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <option value="Ativa">Ativa</option>
+                <option value="Inativa">Inativa</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Campo: Origem */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+              Origem
+            </label>
+            <select
+              value={restrictionForm.origin}
+              onChange={(e) => setRestrictionForm({ ...restrictionForm, origin: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.8125rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '0.375rem',
+                backgroundColor: '#ffffff',
+                boxSizing: 'border-box',
+              }}
+            >
+              <option value="Relatado pelo paciente">Relatado pelo paciente</option>
+              <option value="Avaliação clínica">Avaliação clínica</option>
+              <option value="Exame laboratorial">Exame laboratorial</option>
+              <option value="Histórico prévio">Histórico prévio</option>
+            </select>
+          </div>
+
+          {/* Campo Opcional: Observação */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+              Observação <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#94a3b8' }}>(opcional)</span>
+            </label>
+            <textarea
+              rows={3}
+              value={restrictionForm.observation}
+              onChange={(e) => setRestrictionForm({ ...restrictionForm, observation: e.target.value })}
+              placeholder="Descreva sintomas, manifestações clínicas ou orientações adicionais..."
+              style={{
+                width: '100%',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.8125rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '0.375rem',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit',
+              }}
+            />
+          </div>
+        </div>
+      </AppModal>
 
       {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
       {confirmDelete && (
