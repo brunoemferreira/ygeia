@@ -71,9 +71,9 @@ export const Header: React.FC<HeaderProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: '#ecfdf5',
-              border: '1px solid #a7f3d0',
-              color: '#059669',
+              background: 'var(--primary-light)',
+              border: '1px solid var(--primary-border)',
+              color: 'var(--primary)',
               borderRadius: '0.5rem',
               padding: '0.45rem',
               cursor: 'pointer',
@@ -113,16 +113,16 @@ export const Header: React.FC<HeaderProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: '0.35rem',
-            backgroundColor: '#ecfdf5',
-            border: '1px solid #a7f3d0',
-            color: '#065f46',
+            backgroundColor: 'var(--primary-light)',
+            border: '1px solid var(--primary-border)',
+            color: 'var(--primary)',
             fontSize: '0.75rem',
             fontWeight: 700,
             padding: '0.35rem 0.875rem',
             borderRadius: '9999px',
           }}
         >
-          <ShieldCheck size={13} color="#059669" />
+          <ShieldCheck size={13} color="var(--primary)" />
           <span>
             {mode === 'professional' ? 'Acesso Administrativo Exclusivo' : 'Portal do Paciente'}
           </span>

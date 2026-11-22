@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
 import {
   User,
-  Activity,
-  ShieldCheck,
-  Building2,
+  Stethoscope,
+  ShieldPlus,
+  Building,
   Camera,
   MapPin,
   FileText,
   Receipt,
-  Bell,
+  ChevronLeft,
   Check,
-  Upload,
-  MessageCircle,
+  AlertCircle,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { getStoredBranding } from '../../utils/branding';
 import { PatientRecord } from './PatientDirectory';
 
 export interface NewPatientViewProps {
@@ -26,15 +23,92 @@ export interface NewPatientViewProps {
   onPatientUpdated?: (patient: any) => void;
 }
 
-type StepKey =
-  | 'dados_pessoais'
-  | 'tratamento'
-  | 'convenio'
-  | 'local'
-  | 'foto'
-  | 'endereco'
-  | 'observacao'
-  | 'atestado';
+type WizardStep =
+  | 'personal'
+  | 'treatment'
+  | 'insurance'
+  | 'location'
+  | 'photo'
+  | 'address'
+  | 'notes'
+  | 'receipt';
+
+interface StepMenuItem {
+  id: WizardStep;
+  label: string;
+  icon: React.ComponentType<{ size?: number; color?: string; style?: React.CSSProperties }>;
+}
+
+const STEPS: StepMenuItem[] = [
+  { id: 'personal', label: 'Dados pessoais', icon: User },
+  { id: 'treatment', label: 'Tratamento e protocolos', icon: Stethoscope },
+  { id: 'insurance', label: 'Convênio', icon: ShieldPlus },
+  { id: 'location', label: 'Local de atendimento', icon: Building },
+  { id: 'photo', label: 'Foto do paciente', icon: Camera },
+  { id: 'address', label: 'Endereço completo', icon: MapPin },
+  { id: 'notes', label: 'Observação importante', icon: FileText },
+  { id: 'receipt', label: 'Atestado e recibo', icon: Receipt },
+];
+
+const AVAILABLE_PROTOCOLS = [
+  'Emagrecimento Saudável',
+  'Hipertrofia Muscular',
+  'Reeducação Alimentar',
+  'Nutrição Esportiva',
+  'Saúde Intestinal (Microbiota)',
+  'Longevidade & Anti-inflamatório',
+  'Controle de Diabetes / Resistência Insulínica',
+  'Saúde da Mulher & Gestante',
+  'Controle de Colesterol / Dislipidemia',
+  'Vegetarianismo / Veganismo',
+];
+
+const INSURANCE_OPTIONS = [
+  'Sem convênio',
+  'Unimed',
+  'Bradesco Saúde',
+  'Amil',
+  'SulAmérica Saúde',
+  'Porto Seguro Saúde',
+  'NotreDame Intermédica',
+  'Allianz Saúde',
+  'Outro convênio',
+];
+
+const LOCATION_OPTIONS = [
+  'Consultório Principal (Matriz)',
+  'Atendimento Online / Telemedicina',
+  'Clínica Integrada Parceira',
+  'Atendimento Domiciliar',
+];
+
+function formatCpf(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+}
+
+function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+}
+
+function formatDate(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+}
+
+function formatCep(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
 
 export const NewPatientView: React.FC<NewPatientViewProps> = ({
   initialPatient,
@@ -43,165 +117,181 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
   onPatientCreated,
   onPatientUpdated,
 }) => {
-  const { token } = useAuth();
   const { toast } = useToast();
-  const branding = getStoredBranding();
-  const primaryColor = branding.primaryColor || '#059669';
+  const [currentStep, setCurrentStep] = useState<WizardStep>('personal');
+  const isEditing = mode === 'edit' || Boolean(initialPatient);
 
-  const isEdit = mode === 'edit' || !!initialPatient;
-
-  // Active step
-  const [activeStep, setActiveStep] = useState<StepKey>('dados_pessoais');
-
-  // Form State - Dados Pessoais (Preenchidos se for edição)
+  // Step 1: Personal
   const [fullName, setFullName] = useState(initialPatient?.name || '');
-  const [birthDate, setBirthDate] = useState(initialPatient?.birthDate || '');
-  const [sex, setSex] = useState<'Feminino' | 'Masculino' | ''>(
-    initialPatient?.sex === 'Masculino' ? 'Masculino' : initialPatient?.sex === 'Feminino' ? 'Feminino' : 'Feminino'
-  );
-  const [assignedSexAtBirth, setAssignedSexAtBirth] = useState<string>(
-    initialPatient?.assignedSexAtBirth || (initialPatient?.sex === 'Masculino' ? 'Masculino' : 'Feminino')
-  );
-  const [genderIdentity, setGenderIdentity] = useState<string>(
-    initialPatient?.genderIdentity || ''
-  );
+  const [birthDate, setBirthDate] = useState(initialPatient?.birthDate ? formatDate(initialPatient.birthDate) : '');
+  const [gender, setGender] = useState(initialPatient?.gender || initialPatient?.sex || '');
   const [email, setEmail] = useState(initialPatient?.email || '');
-  const [phone, setPhone] = useState(initialPatient?.phone || '');
-  const [cpf, setCpf] = useState(initialPatient?.cpf || '');
+  const [phone, setPhone] = useState(initialPatient?.phone ? formatPhone(initialPatient.phone) : '');
+  const [cpf, setCpf] = useState(initialPatient?.cpf ? formatCpf(initialPatient.cpf) : '');
   const [guardianName, setGuardianName] = useState(initialPatient?.guardianName || '');
-  const [guardianCpf, setGuardianCpf] = useState(initialPatient?.guardianCpf || '');
-  const [welcomeEmail, setWelcomeEmail] = useState(initialPatient?.welcomeEmail ?? true);
-  const [welcomeWhatsapp, setWelcomeWhatsapp] = useState(initialPatient?.welcomeWhatsapp ?? false);
+  const [guardianCpf, setGuardianCpf] = useState(
+    initialPatient?.guardianCpf ? formatCpf(initialPatient.guardianCpf) : ''
+  );
+  const [sendWelcomeEmail, setSendWelcomeEmail] = useState(
+    initialPatient?.sendWelcomeEmail !== undefined ? initialPatient.sendWelcomeEmail : true
+  );
+  const [sendWelcomeWhatsapp, setSendWelcomeWhatsapp] = useState(
+    initialPatient?.sendWelcomeWhatsapp !== undefined ? initialPatient.sendWelcomeWhatsapp : true
+  );
 
-  // Form State - Etapas Adicionais
-  const [treatmentGoals, setTreatmentGoals] = useState(initialPatient?.goal || '');
-  const [insurancePlan, setInsurancePlan] = useState(initialPatient?.insurancePlan || 'Particular');
-  const [locationName, setLocationName] = useState(initialPatient?.locationName || 'Meu consultório');
-  const [photoUrl, setPhotoUrl] = useState('');
-  const [fullAddress, setFullAddress] = useState('');
-  const [notes, setNotes] = useState('');
-  const [receiptCpfCnpj, setReceiptCpfCnpj] = useState('');
+  // Step 2: Protocols
+  const [selectedProtocols, setSelectedProtocols] = useState<string[]>(
+    initialPatient?.treatmentProtocols || ['Emagrecimento Saudável']
+  );
+  const [protocolNotes, setProtocolNotes] = useState(initialPatient?.protocolNotes || initialPatient?.goal || '');
 
-  const [loading, setLoading] = useState(false);
+  // Step 3: Insurance
+  const [insuranceName, setInsuranceName] = useState(
+    initialPatient?.insurancePlan || 'Sem convênio'
+  );
+  const [insuranceCardNumber, setInsuranceCardNumber] = useState(
+    initialPatient?.insuranceCardNumber || ''
+  );
+  const [insuranceRepassAmount, setInsuranceRepassAmount] = useState(
+    initialPatient?.insuranceRepassAmount || ''
+  );
 
-  // Formatadores de máscara simples
-  const formatBirthDate = (val: string) => {
-    const digits = val.replace(/\D/g, '').slice(0, 8);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+  // Step 4: Location
+  const [attendanceLocation, setAttendanceLocation] = useState(
+    initialPatient?.attendanceLocation || 'Consultório Principal (Matriz)'
+  );
+
+  // Step 5: Photo
+  const [photoUrl, setPhotoUrl] = useState(initialPatient?.photoUrl || '');
+
+  // Step 6: Address
+  const [cep, setCep] = useState(
+    initialPatient?.address?.cep ? formatCep(initialPatient.address.cep) : ''
+  );
+  const [street, setStreet] = useState(initialPatient?.address?.street || '');
+  const [number, setNumber] = useState(initialPatient?.address?.number || '');
+  const [complement, setComplement] = useState(initialPatient?.address?.complement || '');
+  const [neighborhood, setNeighborhood] = useState(initialPatient?.address?.neighborhood || '');
+  const [city, setCity] = useState(initialPatient?.address?.city || '');
+  const [state, setState] = useState(initialPatient?.address?.state || '');
+  const [isLoadingCep, setIsLoadingCep] = useState(false);
+
+  // Step 7: Notes
+  const [notes, setNotes] = useState(initialPatient?.notes || '');
+
+  // Step 8: Receipt
+  const [emitInGuardianName, setEmitInGuardianName] = useState(false);
+  const [customReceiptPayerCpf, setCustomReceiptPayerCpf] = useState('');
+  const [receiptNotes, setReceiptNotes] = useState('');
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ViaCEP integration
+  const handleCepBlur = async () => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length === 8) {
+      setIsLoadingCep(true);
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        const data = await response.json();
+        if (!data.erro) {
+          setStreet(data.logradouro || '');
+          setNeighborhood(data.bairro || '');
+          setCity(data.localidade || '');
+          setState(data.uf || '');
+          toast.success('Endereço localizado com sucesso via CEP!');
+        } else {
+          toast.error('CEP não encontrado na base pública.');
+        }
+      } catch {
+        toast.error('Falha ao consultar o CEP.');
+      } finally {
+        setIsLoadingCep(false);
+      }
+    }
   };
 
-  const formatCpf = (val: string) => {
-    const digits = val.replace(/\D/g, '').slice(0, 11);
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
-    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
-    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+  const toggleProtocol = (proto: string) => {
+    setSelectedProtocols((prev) =>
+      prev.includes(proto) ? prev.filter((p) => p !== proto) : [...prev, proto]
+    );
   };
 
-  const formatPhone = (val: string) => {
-    const digits = val.replace(/\D/g, '').slice(0, 11);
-    if (digits.length <= 2) return digits ? `(${digits}` : '';
-    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+  const handleNextStep = () => {
+    const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
+    if (currentIndex < STEPS.length - 1) {
+      setCurrentStep(STEPS[currentIndex + 1]!.id);
+    }
   };
 
-  const steps: { key: StepKey; label: string; icon: any }[] = [
-    { key: 'dados_pessoais', label: 'Dados pessoais', icon: User },
-    { key: 'tratamento', label: 'Tratamento e protocolos', icon: Activity },
-    { key: 'convenio', label: 'Convênio', icon: ShieldCheck },
-    { key: 'local', label: 'Local de atendimento', icon: Building2 },
-    { key: 'foto', label: 'Foto do paciente', icon: Camera },
-    { key: 'endereco', label: 'Endereço completo', icon: MapPin },
-    { key: 'observacao', label: 'Observação importante', icon: FileText },
-    { key: 'atestado', label: 'Atestado e recibo', icon: Receipt },
-  ];
+  const handlePrevStep = () => {
+    const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
+    if (currentIndex > 0) {
+      setCurrentStep(STEPS[currentIndex - 1]!.id);
+    }
+  };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
     if (!fullName.trim()) {
-      toast.error('Informe o nome completo do paciente.');
-      setActiveStep('dados_pessoais');
+      toast.error('O nome completo do paciente é obrigatório.');
+      setCurrentStep('personal');
       return;
     }
 
     if (!birthDate.trim()) {
-      toast.error('Informe a data de nascimento.');
-      setActiveStep('dados_pessoais');
+      toast.error('A data de nascimento é obrigatória.');
+      setCurrentStep('personal');
       return;
     }
 
-    if (!sex) {
-      toast.error('Selecione o sexo de referência para cálculos.');
-      setActiveStep('dados_pessoais');
-      return;
-    }
-
-    setLoading(true);
-
+    setIsSubmitting(true);
     try {
-      const apiBase = ((import.meta as any).env?.VITE_API_URL || 'http://localhost:4333') + '/api/v1';
-      const endpoint = isEdit && initialPatient?.id
-        ? `${apiBase}/patients/${initialPatient.id}`
-        : `${apiBase}/patients`;
-      const method = isEdit && initialPatient?.id ? 'PUT' : 'POST';
-
       const payload = {
+        id: initialPatient?.id || String(Date.now()),
         fullName: fullName.trim(),
-        birthDate: birthDate.includes('/')
-          ? birthDate.split('/').reverse().join('-')
-          : birthDate,
-        biologicalSex: sex === 'Feminino' ? 'FEMALE' : 'MALE',
-        assignedSexAtBirth: assignedSexAtBirth || (sex === 'Feminino' ? 'FEMALE' : 'MALE'),
-        genderIdentity: genderIdentity || undefined,
+        birthDate,
+        gender: gender || 'Não informado',
         email: email.trim() || undefined,
-        phone: phone.trim() || undefined,
-        cpf: cpf.trim() || undefined,
+        phone: phone || undefined,
+        cpf: cpf || undefined,
         guardianName: guardianName.trim() || undefined,
-        guardianCpf: guardianCpf.trim() || undefined,
-        welcomeEmail,
-        welcomeWhatsapp,
-        treatmentGoals: treatmentGoals.trim() || undefined,
-        insurancePlan: insurancePlan.trim() || undefined,
-        locationName: locationName.trim() || undefined,
-        fullAddress: fullAddress.trim() || undefined,
-        notes: notes.trim() || undefined,
+        guardianCpf: guardianCpf || undefined,
+        sendWelcomeEmail,
+        sendWelcomeWhatsapp,
+        treatmentProtocols: selectedProtocols,
+        protocolNotes: protocolNotes.trim() || undefined,
+        insurancePlan: insuranceName,
+        insuranceCardNumber: insuranceCardNumber.trim() || undefined,
+        insuranceRepassAmount: insuranceRepassAmount || undefined,
+        attendanceLocation: attendanceLocation || 'Consultório Principal (Matriz)',
         photoUrl: photoUrl.trim() || undefined,
+        address: {
+          cep: cep.trim() || undefined,
+          street: street.trim() || undefined,
+          number: number.trim() || undefined,
+          complement: complement.trim() || undefined,
+          neighborhood: neighborhood.trim() || undefined,
+          city: city.trim() || undefined,
+          state: state.trim() || undefined,
+        },
+        notes: notes.trim() || undefined,
       };
 
-      const res = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || (isEdit ? 'Erro ao atualizar paciente.' : 'Erro ao cadastrar paciente.'));
-      }
-
-      const result = await res.json();
-      if (isEdit) {
-        toast.success(`Paciente ${fullName} atualizado com sucesso!`);
-        if (onPatientUpdated) {
-          onPatientUpdated(result);
-        }
-      } else {
+      if (isEditing && onPatientUpdated) {
+        onPatientUpdated(payload);
+        toast.success(`Dados de ${fullName} atualizados com sucesso!`);
+      } else if (onPatientCreated) {
+        onPatientCreated(payload);
         toast.success(`Paciente ${fullName} cadastrado com sucesso!`);
-        if (onPatientCreated) {
-          onPatientCreated(result);
-        }
       }
+
       onBackToGrid();
-    } catch (err: any) {
-      toast.error(err.message || 'Falha ao salvar paciente.');
+    } catch {
+      toast.error('Falha ao salvar dados do paciente.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -209,388 +299,340 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
     <div
       style={{
         display: 'flex',
+        width: '100%',
         flexDirection: 'column',
-        gap: '1.25rem',
-        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        gap: '1.5rem',
+        fontFamily: 'var(--font-sans)',
       }}
     >
-      {/* Top Header da Tela (Conforme Mockup media_1795311187219_22060d3a.jpg) */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      {/* 1. Top Header Idêntico ao Better Health */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem',
+        }}
+      >
         <div>
-          {/* Badge cinza/azul PACIENTES */}
-          <div
+          <span
             style={{
-              display: 'inline-block',
-              fontSize: '0.6875rem',
-              fontWeight: 800,
-              letterSpacing: '0.06em',
-              color: '#475569',
-              backgroundColor: '#e2e8f0',
-              padding: '0.2rem 0.6rem',
+              display: 'inline-flex',
+              alignItems: 'center',
               borderRadius: '9999px',
-              marginBottom: '0.5rem',
+              backgroundColor: '#e2e8f0',
+              padding: '0.25rem 0.75rem',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.05em',
+              color: '#334155',
               textTransform: 'uppercase',
             }}
           >
             PACIENTES
-          </div>
-
-          <h2
+          </span>
+          <h1
             style={{
+              marginTop: '0.5rem',
               fontSize: '1.75rem',
               fontWeight: 800,
+              letterSpacing: '-0.025em',
               color: '#0f172a',
-              letterSpacing: '-0.02em',
-              margin: '0 0 0.25rem 0',
+              lineHeight: 1.2,
             }}
           >
-            {isEdit ? 'Editar paciente' : 'Novo paciente'}
-          </h2>
-          <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0, fontWeight: 400 }}>
-            {isEdit
-              ? `Atualize as etapas e dados cadastrais de ${fullName || initialPatient?.name || 'paciente'}`
-              : 'Preencha as etapas para cadastrar um novo paciente'}
+            {isEditing ? 'Editar paciente' : 'Novo paciente'}
+          </h1>
+          <p style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#64748b' }}>
+            Preencha as etapas para cadastrar um novo paciente
           </p>
         </div>
 
-        {/* Botão Fechar no canto superior direito */}
         <button
           type="button"
           onClick={onBackToGrid}
           style={{
-            background: 'none',
-            border: 'none',
-            color: '#64748b',
-            fontSize: '0.8125rem',
+            borderRadius: '0.5rem',
+            padding: '0.4rem 0.85rem',
+            fontSize: '0.875rem',
             fontWeight: 600,
+            color: '#475569',
+            backgroundColor: '#f1f5f9',
+            border: '1px solid #e2e8f0',
             cursor: 'pointer',
-            padding: '0.35rem 0.65rem',
-            borderRadius: '0.375rem',
-            transition: 'color 0.15s ease',
+            transition: 'all 0.15s ease',
           }}
-          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = '#0f172a')}
-          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#64748b')}
+          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#e2e8f0')}
+          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
         >
           Fechar
         </button>
       </div>
 
-      {/* Grid de 2 Colunas: Stepper à Esquerda + Form à Direita */}
+      {/* 2. Grid de 2 Colunas: Stepper à Esquerda (3 col) + Form à Direita (9 col) */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '270px 1fr',
+          gridTemplateColumns: 'repeat(12, 1fr)',
           gap: '1.5rem',
-          alignItems: 'start',
         }}
       >
-        {/* ====================================================
-            COLUNA ESQUERDA: CARD COM STEPPER
-           ==================================================== */}
-        <aside
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '1rem',
-            border: '1px solid #e2e8f0',
-            padding: '1.25rem 0.875rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-          }}
-        >
+        {/* COLUNA ESQUERDA: STEPPER */}
+        <aside style={{ gridColumn: 'span 3' }}>
           <div
             style={{
-              fontSize: '0.8125rem',
-              fontWeight: 800,
-              color: '#0f172a',
-              padding: '0 0.5rem 0.75rem 0.5rem',
-              marginBottom: '0.5rem',
+              borderRadius: '1rem',
+              border: '1px solid #e2e8f0',
+              backgroundColor: '#ffffff',
+              padding: '1rem',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
             }}
           >
-            {isEdit ? 'Editar paciente' : 'Novo paciente'}
+            <h2
+              style={{
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                color: '#1e293b',
+                padding: '0 0.75rem',
+                marginBottom: '0.75rem',
+              }}
+            >
+              Novo paciente
+            </h2>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              {STEPS.map((step) => {
+                const Icon = step.icon;
+                const isActive = currentStep === step.id;
+                return (
+                  <button
+                    key={step.id}
+                    type="button"
+                    onClick={() => setCurrentStep(step.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      width: '100%',
+                      padding: '0.625rem 0.75rem',
+                      borderRadius: '0.5rem',
+                      border: 'none',
+                      borderLeft: isActive ? '4px solid var(--primary)' : '4px solid transparent',
+                      backgroundColor: isActive ? 'var(--primary-light)' : 'transparent',
+                      color: isActive ? 'var(--primary)' : '#475569',
+                      fontWeight: isActive ? 700 : 500,
+                      fontSize: '0.875rem',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onMouseOver={(e) => {
+                      if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseOut={(e) => {
+                      if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <Icon size={16} />
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {step.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
-
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            {steps.map((s) => {
-              const IconComponent = s.icon;
-              const isActive = activeStep === s.key;
-              return (
-                <button
-                  key={s.key}
-                  type="button"
-                  onClick={() => setActiveStep(s.key)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.625rem',
-                    width: '100%',
-                    padding: '0.65rem 0.75rem',
-                    borderRadius: '0.5rem',
-                    border: 'none',
-                    backgroundColor: isActive ? '#ecfdf5' : 'transparent',
-                    color: isActive ? '#059669' : '#64748b',
-                    fontWeight: isActive ? 700 : 500,
-                    fontSize: '0.8125rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s ease',
-                    borderLeft: isActive ? `3px solid #10b981` : '3px solid transparent',
-                  }}
-                  onMouseOver={(e) => {
-                    if (!isActive) {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                      (e.currentTarget as HTMLElement).style.color = '#0f172a';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (!isActive) {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                      (e.currentTarget as HTMLElement).style.color = '#64748b';
-                    }
-                  }}
-                >
-                  <IconComponent size={16} color={isActive ? '#059669' : '#94a3b8'} />
-                  <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {s.label}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
         </aside>
 
-        {/* ====================================================
-            COLUNA DIREITA: FORMULÁRIO DO STEP ATIVO
-           ==================================================== */}
-        <main
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '1rem',
-            border: '1px solid #e2e8f0',
-            padding: '2.25rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {/* ETAPA 1: DADOS PESSOAIS (100% FIEL AO MOCKUP media_1795311187219_22060d3a.jpg) */}
-            {activeStep === 'dados_pessoais' && (
-              <>
-                <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
+        {/* COLUNA DIREITA: CONTEÚDO DA ETAPA ATIVA */}
+        <main style={{ gridColumn: 'span 9' }}>
+          <div
+            style={{
+              borderRadius: '1rem',
+              border: '1px solid #e2e8f0',
+              backgroundColor: '#ffffff',
+              padding: '1.75rem 2rem',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+            }}
+          >
+            {/* ETAPA 1: DADOS PESSOAIS */}
+            {currentStep === 'personal' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
                   Dados pessoais
-                </div>
+                </h3>
 
-                {/* Nome completo * */}
+                {/* Nome Completo */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Nome completo <span style={{ color: '#ef4444' }}>*</span>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    Nome completo <span style={{ color: 'var(--primary)' }}>*</span>
                   </label>
                   <input
                     type="text"
-                    required
-                    placeholder="Ex: Maria Silva"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Ex: Maria Silva"
+                    required
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.875rem',
+                      padding: '0.625rem 0.875rem',
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                    onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'var(--primary)';
+                      e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#cbd5e1';
+                      e.target.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
 
-                {/* Data de nascimento * & Sexo de referência para cálculos * */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {/* Data de Nascimento e Sexo */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                      Data de nascimento <span style={{ color: '#ef4444' }}>*</span>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                      Data de nascimento <span style={{ color: 'var(--primary)' }}>*</span>
                     </label>
                     <input
                       type="text"
-                      required
-                      placeholder="DD/MM/AAAA"
                       value={birthDate}
-                      onChange={(e) => setBirthDate(formatBirthDate(e.target.value))}
+                      onChange={(e) => setBirthDate(formatDate(e.target.value))}
+                      placeholder="DD/MM/AAAA"
+                      maxLength={10}
+                      required
                       style={{
                         width: '100%',
-                        padding: '0.65rem 0.875rem',
+                        padding: '0.625rem 0.875rem',
                         borderRadius: '0.5rem',
                         border: '1px solid #cbd5e1',
                         fontSize: '0.875rem',
-                        color: '#0f172a',
                         outline: 'none',
                         boxSizing: 'border-box',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = 'none';
+                      }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                      Sexo de referência para cálculos <span style={{ color: '#ef4444' }}>*</span>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                      Sexo <span style={{ color: 'var(--primary)' }}>*</span>
                     </label>
                     <select
-                      required
-                      value={sex}
-                      onChange={(e) => setSex(e.target.value as any)}
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
                       style={{
                         width: '100%',
-                        padding: '0.65rem 0.875rem',
+                        padding: '0.625rem 0.875rem',
                         borderRadius: '0.5rem',
                         border: '1px solid #cbd5e1',
                         fontSize: '0.875rem',
-                        color: sex ? '#0f172a' : '#64748b',
                         backgroundColor: '#ffffff',
                         outline: 'none',
                         boxSizing: 'border-box',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = 'none';
+                      }}
                     >
                       <option value="">Selecione</option>
                       <option value="Feminino">Feminino</option>
                       <option value="Masculino">Masculino</option>
-                    </select>
-                    <div style={{ fontSize: '0.6875rem', color: '#64748b', marginTop: '0.3rem' }}>
-                      Usado nos cálculos e nas faixas de referência. Revise conforme a avaliação clínica.
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sexo atribuído ao nascimento & Identidade de gênero (opcional) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                      Sexo atribuído ao nascimento
-                    </label>
-                    <select
-                      value={assignedSexAtBirth}
-                      onChange={(e) => setAssignedSexAtBirth(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.65rem 0.875rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.875rem',
-                        color: assignedSexAtBirth ? '#0f172a' : '#64748b',
-                        backgroundColor: '#ffffff',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                      }}
-                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
-                    >
-                      <option value="">Selecione...</option>
-                      <option value="Feminino">Feminino</option>
-                      <option value="Masculino">Masculino</option>
-                      <option value="Não informado">Não informado</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                      Identidade de gênero (opcional)
-                    </label>
-                    <select
-                      value={genderIdentity}
-                      onChange={(e) => setGenderIdentity(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.65rem 0.875rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.875rem',
-                        color: genderIdentity ? '#0f172a' : '#64748b',
-                        backgroundColor: '#ffffff',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                      }}
-                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
-                    >
-                      <option value="">Selecione...</option>
-                      <option value="Mulher cisgênero">Mulher cisgênero</option>
-                      <option value="Homem cisgênero">Homem cisgênero</option>
-                      <option value="Mulher transgênero">Mulher transgênero</option>
-                      <option value="Homem transgênero">Homem transgênero</option>
-                      <option value="Não-binário">Não-binário</option>
                       <option value="Outro">Outro</option>
-                      <option value="Prefiro não informar">Prefiro não informar</option>
                     </select>
                   </div>
                 </div>
 
-                {/* E-mail & Telefone */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {/* E-mail e Telefone */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       E-mail
                     </label>
                     <input
                       type="email"
-                      placeholder="email@exemplo.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      placeholder="email@exemplo.com"
                       style={{
                         width: '100%',
-                        padding: '0.65rem 0.875rem',
+                        padding: '0.625rem 0.875rem',
                         borderRadius: '0.5rem',
                         border: '1px solid #cbd5e1',
                         fontSize: '0.875rem',
-                        color: '#0f172a',
                         outline: 'none',
                         boxSizing: 'border-box',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = 'none';
+                      }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       Telefone
                     </label>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        overflow: 'hidden',
+                      }}
+                    >
                       <div
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.35rem',
+                          gap: '0.375rem',
                           backgroundColor: '#f8fafc',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '0.5rem',
-                          padding: '0 0.65rem',
-                          fontSize: '0.8125rem',
-                          color: '#334155',
-                          flexShrink: 0,
+                          borderRight: '1px solid #cbd5e1',
+                          padding: '0 0.75rem',
+                          fontSize: '0.875rem',
+                          color: '#475569',
+                          fontWeight: 600,
                         }}
                       >
-                        <span>🇧🇷 +55</span>
+                        <span>🇧🇷</span>
+                        <span>+55</span>
                       </div>
                       <input
                         type="text"
-                        placeholder="(00) 00000-0000"
                         value={phone}
                         onChange={(e) => setPhone(formatPhone(e.target.value))}
+                        placeholder="(00) 00000-0000"
+                        maxLength={15}
                         style={{
-                          width: '100%',
-                          padding: '0.65rem 0.875rem',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #cbd5e1',
+                          flex: 1,
+                          border: 'none',
+                          padding: '0.625rem 0.875rem',
                           fontSize: '0.875rem',
-                          color: '#0f172a',
                           outline: 'none',
-                          boxSizing: 'border-box',
                         }}
-                        onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                        onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
                       />
                     </div>
                   </div>
@@ -598,569 +640,1327 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
 
                 {/* CPF */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                     CPF
                   </label>
                   <input
                     type="text"
-                    placeholder="000.000.000-00"
                     value={cpf}
                     onChange={(e) => setCpf(formatCpf(e.target.value))}
+                    placeholder="000.000.000-00"
+                    maxLength={14}
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.875rem',
+                      padding: '0.625rem 0.875rem',
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                    onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'var(--primary)';
+                      e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#cbd5e1';
+                      e.target.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
 
-                {/* Responsável (Para menores de idade) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {/* Responsável (Para menores) */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       Nome do responsável
                     </label>
                     <input
                       type="text"
-                      placeholder="Nome completo do responsável"
                       value={guardianName}
                       onChange={(e) => setGuardianName(e.target.value)}
+                      placeholder="Nome completo do responsável"
                       style={{
                         width: '100%',
-                        padding: '0.65rem 0.875rem',
+                        padding: '0.625rem 0.875rem',
                         borderRadius: '0.5rem',
                         border: '1px solid #cbd5e1',
                         fontSize: '0.875rem',
-                        color: '#0f172a',
                         outline: 'none',
                         boxSizing: 'border-box',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = 'none';
+                      }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       CPF do responsável
                     </label>
                     <input
                       type="text"
-                      placeholder="000.000.000-00"
                       value={guardianCpf}
                       onChange={(e) => setGuardianCpf(formatCpf(e.target.value))}
+                      placeholder="000.000.000-00"
+                      maxLength={14}
                       style={{
                         width: '100%',
-                        padding: '0.65rem 0.875rem',
+                        padding: '0.625rem 0.875rem',
                         borderRadius: '0.5rem',
                         border: '1px solid #cbd5e1',
                         fontSize: '0.875rem',
-                        color: '#0f172a',
                         outline: 'none',
                         boxSizing: 'border-box',
                       }}
-                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = 'none';
+                      }}
                     />
                   </div>
                 </div>
-                <div style={{ fontSize: '0.71875rem', color: '#64748b', marginTop: '-0.5rem', marginBottom: '0.25rem' }}>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '-0.5rem 0 0 0' }}>
                   Para menores de idade — o recibo será emitido em nome do responsável.
-                </div>
+                </p>
 
-                {/* Seção: Mensagem de boas-vindas */}
-                <div style={{ marginTop: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.2rem' }}>
-                    <Bell size={15} color="#eab308" />
-                    <span>Mensagem de boas-vindas</span>
+                {/* Mensagem de boas-vindas */}
+                <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>🔔</span>
+                    <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                      Mensagem de boas-vindas
+                    </h4>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem' }}>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
                     Escolha como deseja notificar o paciente após o cadastro
-                  </div>
+                  </p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    {/* Card 1: Enviar e-mail de boas-vindas */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginTop: '0.75rem' }}>
+                    {/* E-mail Card */}
                     <div
                       style={{
-                        padding: '0.875rem 1rem',
-                        borderRadius: '0.75rem',
-                        border: '1px solid #e2e8f0',
-                        backgroundColor: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        gap: '0.75rem',
+                        borderRadius: '0.75rem',
+                        border: '1px solid #e2e8f0',
+                        padding: '0.875rem',
                       }}
                     >
-                      <div>
-                        <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a' }}>
+                      <div style={{ paddingRight: '0.75rem' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
                           Enviar e-mail de boas-vindas
-                        </div>
-                        <div style={{ fontSize: '0.71875rem', color: '#64748b' }}>
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
                           Cadastre o e-mail acima para o envio acontecer
-                        </div>
+                        </p>
                       </div>
-
-                      {/* Switch Toggle */}
-                      <div
-                        onClick={() => setWelcomeEmail(!welcomeEmail)}
+                      <button
+                        type="button"
+                        onClick={() => setSendWelcomeEmail(!sendWelcomeEmail)}
                         style={{
-                          width: '42px',
+                          width: '44px',
                           height: '24px',
-                          backgroundColor: welcomeEmail ? '#10b981' : '#e2e8f0',
                           borderRadius: '9999px',
+                          border: 'none',
+                          backgroundColor: sendWelcomeEmail ? 'var(--primary)' : '#cbd5e1',
                           position: 'relative',
                           cursor: 'pointer',
                           transition: 'background-color 0.2s ease',
                           flexShrink: 0,
                         }}
                       >
-                        <div
+                        <span
                           style={{
-                            width: '18px',
-                            height: '18px',
-                            backgroundColor: '#ffffff',
-                            borderRadius: '50%',
                             position: 'absolute',
-                            top: '3px',
-                            left: welcomeEmail ? '21px' : '3px',
+                            top: '2px',
+                            left: sendWelcomeEmail ? '22px' : '2px',
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            backgroundColor: '#ffffff',
                             transition: 'left 0.2s ease',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
                           }}
                         />
-                      </div>
+                      </button>
                     </div>
 
-                    {/* Card 2: Enviar WhatsApp de boas-vindas */}
+                    {/* WhatsApp Card */}
                     <div
                       style={{
-                        padding: '0.875rem 1rem',
-                        borderRadius: '0.75rem',
-                        border: '1px solid #e2e8f0',
-                        backgroundColor: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        gap: '0.75rem',
+                        borderRadius: '0.75rem',
+                        border: '1px solid #e2e8f0',
+                        padding: '0.875rem',
                       }}
                     >
-                      <div>
-                        <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a' }}>
+                      <div style={{ paddingRight: '0.75rem' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
                           Enviar WhatsApp de boas-vindas
-                        </div>
-                        <div style={{ fontSize: '0.71875rem', color: '#64748b' }}>
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
                           Cadastre o telefone acima para o envio acontecer
-                        </div>
+                        </p>
                       </div>
-
-                      {/* Switch Toggle */}
-                      <div
-                        onClick={() => setWelcomeWhatsapp(!welcomeWhatsapp)}
+                      <button
+                        type="button"
+                        onClick={() => setSendWelcomeWhatsapp(!sendWelcomeWhatsapp)}
                         style={{
-                          width: '42px',
+                          width: '44px',
                           height: '24px',
-                          backgroundColor: welcomeWhatsapp ? '#10b981' : '#e2e8f0',
                           borderRadius: '9999px',
+                          border: 'none',
+                          backgroundColor: sendWelcomeWhatsapp ? 'var(--primary)' : '#cbd5e1',
                           position: 'relative',
                           cursor: 'pointer',
                           transition: 'background-color 0.2s ease',
                           flexShrink: 0,
                         }}
                       >
-                        <div
+                        <span
                           style={{
-                            width: '18px',
-                            height: '18px',
-                            backgroundColor: '#ffffff',
-                            borderRadius: '50%',
                             position: 'absolute',
-                            top: '3px',
-                            left: welcomeWhatsapp ? '21px' : '3px',
+                            top: '2px',
+                            left: sendWelcomeWhatsapp ? '22px' : '2px',
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            backgroundColor: '#ffffff',
                             transition: 'left 0.2s ease',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
                           }}
                         />
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>
-              </>
+
+                {/* Ações da Etapa 1 */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: '0.75rem',
+                    paddingTop: '1rem',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={onBackToGrid}
+                    style={{
+                      borderRadius: '0.5rem',
+                      border: '1px solid #cbd5e1',
+                      backgroundColor: '#ffffff',
+                      padding: '0.625rem 1.25rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    style={{
+                      borderRadius: '0.5rem',
+                      border: '1px solid #cbd5e1',
+                      backgroundColor: '#ffffff',
+                      padding: '0.625rem 1.25rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Continuar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSubmit()}
+                    disabled={isSubmitting}
+                    style={{
+                      borderRadius: '0.5rem',
+                      border: 'none',
+                      backgroundColor: 'var(--primary)',
+                      padding: '0.625rem 1.5rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                      opacity: isSubmitting ? 0.6 : 1,
+                    }}
+                  >
+                    {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Cadastrar'}
+                  </button>
+                </div>
+
+                {/* Footer Help */}
+                <div style={{ paddingTop: '1rem', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>
+                  <p style={{ margin: 0 }}>
+                    Vindo de outro software?{' '}
+                    <span style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+                      Clique aqui para importar
+                    </span>
+                  </p>
+                  <p style={{ margin: '0.25rem 0 0 0' }}>
+                    Se precisar de ajuda,{' '}
+                    <span style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+                      clique aqui 💬
+                    </span>
+                  </p>
+                </div>
+              </div>
             )}
 
             {/* ETAPA 2: TRATAMENTO E PROTOCOLOS */}
-            {activeStep === 'tratamento' && (
-              <div>
-                <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                  Tratamento e protocolos
+            {currentStep === 'treatment' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    Tratamento e protocolos
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    Defina os objetivos clínicos, protocolos ativos e metas terapêuticas do paciente.
+                  </p>
                 </div>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Defina o objetivo metabólico, protocolos de acompanhamento e tags clínicas para este paciente.
-                </p>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Objetivo metabólico principal
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem' }}>
+                    Protocolos e Metas Clínicas
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Emagrecimento & Hipertrofia, Modulação de Lipídios, etc."
-                    value={treatmentGoals}
-                    onChange={(e) => setTreatmentGoals(e.target.value)}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {AVAILABLE_PROTOCOLS.map((proto) => {
+                      const isSelected = selectedProtocols.includes(proto);
+                      return (
+                        <button
+                          key={proto}
+                          type="button"
+                          onClick={() => toggleProtocol(proto)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.375rem',
+                            borderRadius: '9999px',
+                            padding: '0.45rem 0.875rem',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            border: isSelected ? '1px solid var(--primary)' : '1px solid #e2e8f0',
+                            backgroundColor: isSelected ? 'var(--primary-light)' : '#f8fafc',
+                            color: isSelected ? 'var(--primary)' : '#475569',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          {isSelected && <Check size={14} />}
+                          <span>{proto}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    Observações do tratamento
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={protocolNotes}
+                    onChange={(e) => setProtocolNotes(e.target.value)}
+                    placeholder="Ex: Paciente busca recomposição corporal e relata fadiga no final do dia."
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.875rem',
+                      padding: '0.75rem',
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
                   />
+                </div>
+
+                {/* Controles da Etapa 2 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <ChevronLeft size={16} /> Voltar
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={onBackToGrid}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        backgroundColor: 'var(--primary)',
+                        padding: '0.625rem 1.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Continuar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* ETAPA 3: CONVÊNIO */}
-            {activeStep === 'convenio' && (
-              <div>
-                <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                  Convênio e Faturamento
+            {currentStep === 'insurance' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    Convênio
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    Convênio do paciente e quanto ele repassa a você. Com repasse informado, é esse o valor lançado no controle financeiro.
+                  </p>
                 </div>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Informe se o atendimento é particular ou vinculado a uma operadora credenciada.
-                </p>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Plano de Saúde / Convênio
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    Convênio
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Particular, Unimed, Bradesco Saúde, Amil"
-                    value={insurancePlan}
-                    onChange={(e) => setInsurancePlan(e.target.value)}
+                  <select
+                    value={insuranceName}
+                    onChange={(e) => setInsuranceName(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.875rem',
+                      padding: '0.625rem 0.875rem',
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
+                      backgroundColor: '#ffffff',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
-                  />
+                  >
+                    {INSURANCE_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {insuranceName !== 'Sem convênio' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                        Número da carteirinha
+                      </label>
+                      <input
+                        type="text"
+                        value={insuranceCardNumber}
+                        onChange={(e) => setInsuranceCardNumber(e.target.value)}
+                        placeholder="Ex: 0023.8829.1120-00"
+                        style={{
+                          width: '100%',
+                          padding: '0.625rem 0.875rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.875rem',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                        Valor do repasse (R$)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={insuranceRepassAmount}
+                        onChange={(e) => setInsuranceRepassAmount(e.target.value)}
+                        placeholder="Ex: 120,00"
+                        style={{
+                          width: '100%',
+                          padding: '0.625rem 0.875rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.875rem',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Controles da Etapa 3 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <ChevronLeft size={16} /> Voltar
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={onBackToGrid}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        backgroundColor: 'var(--primary)',
+                        padding: '0.625rem 1.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Continuar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* ETAPA 4: LOCAL DE ATENDIMENTO */}
-            {activeStep === 'local' && (
-              <div>
-                <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                  Local de atendimento
-                </div>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Selecione a unidade clínica, consultório parceiro ou modalidade teleconsulta.
-                </p>
-
+            {currentStep === 'location' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Unidade de atendimento
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Consultório Principal, Teleatendimento Ygeía"
-                    value={locationName}
-                    onChange={(e) => setLocationName(e.target.value)}
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    Local de atendimento
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    Selecione o local padrão onde ocorrem os atendimentos deste paciente.
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                  {LOCATION_OPTIONS.map((loc) => {
+                    const isSelected = attendanceLocation === loc;
+                    return (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => setAttendanceLocation(loc)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          borderRadius: '0.75rem',
+                          border: isSelected ? '1.5px solid var(--primary)' : '1px solid #e2e8f0',
+                          backgroundColor: isSelected ? 'var(--primary-light)' : '#ffffff',
+                          padding: '1rem',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <Building size={20} color={isSelected ? 'var(--primary)' : '#94a3b8'} />
+                          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: isSelected ? '#0f172a' : '#475569' }}>
+                            {loc}
+                          </span>
+                        </div>
+                        {isSelected && <Check size={18} color="var(--primary)" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Controles da Etapa 4 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
                     style={{
-                      width: '100%',
-                      padding: '0.65rem 0.875rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      background: 'none',
+                      border: 'none',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
-                      outline: 'none',
-                      boxSizing: 'border-box',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
                     }}
-                  />
+                  >
+                    <ChevronLeft size={16} /> Voltar
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={onBackToGrid}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        backgroundColor: 'var(--primary)',
+                        padding: '0.625rem 1.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Continuar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* ETAPA 5: FOTO DO PACIENTE */}
-            {activeStep === 'foto' && (
-              <div>
-                <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                  Foto do paciente
+            {currentStep === 'photo' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    Foto do paciente
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    Adicione uma foto do paciente para facilitar a identificação visual no sistema.
+                  </p>
                 </div>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Faça upload da imagem do paciente para exibição no prontuário e no aplicativo.
-                </p>
 
                 <div
                   style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '1rem',
                     border: '2px dashed #cbd5e1',
-                    borderRadius: '0.75rem',
-                    padding: '2.5rem',
+                    padding: '2.5rem 1.5rem',
                     textAlign: 'center',
-                    cursor: 'pointer',
-                    backgroundColor: '#f8fafc',
                   }}
-                  onClick={() => toast.info('Selecione uma imagem JPG ou PNG de até 5MB.')}
                 >
-                  <Upload size={32} color="#94a3b8" style={{ margin: '0 auto 0.75rem auto' }} />
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
-                    Arraste ou clique para anexar uma foto
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
-                    PNG, JPG ou WEBP até 5MB
-                  </div>
-                </div>
+                  {photoUrl ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                      <img
+                        src={photoUrl}
+                        alt="Preview"
+                        style={{
+                          width: '110px',
+                          height: '110px',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          boxShadow: '0 0 0 4px var(--primary-border)',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPhotoUrl('')}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          color: '#e11d48',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                        }}
+                      >
+                        Remover foto
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          borderRadius: '50%',
+                          backgroundColor: '#f1f5f9',
+                          padding: '1rem',
+                          color: '#94a3b8',
+                          marginBottom: '0.75rem',
+                        }}
+                      >
+                        <Camera size={32} />
+                      </div>
+                      <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', margin: 0 }}>
+                        Insira a URL de uma foto ou avatar
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
+                        Formatos suportados: PNG, JPG ou WebP
+                      </p>
+                    </>
+                  )}
 
-                <div style={{ marginTop: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Ou insira a URL da foto
-                  </label>
                   <input
                     type="url"
-                    placeholder="https://exemplo.com/foto.jpg"
                     value={photoUrl}
                     onChange={(e) => setPhotoUrl(e.target.value)}
+                    placeholder="https://exemplo.com/foto-paciente.jpg"
                     style={{
+                      marginTop: '1.25rem',
                       width: '100%',
-                      padding: '0.65rem 0.875rem',
+                      maxWidth: '420px',
+                      padding: '0.625rem 0.875rem',
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
                       outline: 'none',
-                      boxSizing: 'border-box',
                     }}
                   />
+                </div>
+
+                {/* Controles da Etapa 5 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <ChevronLeft size={16} /> Voltar
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={onBackToGrid}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        backgroundColor: 'var(--primary)',
+                        padding: '0.625rem 1.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Continuar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* ETAPA 6: ENDEREÇO COMPLETO */}
-            {activeStep === 'endereco' && (
-              <div>
-                <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                  Endereço completo
-                </div>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Cadastre o endereço residencial ou profissional para fins fiscais e de faturamento.
-                </p>
-
+            {currentStep === 'address' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Logradouro, número, bairro e cidade
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    Endereço completo
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    Informe o CEP para preenchimento automático das informações de endereço.
+                  </p>
+                </div>
+
+                {/* CEP com busca automática */}
+                <div style={{ maxWidth: '280px' }}>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    CEP
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Av. Paulista, 1000, Apto 52, Bela Vista, São Paulo - SP"
-                    value={fullAddress}
-                    onChange={(e) => setFullAddress(e.target.value)}
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      value={cep}
+                      onChange={(e) => setCep(formatCep(e.target.value))}
+                      placeholder="00000-000"
+                      maxLength={9}
+                      style={{
+                        width: '100%',
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = 'none';
+                        handleCepBlur();
+                      }}
+                    />
+                    {isLoadingCep && (
+                      <span style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', color: '#94a3b8' }}>
+                        Buscando...
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Logradouro e Número */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                      Logradouro
+                    </label>
+                    <input
+                      type="text"
+                      value={street}
+                      onChange={(e) => setStreet(e.target.value)}
+                      placeholder="Rua, Avenida, Alameda..."
+                      style={{
+                        width: '100%',
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                      Número
+                    </label>
+                    <input
+                      type="text"
+                      value={number}
+                      onChange={(e) => setNumber(e.target.value)}
+                      placeholder="Ex: 123"
+                      style={{
+                        width: '100%',
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Complemento e Bairro */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                      Complemento
+                    </label>
+                    <input
+                      type="text"
+                      value={complement}
+                      onChange={(e) => setComplement(e.target.value)}
+                      placeholder="Apto, Bloco..."
+                      style={{
+                        width: '100%',
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                      Bairro
+                    </label>
+                    <input
+                      type="text"
+                      value={neighborhood}
+                      onChange={(e) => setNeighborhood(e.target.value)}
+                      placeholder="Ex: Centro"
+                      style={{
+                        width: '100%',
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Cidade e UF */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                      Cidade
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Ex: São Paulo"
+                      style={{
+                        width: '100%',
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                      Estado (UF)
+                    </label>
+                    <input
+                      type="text"
+                      value={state}
+                      onChange={(e) => setState(e.target.value.toUpperCase())}
+                      placeholder="SP"
+                      maxLength={2}
+                      style={{
+                        width: '100%',
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Controles da Etapa 6 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
                     style={{
-                      width: '100%',
-                      padding: '0.65rem 0.875rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      background: 'none',
+                      border: 'none',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
-                      outline: 'none',
-                      boxSizing: 'border-box',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
                     }}
-                  />
+                  >
+                    <ChevronLeft size={16} /> Voltar
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={onBackToGrid}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        backgroundColor: 'var(--primary)',
+                        padding: '0.625rem 1.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Continuar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* ETAPA 7: OBSERVAÇÃO IMPORTANTE */}
-            {activeStep === 'observacao' && (
-              <div>
-                <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                  Observação importante
-                </div>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Alergias graves, restrições alimentares severas ou notas confidenciais que devem ficar em destaque.
-                </p>
-
+            {currentStep === 'notes' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Notas clínicas prioritárias
-                  </label>
-                  <textarea
-                    rows={4}
-                    placeholder="Ex: Paciente com diagnóstico de doença celíaca severa e intolerância à lactose."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    Observação importante
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    Anotações clínicas críticas em destaque (alergias severas, intolerâncias, condições crônicas).
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    borderRadius: '0.75rem',
+                    border: '1px solid #fde68a',
+                    backgroundColor: '#fffbeb',
+                    padding: '1rem',
+                    fontSize: '0.75rem',
+                    color: '#92400e',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
+                    <AlertCircle size={16} color="#d97706" />
+                    <span>Aviso de visualização rápida</span>
+                  </div>
+                  <p style={{ marginTop: '0.25rem', color: '#b45309', margin: '0.25rem 0 0 0' }}>
+                    As informações registradas aqui serão exibidas com destaque no topo da ficha do paciente para toda a equipe.
+                  </p>
+                </div>
+
+                <textarea
+                  rows={6}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Ex: Paciente alérgico a frutos do mar e amendoim. Diagnosticado com intolerância severa à lactose."
+                  style={{
+                    width: '100%',
+                    padding: '0.875rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.875rem',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+
+                {/* Controles da Etapa 7 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
                     style={{
-                      width: '100%',
-                      padding: '0.65rem 0.875rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      background: 'none',
+                      border: 'none',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                      fontFamily: 'inherit',
-                      resize: 'vertical',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
                     }}
-                  />
+                  >
+                    <ChevronLeft size={16} /> Voltar
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={onBackToGrid}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        backgroundColor: 'var(--primary)',
+                        padding: '0.625rem 1.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Continuar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* ETAPA 8: ATESTADO E RECIBO */}
-            {activeStep === 'atestado' && (
-              <div>
-                <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                  Atestado e recibo
-                </div>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Configurações de emissão de recibo para declaração do imposto de renda ou reembolso.
-                </p>
-
+            {currentStep === 'receipt' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    CPF/CNPJ para emissão de comprovante fiscal
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    Atestado e recibo
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    Configure os parâmetros para emissão de recibos e declarações de comparecimento.
+                  </p>
+                </div>
+
+                {/* Switch menor de idade */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderRadius: '0.75rem',
+                    border: '1px solid #e2e8f0',
+                    padding: '1rem',
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
+                      Emitir recibos em nome do responsável
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>
+                      Habilite se o paciente for dependente fiscal ou menor de idade.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEmitInGuardianName(!emitInGuardianName)}
+                    style={{
+                      width: '44px',
+                      height: '24px',
+                      borderRadius: '9999px',
+                      border: 'none',
+                      backgroundColor: emitInGuardianName ? 'var(--primary)' : '#cbd5e1',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s ease',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '2px',
+                        left: emitInGuardianName ? '22px' : '2px',
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                        transition: 'left 0.2s ease',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                      }}
+                    />
+                  </button>
+                </div>
+
+                {/* CPF customizado no recibo */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    CPF do pagador / responsável no recibo
                   </label>
                   <input
                     type="text"
+                    value={customReceiptPayerCpf}
+                    onChange={(e) => setCustomReceiptPayerCpf(formatCpf(e.target.value))}
                     placeholder="000.000.000-00"
-                    value={receiptCpfCnpj}
-                    onChange={(e) => setReceiptCpfCnpj(formatCpf(e.target.value))}
+                    maxLength={14}
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.875rem',
+                      maxWidth: '420px',
+                      padding: '0.625rem 0.875rem',
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
-                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
                   />
                 </div>
+
+                {/* Notas adicionais no recibo */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    Notas e instruções adicionais do recibo
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={receiptNotes}
+                    onChange={(e) => setReceiptNotes(e.target.value)}
+                    placeholder="Ex: Consulta nutricional clínica com finalidade de assistência à saúde para fins de dedução no IRPF."
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.875rem',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                {/* Controles Finais */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem' }}>
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <ChevronLeft size={16} /> Voltar
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={onBackToGrid}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit()}
+                      disabled={isSubmitting}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        backgroundColor: 'var(--primary)',
+                        padding: '0.625rem 1.75rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        opacity: isSubmitting ? 0.6 : 1,
+                      }}
+                    >
+                      {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Cadastrar Paciente'}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
-
-            {/* ====================================================
-                AÇÕES DO FORMULÁRIO (CANCELAR + SALVAR / CADASTRAR)
-                (Conforme Mockup media_1795311187219_22060d3a.jpg)
-               ==================================================== */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                gap: '0.75rem',
-                marginTop: '1.5rem',
-                paddingTop: '1.5rem',
-                borderTop: '1px solid #f1f5f9',
-              }}
-            >
-              {/* Botão Cancelar */}
-              <button
-                type="button"
-                onClick={onBackToGrid}
-                style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  color: '#475569',
-                  borderRadius: '0.5rem',
-                  padding: '0.6rem 1.5rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
-              >
-                Cancelar
-              </button>
-
-              {/* Botão Cadastrar / Salvar alterações */}
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  backgroundColor: '#059669',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  padding: '0.6rem 1.85rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 700,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.35)',
-                  opacity: loading ? 0.75 : 1,
-                  transition: 'background-color 0.15s ease',
-                }}
-                onMouseOver={(e) => {
-                  if (!loading) (e.currentTarget as HTMLElement).style.backgroundColor = '#047857';
-                }}
-                onMouseOut={(e) => {
-                  if (!loading) (e.currentTarget as HTMLElement).style.backgroundColor = '#059669';
-                }}
-              >
-                {loading ? (
-                  <span>Salvando...</span>
-                ) : (
-                  <>
-                    <Check size={16} />
-                    <span>{isEdit ? 'Salvar alterações' : 'Cadastrar'}</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Links no rodapé inferior */}
-            <div
-              style={{
-                textAlign: 'center',
-                fontSize: '0.75rem',
-                color: '#64748b',
-                marginTop: '1.25rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.35rem',
-              }}
-            >
-              <div>
-                Vindo de outro software?{' '}
-                <span
-                  onClick={() => toast.info('Módulo de migração de prontuários em lote disponível nas Configurações.')}
-                  style={{ color: '#059669', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
-                >
-                  Clique aqui para importar
-                </span>
-              </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
-                <span>Se precisar de ajuda,</span>
-                <span
-                  onClick={() => toast.info('Suporte Ygeía: WhatsApp de plantão para clínicas ativas.')}
-                  style={{ color: '#0f172a', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
-                >
-                  <span>clique aqui</span>
-                  <MessageCircle size={13} color="#059669" />
-                </span>
-              </div>
-            </div>
-          </form>
+          </div>
         </main>
       </div>
     </div>

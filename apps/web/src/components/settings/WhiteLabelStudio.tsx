@@ -25,6 +25,7 @@ import {
   DEFAULT_BRANDING,
   ClinicBranding,
   buildLoginHeroGradient,
+  applyClinicTheme,
 } from '../../utils/branding';
 
 interface ColorPreset {
@@ -149,13 +150,15 @@ export const WhiteLabelStudio: React.FC = () => {
   const isWcagCompliant = contrastRatioWhite >= 4.5;
 
   const handleApplyPreset = (preset: ColorPreset) => {
-    setBranding((prev) => ({
-      ...prev,
+    const updated = {
+      ...branding,
       primaryColor: preset.primary,
       secondaryColor: preset.secondary,
       accentColor: preset.accent,
-    }));
-    toast.success(`Paleta "${preset.name}" aplicada.`);
+    };
+    setBranding(updated);
+    applyClinicTheme(updated);
+    toast.success(`Paleta "${preset.name}" aplicada à pré-visualização.`);
   };
 
   const handleAutoHarmonize = () => {
@@ -163,16 +166,19 @@ export const WhiteLabelStudio: React.FC = () => {
     const secondary = adjustHex(primary, -35); // Versão profunda e contrastante
     const accent = adjustHex(primary, 30); // Versão vibrante e luminosa
 
-    setBranding((prev) => ({
-      ...prev,
+    const updated = {
+      ...branding,
       secondaryColor: secondary,
       accentColor: accent,
-    }));
+    };
+    setBranding(updated);
+    applyClinicTheme(updated);
     toast.success('Cores secundária e de destaque harmonizadas automaticamente.');
   };
 
   const handleResetDefaults = () => {
     setBranding({ ...DEFAULT_BRANDING });
+    applyClinicTheme(DEFAULT_BRANDING);
     toast.info('Identidade visual restaurada para os padrões oficiais do Ygeía.');
   };
 

@@ -160,3 +160,4 @@ export const ActiveMedicationCard: React.FC<ActiveMedicationCardProps> = ({
     </AppCard>
   );
 };
+

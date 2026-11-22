@@ -6,6 +6,20 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-21
 
 ### Adicionado
+- **Motor de Aplicação Global de Tema Customizado (`branding.ts`)**:
+  - Função `applyClinicTheme`: Aplica e sincroniza automaticamente todas as variáveis CSS no elemento `:root` (`--primary`, `--primary-rgb`, `--primary-hover`, `--primary-light`, `--primary-soft`, `--primary-border`, `--primary-glow`, `--secondary`, `--accent`, `--bh-primary`, `--font-sans`).
+  - Atualização reativa instantânea de todas as telas, botões, modais, headers, seletores e menus ao trocar de tema.
+- **Telas de Pacientes Referenciadas Fielmente no Better Health (`AdminRoutinePatientsSection` & `AdminNewPatientWizard`)**:
+  - `PatientDirectory.tsx`: Layout com 4 cards de KPI, busca, filtro por convênio, tabela de pacientes e modal de confirmação de exclusão.
+  - `NewPatientView.tsx`: Formulário estruturado com stepper vertical de 8 etapas, busca ViaCEP para endereço, máscaras de CPF e telefone (+55), 10 protocolos clínicos selecionáveis e alternância de criação/edição.
+  - `DataTablePagination.tsx`: Componente de paginação com seletor de itens por página e navegação dinâmica.
+
+### Modificado
+- **Ponte de Estilos e Limpeza de Cores Fixas (`styles.css`, `Header.tsx`, `Sidebar.tsx`, `AdminDashboard.tsx`)**:
+  - Mapeadas classes de cores utilitárias para variáveis do tema ativo, eliminando inconsistências visuais e garantindo cobertura de 100% no white-label.
+
+
+### Adicionado
 - **Biblioteca Unificada de Componentes de Design System (`src/components/ui/`)**:
   - `AppButton`: Suporte a variantes (`primary`, `secondary`, `outline`, `danger`, `ghost`), tamanhos (`sm`, `md`, `lg`), estado de carregamento e slot de ícone.
   - `AppInput`: Componente de entrada padronizado com label, ícone frontal, sufixo de unidades clínicas (`kg`, `ml`, `mg`, `UI`), anel de foco e suporte a erro.

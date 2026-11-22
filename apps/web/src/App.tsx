@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
-import { getStoredBranding, ClinicBranding } from './utils/branding';
+import { getStoredBranding, ClinicBranding, applyClinicTheme } from './utils/branding';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { WhiteLabelStudioInteractive } from './components/WhiteLabelStudioInteractive';
@@ -56,8 +56,11 @@ const MainAppContent: React.FC = () => {
   const [storedBranding, setStoredBranding] = useState<ClinicBranding>(() => getStoredBranding());
 
   useEffect(() => {
+    applyClinicTheme(storedBranding);
     const handleBrandingUpdate = (e: any) => {
-      setStoredBranding(e.detail || getStoredBranding());
+      const updated = e.detail || getStoredBranding();
+      setStoredBranding(updated);
+      applyClinicTheme(updated);
     };
     window.addEventListener('ygeia_branding_updated', handleBrandingUpdate);
     return () => window.removeEventListener('ygeia_branding_updated', handleBrandingUpdate);

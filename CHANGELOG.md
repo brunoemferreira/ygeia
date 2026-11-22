@@ -9,6 +9,30 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 💎 Aplicação Global de Tema Customizado White-Label & Migração Completa do Design Better Health
+- **Frontend Web (`apps/web`)**:
+  - **Motor de Tema Dinâmico Global (`branding.ts` & `styles.css`)**:
+    - Implementação de `applyClinicTheme`: Injeta e sincroniza instantaneamente no elemento raiz `:root` do DOM (`document.documentElement.style`) as variáveis CSS essenciais (`--primary`, `--primary-rgb`, `--primary-hover`, `--primary-light`, `--primary-soft`, `--primary-border`, `--primary-glow`, `--secondary`, `--accent`, `--bh-primary`, `--bh-primary-hover`, `--bh-primary-soft`, `--bh-primary-border`, `--bh-shadow-focus`, `--font-sans`).
+    - Ponte de estilos CSS no `styles.css` mapeando classes Tailwind (`.bg-emerald-50`, `.bg-emerald-500`, `.text-emerald-600`, `.border-emerald-500`, anéis de foco) diretamente para os tokens do tema personalizado, eliminando o problema de telas com estilos mesclados ou verdes hardcoded.
+    - Higienização e substituição de cores fixas no `Header.tsx`, `Sidebar.tsx`, `AdminDashboard.tsx`, `SettingsModule.tsx` e componentes de UI para consumirem as variáveis de tema.
+    - Remoção do bloqueio em `branding.ts` que forçava paletas azuis de volta para verde esmeralda.
+  - **Recriação Fiel das Telas de Paciente a Partir do Projeto Better Health**:
+    - `PatientDirectory.tsx`: Recriado com fidelidade milimétrica a partir de `AdminRoutinePatientsSection.tsx` do Better Health:
+      - Cabeçalho com tag `ROTINA CLÍNICA`, título `Pacientes`, botão `+ Novo paciente` com `UserPlus`.
+      - 4 cards de métricas de topo (Total Pacientes, App Conectado, Com Convênio, Particulares).
+      - Barra de busca e filtro de convênio (*Todos os Pacientes*, *Apenas com Convênio*, *Apenas Particulares*).
+      - Tabela de dados com avatar/iniciais, localização do atendimento, contatos com ícones de e-mail e telefone, CPF, badge de convênio, indicador de acesso ao app (`App Ativo` / `Pendente`) e ações de edição e exclusão.
+      - Modal de confirmação de exclusão com backdrop blur.
+    - `NewPatientView.tsx`: Wizard completo das 8 etapas adaptado fielmente de `AdminNewPatientWizard.tsx`:
+      - Stepper vertical responsivo com 8 etapas (*Dados pessoais*, *Tratamento e protocolos*, *Convênio*, *Local de atendimento*, *Foto do paciente*, *Endereço completo*, *Observação importante*, *Atestado e recibo*).
+      - Busca automática de CEP via ViaCEP com autopreenchimento de logradouro, bairro, cidade e estado.
+      - Formatação e máscaras reativas de CPF, telefone brasileiro (+55) e data de nascimento.
+      - Seleção de 10 protocolos e metas clínicas com pílulas interativas.
+      - Toggles reativos para notificação de boas-vindas por e-mail e WhatsApp.
+      - Suporte integral a criação (`mode="create"`) e edição (`mode="edit"`) de pacientes.
+    - `DataTablePagination.tsx`: Componente de paginação idêntico ao do Better Health integrado ao design system.
+
+
 ### 🎨 Padronização de Design System, White-Label Studio & Módulos Clínicos Evolva
 - **Frontend Web (`apps/web`)**:
   - **Biblioteca Unificada de Componentes UI (`src/components/ui/`)**:

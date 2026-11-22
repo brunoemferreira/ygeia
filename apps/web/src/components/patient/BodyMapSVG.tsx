@@ -284,3 +284,4 @@ export const BodyMapSVG: React.FC<BodyMapSVGProps> = ({
     </div>
   );
 };
+

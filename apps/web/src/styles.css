@@ -428,7 +428,7 @@ p {
 }
 
 .nav-link:hover {
-  color: #059669;
+  color: var(--primary);
 }
 
 /* Header Action Group */
@@ -476,3 +476,85 @@ p {
     display: none;
   }
 }
+
+/* ==========================================================================
+   DYNAMIC WHITE-LABEL THEME BRIDGE (100% UNIFIED COLOR APPLICATION)
+   Mapeia classes utilitárias e estilos Better Health para variáveis CSS dinâmicas
+   ========================================================================== */
+.bg-emerald-50,
+.bg-emerald-50\/70,
+.bg-emerald-50\/50 {
+  background-color: var(--primary-light) !important;
+}
+
+.bg-emerald-100 {
+  background-color: var(--primary-soft) !important;
+}
+
+.bg-emerald-500,
+.bg-emerald-600 {
+  background-color: var(--primary) !important;
+}
+
+.hover\:bg-emerald-600:hover,
+.hover\:bg-emerald-700:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+.text-emerald-500,
+.text-emerald-600,
+.text-emerald-700,
+.text-emerald-800,
+.text-emerald-900 {
+  color: var(--primary) !important;
+}
+
+.border-emerald-500,
+.border-emerald-600 {
+  border-color: var(--primary) !important;
+}
+
+.border-emerald-200,
+.border-emerald-300 {
+  border-color: var(--primary-border) !important;
+}
+
+.focus\:border-emerald-500:focus {
+  border-color: var(--primary) !important;
+}
+
+.focus\:ring-emerald-500\/20:focus,
+.focus\:ring-emerald-500\/30:focus {
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+/* Better Health Design System Classes */
+.bh-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.bh-btn-prontuario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #0f172a;
+  color: #ffffff !important;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.bh-btn-prontuario:hover:not(:disabled) {
+  background-color: #1e293b;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+  transform: translateY(-1px);
+}
+
