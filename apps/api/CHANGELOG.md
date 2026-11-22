@@ -5,6 +5,12 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-21
 
+### Adicionado
+- **Módulo e Entidade de Pacientes com RLS Multi-Tenant**:
+  - Migração `0003_patients_schema.sql` criando tabela `patients` com dados clínicos, pessoais, de responsáveis e parâmetros de notificação.
+  - Imposição estrita de Row-Level Security (`tenant_isolation_patients`) com grant para `ygeia_app`.
+  - `PatientsService` e `PatientsController` com rotas `GET /api/v1/patients` e `POST /api/v1/patients`.
+
 ### Removido
 - **Seeder de Demonstração & Fallback Demo**:
   - Removido o método `seedDefaultData()` de `DatabaseService`, prevenindo a injeção automática de `demo-clinica`, `admin@ygeia.com` e `paciente@ygeia.com`.

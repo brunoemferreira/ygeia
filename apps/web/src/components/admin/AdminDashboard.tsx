@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Plus,
@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { SettingsModule } from '../settings/SettingsModule';
+import { NewPatientModal } from '../patients/NewPatientModal';
 import { getStoredBranding } from '../../utils/branding';
 
 export interface AdminDashboardProps {
@@ -20,17 +21,20 @@ export interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   activeItem = 'dashboard_pacientes',
 }) => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { toast } = useToast();
   const branding = getStoredBranding();
   const primaryColor = branding.primaryColor || '#059669';
+
+  // Modal de Cadastro de Pacientes (Conforme Mockup Novo Paciente)
+  const [isNewPatientModalOpen, setIsNewPatientModalOpen] = useState(false);
 
   // State de busca de paciente
   const [patientSearch, setPatientSearch] = useState('');
   const [selectedDay, setSelectedDay] = useState(21);
 
   // Lista de pacientes
-  const [patients] = useState([
+  const [patients, setPatients] = useState([
     {
       id: '1',
       name: user?.fullName || 'Bruno Eduardo de Moura Ferreira',
@@ -42,6 +46,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       lastConsult: '21/11/2026',
     },
   ]);
+
+  // Carrega pacientes reais cadastrados na API
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const apiBase = ((import.meta as any).env?.VITE_API_URL || 'http://localhost:4333') + '/api/v1';
+        const res = await fetch(`${apiBase}/patients`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setPatients(data.map((p: any) => ({
+              id: p.id,
+              name: p.fullName,
+              initials: p.initials || 'PA',
+              email: p.email || '',
+              phone: p.phone || '',
+              goal: p.treatmentGoals || 'Performance & Modulação Metabólica',
+              status: p.status === 'ACTIVE' ? 'Ativo' : p.status,
+              lastConsult: 'Recente',
+            })));
+          }
+        }
+      } catch {}
+    };
+    fetchPatients();
+  }, [token]);
 
   // Lista de agendamentos
   const [appointments] = useState([
@@ -238,7 +270,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => toast.success('Formulário de cadastro aberto com sucesso.')}
+                  onClick={() => setIsNewPatientModalOpen(true)}
                   style={{
                     backgroundColor: primaryColor,
                     color: '#ffffff',
@@ -455,14 +487,107 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {activeItem === 'rotina_pacientes' && (
         <div style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
-            👥 Carteira de Pacientes
-          </h2>
-          <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
-            Gerenciamento completo de prontuários, anamneses, metas de peso e exames laboratoriais.
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+                👥 Carteira de Pacientes
+              </h2>
+              <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>
+                {patients.length} pacientes cadastrados no consultório
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsNewPatientModalOpen(true)}
+              style={{
+                backgroundColor: primaryColor,
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '0.5rem',
+                padding: '0.6rem 1.25rem',
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                boxShadow: `0 2px 8px ${primaryColor}35`,
+              }}
+            >
+              <Plus size={16} />
+              <span>Novo paciente</span>
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
+            {patients.map((p) => (
+              <div
+                key={p.id}
+                style={{
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '0.75rem',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '50%',
+                      backgroundColor: '#f1f5f9',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      color: '#475569',
+                    }}
+                  >
+                    {p.initials}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a' }}>{p.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{p.email || p.phone || 'Sem contato cadastrado'}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid #f8fafc' }}>
+                  <span style={{ color: '#059669', backgroundColor: '#ecfdf5', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
+                    {p.status}
+                  </span>
+                  <span style={{ color: '#94a3b8' }}>{p.goal}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Modal de Cadastro de Paciente (Fidelidade ao Mockup Novo Paciente) */}
+      <NewPatientModal
+        isOpen={isNewPatientModalOpen}
+        onClose={() => setIsNewPatientModalOpen(false)}
+        onPatientCreated={(newP) => {
+          setPatients((prev) => [
+            {
+              id: newP.id,
+              name: newP.fullName,
+              initials: newP.initials || 'PA',
+              email: newP.email || '',
+              phone: newP.phone || '',
+              goal: newP.treatmentGoals || 'Performance & Modulação Metabólica',
+              status: 'Ativo',
+              lastConsult: 'Hoje',
+            },
+            ...prev,
+          ]);
+        }}
+      />
     </div>
   );
 };

@@ -5,6 +5,15 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-21
 
+### Adicionado
+- **Modal de Cadastro de Novos Pacientes (`NewPatientModal.tsx`)**:
+  - Layout modal split com stepper de 8 etapas (*Dados pessoais*, *Tratamento e protocolos*, *Convênio*, *Local de atendimento*, *Foto*, *Endereço*, *Observações*, *Atestados*).
+  - Formulário completo de dados pessoais com máscaras de data, CPF e telefone, sexo biológico para cálculos e dados de responsáveis.
+  - Toggles interativos para envio de mensagens automáticas de boas-vindas por e-mail e WhatsApp.
+  - Integração com a API `POST /api/v1/patients` e atualização dinâmica da lista de pacientes.
+- **Visualização da Carteira de Pacientes no Dashboard (`AdminDashboard.tsx`)**:
+  - Grade de cards de pacientes sob o menu `Rotina -> Pacientes` com busca e botão de novo cadastro.
+
 ### Modificado
 - **Identidade Visual e Nome do Sistema (`LoginPage.tsx`, `Sidebar.tsx`, `branding.ts`)**:
   - Substituído qualquer vestígio de nomes herdados de referências externas pela marca **Ygeía** e slogan *"Nutrição Clínica & Governança Metabólica"*.

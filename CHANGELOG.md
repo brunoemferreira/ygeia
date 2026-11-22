@@ -9,6 +9,30 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 👥 Módulo de Cadastro de Pacientes & Stepper Clínico
+- **Frontend Web (`apps/web`)**:
+  - **Componente Modal `NewPatientModal.tsx`**:
+    - Implementação de fidelidade estrita ao design do mockup `Novo paciente`:
+      - **Navegação Lateral por Etapas**: Stepper vertical com 8 etapas: *Dados pessoais* (com indicador visual verde esmeralda e fundo mint), *Tratamento e protocolos*, *Convênio*, *Local de atendimento*, *Foto do paciente*, *Endereço completo*, *Observação importante* e *Atestado e recibo*.
+      - **Etapa de Dados Pessoais**:
+        - Campo obrigatório de nome completo.
+        - Data de nascimento e seleção de sexo de referência para cálculos (com nota orientativa clínica).
+        - Seleção de sexo atribuído ao nascimento e identidade de gênero opcional.
+        - E-mail e telefone com seletor de DDI (`🇧🇷 +55`) e formatação em tempo real.
+        - CPF do paciente, nome e CPF do responsável para menores de idade.
+        - Seção de mensagens de boas-vindas com switches interativos para envio automático por e-mail e WhatsApp.
+      - **Ações e Atalhos**: Botões `Cancelar` e `Cadastrar`, links de rodapé para importação de prontuários externos e suporte via WhatsApp.
+  - **Integração no Painel Administrativo (`AdminDashboard.tsx`)**:
+    - Acionamento direto do modal ao clicar no botão `+ Cadastrar paciente` do card principal ou através do menu `Rotina -> Pacientes`.
+    - Atualização reativa da lista de pacientes em tela após a confirmação do cadastro.
+- **Backend API (`apps/api`) & Banco de Dados**:
+  - **Migração SQL `0003_patients_schema.sql`**:
+    - Criação da tabela `patients` com suporte completo a dados pessoais, identificação civil, sexo biológico, identidade de gênero, contatos, dados de responsáveis e preferências de notificação.
+    - Isolamento multi-tenant obrigatório via PostgreSQL Row-Level Security (`FORCE ROW LEVEL SECURITY`) com a política `tenant_isolation_patients`.
+    - Índices otimizados por `tenant_id` com `full_name`, `email` e `cpf`.
+  - **Módulo NestJS de Pacientes (`PatientsModule`, `PatientsService`, `PatientsController`)**:
+    - Endpoints: `POST /api/v1/patients` para inserção transacional e `GET /api/v1/patients` para busca e listagem filtrada por tenant.
+
 ### 🌿 Identidade Visual Oficial Ygeía na Tela de Login & Sistema
 - **Frontend Web (`apps/web`)**:
   - **Customização do Nome e Paleta Oficial**:

@@ -8,10 +8,12 @@ import { TenantsService } from './modules/tenancy/tenants.service';
 import { TenantsController } from './modules/tenancy/tenants.controller';
 import { AuthService } from './modules/iam/auth.service';
 import { AuthController } from './modules/iam/auth.controller';
+import { PatientsService } from './modules/patients/patients.service';
+import { PatientsController } from './modules/patients/patients.controller';
 import { HealthController } from './health.controller';
 
 @Module({
-  controllers: [HealthController, TenantsController, AuthController],
+  controllers: [HealthController, TenantsController, AuthController, PatientsController],
   providers: [
     DatabaseService,
     TenantContextService,
@@ -19,6 +21,7 @@ import { HealthController } from './health.controller';
     TokenService,
     TenantsService,
     AuthService,
+    PatientsService,
   ],
   exports: [DatabaseService, TenantContextService, PasswordHasherService, TokenService],
 })
