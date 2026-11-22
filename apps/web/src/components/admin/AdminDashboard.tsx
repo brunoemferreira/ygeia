@@ -1054,13 +1054,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <select
               value={tacoCategory}
               onChange={(e) => setTacoCategory(e.target.value)}
+              className="ygeia-select"
               style={{
-                borderRadius: '0.5rem',
-                border: '1px solid #cbd5e1',
-                padding: '0.5rem 0.875rem',
+                minHeight: '38px',
                 fontSize: '0.8125rem',
-                backgroundColor: '#ffffff',
-                outline: 'none',
+                width: 'auto',
+                minWidth: '200px',
               }}
             >
               <option value="ALL">Todas as Categorias</option>
@@ -1314,13 +1313,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <select
                       value={tmbSex}
                       onChange={(e) => setTmbSex(e.target.value as 'MALE' | 'FEMALE')}
-                      style={{
-                        width: '100%',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        padding: '0.5rem 0.75rem',
-                        fontSize: '0.8125rem',
-                      }}
+                      className="ygeia-select"
+                      style={{ minHeight: '38px', fontSize: '0.8125rem' }}
                     >
                       <option value="MALE">Masculino</option>
                       <option value="FEMALE">Feminino</option>
@@ -1336,13 +1330,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <select
                       value={tmbFormula}
                       onChange={(e) => setTmbFormula(e.target.value as 'mifflin' | 'harris')}
-                      style={{
-                        width: '100%',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        padding: '0.5rem 0.75rem',
-                        fontSize: '0.8125rem',
-                      }}
+                      className="ygeia-select"
+                      style={{ minHeight: '38px', fontSize: '0.8125rem' }}
                     >
                       <option value="mifflin">Mifflin-St Jeor (1990) - Recomendada</option>
                       <option value="harris">Harris-Benedict (1984)</option>
@@ -1356,13 +1345,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <select
                       value={tmbActivity}
                       onChange={(e) => setTmbActivity(Number(e.target.value))}
-                      style={{
-                        width: '100%',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        padding: '0.5rem 0.75rem',
-                        fontSize: '0.8125rem',
-                      }}
+                      className="ygeia-select"
+                      style={{ minHeight: '38px', fontSize: '0.8125rem' }}
                     >
                       <option value="1.2">Sedentário (1.20)</option>
                       <option value="1.375">Levemente Ativo (1.375)</option>

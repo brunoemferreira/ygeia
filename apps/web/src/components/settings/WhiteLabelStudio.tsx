@@ -605,17 +605,11 @@ export const WhiteLabelStudio: React.FC = () => {
             <select
               value={branding.fontFamily}
               onChange={(e) => setBranding({ ...branding, fontFamily: e.target.value })}
+              className="ygeia-select"
               style={{
-                width: '100%',
-                padding: '0.65rem 0.85rem',
-                borderRadius: '0.5rem',
-                border: '1px solid #cbd5e1',
+                minHeight: '38px',
                 fontSize: '0.875rem',
                 fontWeight: 600,
-                color: '#0f172a',
-                outline: 'none',
-                backgroundColor: '#ffffff',
-                cursor: 'pointer',
               }}
             >
               <option value="Plus Jakarta Sans">Plus Jakarta Sans (Padrão Oficial Ygeía & Evolva)</option>

@@ -434,15 +434,12 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
           <select
             value={insuranceFilter}
             onChange={(e) => setInsuranceFilter(e.target.value as 'all' | 'insurance' | 'private')}
+            className="ygeia-select"
             style={{
-              borderRadius: '0.75rem',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#ffffff',
-              padding: '0.45rem 0.75rem',
+              minHeight: '38px',
               fontSize: '0.75rem',
               fontWeight: 600,
-              color: '#334155',
-              outline: 'none',
+              padding: '0.45rem 2rem 0.45rem 0.75rem',
               cursor: 'pointer',
             }}
           >

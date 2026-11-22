@@ -257,14 +257,10 @@ export const ScientificEngineInteractive: React.FC = () => {
                 <select
                   value={strategyKey}
                   onChange={(e) => setStrategyKey(e.target.value as any)}
+                  className="ygeia-select"
                   style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid #cbd5e1',
+                    minHeight: '38px',
                     fontSize: '0.8125rem',
-                    background: 'white',
-                    color: '#1e293b',
                     fontWeight: 600,
                   }}
                 >
@@ -430,14 +426,10 @@ export const ScientificEngineInteractive: React.FC = () => {
                 <select
                   value={activityLevel}
                   onChange={(e) => setActivityLevel(e.target.value as any)}
+                  className="ygeia-select"
                   style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid #cbd5e1',
+                    minHeight: '38px',
                     fontSize: '0.8125rem',
-                    background: 'white',
-                    color: '#1e293b',
                     fontWeight: 600,
                   }}
                 >
@@ -456,14 +448,10 @@ export const ScientificEngineInteractive: React.FC = () => {
                 <select
                   value={goal}
                   onChange={(e) => setGoal(e.target.value as any)}
+                  className="ygeia-select"
                   style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid #cbd5e1',
+                    minHeight: '38px',
                     fontSize: '0.8125rem',
-                    background: 'white',
-                    color: '#1e293b',
                     fontWeight: 600,
                   }}
                 >

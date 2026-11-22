@@ -5,6 +5,21 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Componentes Padronizados `AppSelect` e `AppTextarea` (`apps/web/src/components/ui/`)**:
+  - Implementação de `AppSelect.tsx` com altura rigorosa de 38px, borda de 0.5rem, tipografia de 13px, ícone chevron integrado e foco reativo conectado a `var(--primary)` e `var(--primary-light)`.
+  - Implementação de `AppTextarea.tsx` para notas e evoluções clínicas com raio de borda e foco padronizados.
+  - Exportação oficial de ambos no barrel `components/ui/index.ts`.
+
+### Modificado
+- **Harmonização Visual de Telas e Modais de Pacientes (`PatientProfileView.tsx`, `NewPatientModal.tsx`, `PatientDirectory.tsx`)**:
+  - Substituição de inputs e selects nativos avulsos pelos novos componentes `AppInput`, `AppSelect` e `AppTextarea` nos modais de **Recordatório Alimentar**, **Prontuário** e **Restrições Alimentares**.
+  - Padronização da barra de busca e dos filtros de motivo e situação com altura de 38px e anel de foco suave na cor primária.
+  - Harmonização de seletores nos formulários de cadastro de paciente e painel administrativo.
+- **Fidelidade da Marca Registrada SVG (`YgeiaLogo.tsx`, `public/ygeia-logo.svg`)**:
+  - Atualização da linha de pulso cardíaco (ECG) para o tom verde menta `#7eedd6` / `var(--primary-light)`, correspondendo com exatidão à imagem de marca do Ygeía.
+
+
 ### Modificado
 - **Otimização de Espaçamento e Tipografia no Menu Lateral do Paciente (`PatientProfileView.tsx`)**:
   - Redução da altura/padding entre categorias e subitens no menu lateral clínico do prontuário.

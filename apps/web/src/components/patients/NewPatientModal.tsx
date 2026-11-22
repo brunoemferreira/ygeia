@@ -449,19 +449,8 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                         required
                         value={biologicalSex}
                         onChange={(e) => setBiologicalSex(e.target.value as any)}
-                        style={{
-                          width: '100%',
-                          padding: '0.65rem 0.875rem',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.875rem',
-                          color: biologicalSex ? '#0f172a' : '#64748b',
-                          backgroundColor: '#ffffff',
-                          outline: 'none',
-                          boxSizing: 'border-box',
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                        onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                        className="ygeia-select"
+                        style={{ minHeight: '38px', fontSize: '0.8125rem' }}
                       >
                         <option value="">Selecione</option>
                         <option value="FEMALE">Feminino</option>
@@ -482,19 +471,8 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                       <select
                         value={assignedSexAtBirth}
                         onChange={(e) => setAssignedSexAtBirth(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.65rem 0.875rem',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.875rem',
-                          color: assignedSexAtBirth ? '#0f172a' : '#64748b',
-                          backgroundColor: '#ffffff',
-                          outline: 'none',
-                          boxSizing: 'border-box',
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                        onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                        className="ygeia-select"
+                        style={{ minHeight: '38px', fontSize: '0.8125rem' }}
                       >
                         <option value="">Selecione...</option>
                         <option value="Feminino">Feminino</option>
@@ -510,19 +488,8 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                       <select
                         value={genderIdentity}
                         onChange={(e) => setGenderIdentity(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.65rem 0.875rem',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.875rem',
-                          color: genderIdentity ? '#0f172a' : '#64748b',
-                          backgroundColor: '#ffffff',
-                          outline: 'none',
-                          boxSizing: 'border-box',
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                        onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                        className="ygeia-select"
+                        style={{ minHeight: '38px', fontSize: '0.8125rem' }}
                       >
                         <option value="">Selecione...</option>
                         <option value="Mulher cisgênero">Mulher cisgênero</option>
@@ -999,16 +966,8 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                     <select
                       value={locationName}
                       onChange={(e) => setLocationName(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.65rem 0.875rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.875rem',
-                        outline: 'none',
-                        backgroundColor: '#ffffff',
-                        boxSizing: 'border-box',
-                      }}
+                      className="ygeia-select"
+                      style={{ minHeight: '38px', fontSize: '0.8125rem' }}
                     >
                       <option value="Consultório Principal">Consultório Principal (Presencial)</option>
                       <option value="Teleconsulta Online">Teleconsulta Online (Ygeía Telemedicina)</option>

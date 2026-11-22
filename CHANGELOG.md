@@ -9,6 +9,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🎨 Padronização Visual Estrita de UI, Design System Unificado e Regra AGENTS.md
+- **Regras Globais de Engenharia (`AGENTS.md`)**:
+  - **Inclusão da Seção 5**: Estabelecida regra obrigatória e permanente de padronização visual para qualquer agente ou desenvolvedor.
+  - Exigência de paridade estética absoluta: todos os campos de edição (`AppInput`), caixas de seleção (`AppSelect`), áreas de texto (`AppTextarea`), botões (`AppButton`), modais (`AppModal`) e grades (`ClinicalDataGrid`) devem compartilhar as mesmas alturas (`38px`), raio de borda (`0.5rem`), padding e foco conectado dinamicamente à cor primária (`var(--primary)`, `var(--primary-light)`).
+  - Proibição de estilos avulsos e auditoria obrigatória pré-entrega em qualquer nova tela ou alteração de tela existente.
+- **Frontend Web (`apps/web`)**:
+  - `components/ui/AppSelect.tsx`: Criação do componente unificado de combobox com suporte a options/children, chevron SVG integrado, alturas de 38px e anel de foco reativo.
+  - `components/ui/AppTextarea.tsx`: Criação do componente unificado de textarea multilinhas com estados de foco idênticos aos inputs.
+  - `PatientProfileView.tsx`: Refatoração completa dos formulários e modais (Recordatório Alimentar, Prontuário, Restrições Alimentares e barra de filtros de busca) para adoção de `AppInput`, `AppSelect`, `AppTextarea` e `ygeia-select`.
+  - `NewPatientModal.tsx` & `PatientDirectory.tsx` & `AdminDashboard.tsx` & `ScientificEngineInteractive.tsx`: Varredura e harmonização de comboboxes com a classe `ygeia-select` e foco no tema dinâmico.
+  - `YgeiaLogo.tsx` & `ygeia-logo.svg`: Ajuste da cor do pulso cardíaco para verde menta vibrante (`#7eedd6`), alinhado 100% à imagem oficial de marca registrada fornecida pelo usuário.
+
+
 ### 📐 Otimização Visual do Menu do Perfil do Paciente (Prontuário)
 - **Frontend Web (`apps/web`)**:
   - `PatientProfileView.tsx`:

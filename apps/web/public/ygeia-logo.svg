@@ -7,5 +7,5 @@
         fill="#10b981" />
   <!-- Linha de Pulso / Batimento Cardíaco (Vitalidade & Saúde Ygeía) -->
   <path d="M 8 52 L 32 52 L 38 64 L 47 18 L 55 84 L 63 34 L 69 52 L 92 52" 
-        stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
+        stroke="#7eedd6" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

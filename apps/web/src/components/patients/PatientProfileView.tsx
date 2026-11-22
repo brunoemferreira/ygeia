@@ -29,7 +29,7 @@ import {
 import { PatientRecord } from './PatientDirectory';
 import { AnamneseEditor, AnamneseData } from './AnamneseEditor';
 import { useToast } from '../../context/ToastContext';
-import { ClinicalDataGrid, ClinicalRecordItem, AppModal } from '../ui';
+import { ClinicalDataGrid, ClinicalRecordItem, AppModal, AppInput, AppSelect, AppTextarea } from '../ui';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -1734,14 +1734,26 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     value={restrictionSearchQuery}
                     onChange={(e) => setRestrictionSearchQuery(e.target.value)}
                     placeholder="Buscar alimento, motivo, origem..."
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'var(--primary)';
+                      e.target.style.boxShadow = '0 0 0 3px var(--primary-light, rgba(5, 150, 105, 0.15))';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#cbd5e1';
+                      e.target.style.boxShadow = 'none';
+                    }}
                     style={{
                       width: '100%',
-                      padding: '0.45rem 0.75rem 0.45rem 2.25rem',
+                      minHeight: '38px',
+                      padding: '0.5rem 0.75rem 0.5rem 2.25rem',
                       fontSize: '0.8125rem',
+                      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                       border: '1px solid #cbd5e1',
-                      borderRadius: '0.375rem',
+                      borderRadius: '0.5rem',
                       backgroundColor: '#ffffff',
                       outline: 'none',
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
                     }}
                   />
                   {restrictionSearchQuery && (
@@ -1764,20 +1776,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                 </div>
 
                 {/* Filtro por Motivo */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Motivo:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '160px' }}>
                   <select
                     value={restrictionFilterReason}
                     onChange={(e) => setRestrictionFilterReason(e.target.value)}
-                    style={{
-                      padding: '0.45rem 0.75rem',
-                      fontSize: '0.8125rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '0.375rem',
-                      backgroundColor: '#ffffff',
-                      color: '#0f172a',
-                      cursor: 'pointer',
-                    }}
+                    className="ygeia-select"
+                    style={{ minHeight: '38px', fontSize: '0.8125rem', padding: '0.45rem 2rem 0.45rem 0.75rem' }}
                   >
                     <option value="ALL">Todos os motivos</option>
                     <option value="Alergia">Alergia</option>
@@ -1788,20 +1792,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                 </div>
 
                 {/* Filtro por Situação */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Situação:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '130px' }}>
                   <select
                     value={restrictionFilterStatus}
                     onChange={(e) => setRestrictionFilterStatus(e.target.value)}
-                    style={{
-                      padding: '0.45rem 0.75rem',
-                      fontSize: '0.8125rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '0.375rem',
-                      backgroundColor: '#ffffff',
-                      color: '#0f172a',
-                      cursor: 'pointer',
-                    }}
+                    className="ygeia-select"
+                    style={{ minHeight: '38px', fontSize: '0.8125rem', padding: '0.45rem 2rem 0.45rem 0.75rem' }}
                   >
                     <option value="ALL">Todas</option>
                     <option value="Ativa">Ativa</option>
@@ -2272,91 +2268,43 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         }
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-              Título do Recordatório <span style={{ color: '#e11d48' }}>*</span>
-            </label>
-            <input
-              type="text"
-              value={recallForm.title}
-              onChange={(e) => setRecallForm({ ...recallForm, title: e.target.value })}
-              placeholder="Ex: Recordatório 24 Horas - Consulta Inicial"
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.8125rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
+          <AppInput
+            label="Título do Recordatório"
+            required
+            type="text"
+            value={recallForm.title}
+            onChange={(e) => setRecallForm({ ...recallForm, title: e.target.value })}
+            placeholder="Ex: Recordatório 24 Horas - Consulta Inicial"
+          />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Modelo / Tipo
-              </label>
-              <select
-                value={recallForm.templateType}
-                onChange={(e) => setRecallForm({ ...recallForm, templateType: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.8125rem',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '0.375rem',
-                  backgroundColor: '#ffffff',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <option value="Recordatório 24 Horas">Recordatório 24 Horas</option>
-                <option value="Registro Habitual">Registro Habitual</option>
-                <option value="Registro de 3 Dias">Registro de 3 Dias</option>
-                <option value="QFA - Frequência">QFA - Frequência</option>
-              </select>
-            </div>
+            <AppSelect
+              label="Modelo / Tipo"
+              value={recallForm.templateType}
+              onChange={(e) => setRecallForm({ ...recallForm, templateType: e.target.value })}
+              options={[
+                { value: 'Recordatório 24 Horas', label: 'Recordatório 24 Horas' },
+                { value: 'Registro Habitual', label: 'Registro Habitual' },
+                { value: 'Registro de 3 Dias', label: 'Registro de 3 Dias' },
+                { value: 'QFA - Frequência', label: 'QFA - Frequência' },
+              ]}
+            />
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Data da Coleta
-              </label>
-              <input
-                type="date"
-                value={recallForm.date}
-                onChange={(e) => setRecallForm({ ...recallForm, date: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.45rem 0.75rem',
-                  fontSize: '0.8125rem',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '0.375rem',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-              Refeições, Alimentos & Horários
-            </label>
-            <textarea
-              rows={4}
-              value={recallForm.notes}
-              onChange={(e) => setRecallForm({ ...recallForm, notes: e.target.value })}
-              placeholder="Descreva as refeições consumidas pelo paciente, horários aproximados, quantidades e marcas..."
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.8125rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-              }}
+            <AppInput
+              label="Data da Coleta"
+              type="date"
+              value={recallForm.date}
+              onChange={(e) => setRecallForm({ ...recallForm, date: e.target.value })}
             />
           </div>
+
+          <AppTextarea
+            label="Refeições, Alimentos & Horários"
+            rows={4}
+            value={recallForm.notes}
+            onChange={(e) => setRecallForm({ ...recallForm, notes: e.target.value })}
+            placeholder="Descreva as refeições consumidas pelo paciente, horários aproximados, quantidades e marcas..."
+          />
         </div>
       </AppModal>
 
@@ -2405,91 +2353,43 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         }
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-              Título da Evolução <span style={{ color: '#e11d48' }}>*</span>
-            </label>
-            <input
-              type="text"
-              value={prontuarioForm.title}
-              onChange={(e) => setProntuarioForm({ ...prontuarioForm, title: e.target.value })}
-              placeholder="Ex: Consulta de Retorno - Ajuste Calórico"
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.8125rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
+          <AppInput
+            label="Título da Evolução"
+            required
+            type="text"
+            value={prontuarioForm.title}
+            onChange={(e) => setProntuarioForm({ ...prontuarioForm, title: e.target.value })}
+            placeholder="Ex: Consulta de Retorno - Ajuste Calórico"
+          />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Tipo / Categoria
-              </label>
-              <select
-                value={prontuarioForm.templateType}
-                onChange={(e) => setProntuarioForm({ ...prontuarioForm, templateType: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.8125rem',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '0.375rem',
-                  backgroundColor: '#ffffff',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <option value="Evolução Clínica">Evolução Clínica</option>
-                <option value="Consulta de Retorno">Consulta de Retorno</option>
-                <option value="Ajuste de Conduta">Ajuste de Conduta</option>
-                <option value="Intercorrência">Intercorrência</option>
-              </select>
-            </div>
+            <AppSelect
+              label="Tipo / Categoria"
+              value={prontuarioForm.templateType}
+              onChange={(e) => setProntuarioForm({ ...prontuarioForm, templateType: e.target.value })}
+              options={[
+                { value: 'Evolução Clínica', label: 'Evolução Clínica' },
+                { value: 'Consulta de Retorno', label: 'Consulta de Retorno' },
+                { value: 'Ajuste de Conduta', label: 'Ajuste de Conduta' },
+                { value: 'Intercorrência', label: 'Intercorrência' },
+              ]}
+            />
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Data da Evolução
-              </label>
-              <input
-                type="date"
-                value={prontuarioForm.date}
-                onChange={(e) => setProntuarioForm({ ...prontuarioForm, date: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.45rem 0.75rem',
-                  fontSize: '0.8125rem',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '0.375rem',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-              Conduta Clínica e Anotações
-            </label>
-            <textarea
-              rows={4}
-              value={prontuarioForm.notes}
-              onChange={(e) => setProntuarioForm({ ...prontuarioForm, notes: e.target.value })}
-              placeholder="Descreva a avaliação do encontro, respostas aos protocolos e orientações fornecidas..."
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.8125rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-              }}
+            <AppInput
+              label="Data da Evolução"
+              type="date"
+              value={prontuarioForm.date}
+              onChange={(e) => setProntuarioForm({ ...prontuarioForm, date: e.target.value })}
             />
           </div>
+
+          <AppTextarea
+            label="Conduta Clínica e Anotações"
+            rows={4}
+            value={prontuarioForm.notes}
+            onChange={(e) => setProntuarioForm({ ...prontuarioForm, notes: e.target.value })}
+            placeholder="Descreva a avaliação do encontro, respostas aos protocolos e orientações fornecidas..."
+          />
         </div>
       </AppModal>
 
@@ -2538,127 +2438,66 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         }
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Campo: Alimento ou Substância */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-              Alimento ou substância <span style={{ color: '#e11d48' }}>*</span>
-            </label>
-            <input
-              type="text"
-              value={restrictionForm.foodOrSubstance}
-              onChange={(e) => setRestrictionForm({ ...restrictionForm, foodOrSubstance: e.target.value })}
-              placeholder="Ex: Leite de vaca, Glúten, Camarão, Ovo..."
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.8125rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                boxSizing: 'border-box',
-              }}
-            />
-            {/* Texto explicativo obrigatório solicitado pelo usuário */}
-            <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic' }}>
-              Se a restrição depende do preparo, inclua essa informação no nome
-            </p>
-          </div>
+          {/* Campo: Alimento ou Substância com texto explicativo padronizado */}
+          <AppInput
+            label="Alimento ou substância"
+            required
+            type="text"
+            value={restrictionForm.foodOrSubstance}
+            onChange={(e) => setRestrictionForm({ ...restrictionForm, foodOrSubstance: e.target.value })}
+            placeholder="Ex: Leite de vaca, Glúten, Camarão, Ovo..."
+            helperText="Se a restrição depende do preparo, inclua essa informação no nome"
+          />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             {/* Campo Selecionável: Motivo */}
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Motivo <span style={{ color: '#e11d48' }}>*</span>
-              </label>
-              <select
-                value={restrictionForm.reason}
-                onChange={(e) => setRestrictionForm({ ...restrictionForm, reason: e.target.value as any })}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.8125rem',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '0.375rem',
-                  backgroundColor: '#ffffff',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <option value="Alergia">Alergia</option>
-                <option value="Intolerância">Intolerância</option>
-                <option value="Não Gosta">Não Gosta</option>
-                <option value="Outra restrição">Outra restrição</option>
-              </select>
-            </div>
+            <AppSelect
+              label="Motivo"
+              required
+              value={restrictionForm.reason}
+              onChange={(e) => setRestrictionForm({ ...restrictionForm, reason: e.target.value as any })}
+              options={[
+                { value: 'Alergia', label: 'Alergia' },
+                { value: 'Intolerância', label: 'Intolerância' },
+                { value: 'Não Gosta', label: 'Não Gosta' },
+                { value: 'Outra restrição', label: 'Outra restrição' },
+              ]}
+            />
 
             {/* Campo: Situação */}
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Situação
-              </label>
-              <select
-                value={restrictionForm.status}
-                onChange={(e) => setRestrictionForm({ ...restrictionForm, status: e.target.value as any })}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.8125rem',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '0.375rem',
-                  backgroundColor: '#ffffff',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <option value="Ativa">Ativa</option>
-                <option value="Inativa">Inativa</option>
-              </select>
-            </div>
+            <AppSelect
+              label="Situação"
+              value={restrictionForm.status}
+              onChange={(e) => setRestrictionForm({ ...restrictionForm, status: e.target.value as any })}
+              options={[
+                { value: 'Ativa', label: 'Ativa' },
+                { value: 'Inativa', label: 'Inativa' },
+              ]}
+            />
           </div>
 
           {/* Campo: Origem */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-              Origem
-            </label>
-            <select
-              value={restrictionForm.origin}
-              onChange={(e) => setRestrictionForm({ ...restrictionForm, origin: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.8125rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                backgroundColor: '#ffffff',
-                boxSizing: 'border-box',
-              }}
-            >
-              <option value="Relatado pelo paciente">Relatado pelo paciente</option>
-              <option value="Avaliação clínica">Avaliação clínica</option>
-              <option value="Exame laboratorial">Exame laboratorial</option>
-              <option value="Histórico prévio">Histórico prévio</option>
-            </select>
-          </div>
+          <AppSelect
+            label="Origem"
+            value={restrictionForm.origin}
+            onChange={(e) => setRestrictionForm({ ...restrictionForm, origin: e.target.value })}
+            options={[
+              { value: 'Relatado pelo paciente', label: 'Relatado pelo paciente' },
+              { value: 'Avaliação clínica', label: 'Avaliação clínica' },
+              { value: 'Exame laboratorial', label: 'Exame laboratorial' },
+              { value: 'Histórico prévio', label: 'Histórico prévio' },
+            ]}
+          />
 
           {/* Campo Opcional: Observação */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-              Observação <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#94a3b8' }}>(opcional)</span>
-            </label>
-            <textarea
-              rows={3}
-              value={restrictionForm.observation}
-              onChange={(e) => setRestrictionForm({ ...restrictionForm, observation: e.target.value })}
-              placeholder="Descreva sintomas, manifestações clínicas ou orientações adicionais..."
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.8125rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
+          <AppTextarea
+            label="Observação"
+            rows={3}
+            value={restrictionForm.observation}
+            onChange={(e) => setRestrictionForm({ ...restrictionForm, observation: e.target.value })}
+            placeholder="Descreva sintomas, manifestações clínicas ou orientações adicionais..."
+            helperText="Opcional"
+          />
         </div>
       </AppModal>
 

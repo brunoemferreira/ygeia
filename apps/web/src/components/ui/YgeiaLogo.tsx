@@ -54,7 +54,7 @@ export const YgeiaLogo: React.FC<YgeiaLogoProps> = ({
 
   const resolvedPulseColor = inverted
     ? color || 'var(--primary, #059669)'
-    : pulseColor || '#ffffff';
+    : pulseColor || '#7eedd6';
 
   // SVG do Símbolo Oficial
   const symbolSvg = (

@@ -1,5 +1,7 @@
 export * from './AppButton';
 export * from './AppInput';
+export * from './AppSelect';
+export * from './AppTextarea';
 export * from './AppCard';
 export * from './AppBadge';
 export * from './AppModal';
