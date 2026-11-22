@@ -5,6 +5,12 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Eliminação de Exceção e Tela Branca ao Criar Anamnese (`PatientProfileView.tsx`, `AnamneseEditor.tsx`)**:
+  - Correção da ordem dos React Hooks no `PatientProfileView`: o `if (isEditingAnamnese)` retornava antes da declaração de `filteredMenuGroups = useMemo(...)`, violando as Regras dos Hooks do React (`Rendered fewer hooks than expected`) e causando o desmonte da tela ao clicar em "+ Adicionar anamnese" ou em itens do grid.
+  - Reorganização de todas as chamadas de hooks para serem executadas incondicionalmente no topo do componente antes de qualquer saída de renderização.
+  - Adição de fallbacks e encadeamento nulo seguro (`(sections?.campo || '').length` e `sections?.campo || ''`) nas 6 seções clínicas do `AnamneseEditor`.
+
 ### Modificado
 - **Botão Único "+ Adicionar anamnese" (`PatientProfileView.tsx`)**:
   - Conversão do botão dividido com dropdown para um botão de ação única e direta, removendo o seletor com chevron e as opções internas conforme solicitado.

@@ -799,11 +799,11 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
                   Queixa principal e objetivo
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
-                  {sections.queixaPrincipal.length} caracteres
+                  {(sections?.queixaPrincipal || '').length} caracteres
                 </span>
               </div>
               <textarea
-                value={sections.queixaPrincipal}
+                value={sections?.queixaPrincipal || ''}
                 onChange={(e) => setSections({ ...sections, queixaPrincipal: e.target.value })}
                 placeholder="Descreva o motivo da consulta, queixas clínicas e expectativas nutricionais do paciente..."
                 rows={3}
@@ -852,11 +852,11 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
                   História clínica e medicamentos
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
-                  {sections.historiaClinica.length} caracteres
+                  {(sections?.historiaClinica || '').length} caracteres
                 </span>
               </div>
               <textarea
-                value={sections.historiaClinica}
+                value={sections?.historiaClinica || ''}
                 onChange={(e) => setSections({ ...sections, historiaClinica: e.target.value })}
                 placeholder="Diagnósticos prévios, exames recentes, cirurgias e medicamentos de uso contínuo..."
                 rows={3}
@@ -905,11 +905,11 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
                   Hábito intestinal
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
-                  {sections.habitoIntestinal.length} caracteres
+                  {(sections?.habitoIntestinal || '').length} caracteres
                 </span>
               </div>
               <textarea
-                value={sections.habitoIntestinal}
+                value={sections?.habitoIntestinal || ''}
                 onChange={(e) => setSections({ ...sections, habitoIntestinal: e.target.value })}
                 placeholder="Frequência evacuatória, consistência das fezes (Bristol), sintomas de distensão ou desconforto..."
                 rows={3}
@@ -958,11 +958,11 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
                   Hidratação
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
-                  {sections.hidratacao.length} caracteres
+                  {(sections?.hidratacao || '').length} caracteres
                 </span>
               </div>
               <textarea
-                value={sections.hidratacao}
+                value={sections?.hidratacao || ''}
                 onChange={(e) => setSections({ ...sections, hidratacao: e.target.value })}
                 placeholder="Consumo hídrico diário estimado em litros/ml, consumo de chás, café e outras bebidas..."
                 rows={3}
@@ -1011,11 +1011,11 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
                   Rotina alimentar
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
-                  {sections.rotinaAlimentar.length} caracteres
+                  {(sections?.rotinaAlimentar || '').length} caracteres
                 </span>
               </div>
               <textarea
-                value={sections.rotinaAlimentar}
+                value={sections?.rotinaAlimentar || ''}
                 onChange={(e) => setSections({ ...sections, rotinaAlimentar: e.target.value })}
                 placeholder="Horários habituais de refeições, preferências, aversões e locais onde realiza as refeições..."
                 rows={3}
@@ -1064,11 +1064,11 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
                   Sono e atividade física
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
-                  {sections.sonoAtividadeFisica.length} caracteres
+                  {(sections?.sonoAtividadeFisica || '').length} caracteres
                 </span>
               </div>
               <textarea
-                value={sections.sonoAtividadeFisica}
+                value={sections?.sonoAtividadeFisica || ''}
                 onChange={(e) => setSections({ ...sections, sonoAtividadeFisica: e.target.value })}
                 placeholder="Horas e qualidade de sono por noite, frequência e modalidades de exercício praticadas..."
                 rows={3}

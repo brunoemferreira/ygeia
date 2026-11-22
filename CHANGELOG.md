@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🩹 Correção Definitiva da Tela Branca ao Criar ou Abrir Anamnese (React Hook Order)
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - Resolução da exceção de runtime do React 19 (`Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement`).
+    - Realocação do retorno antecipado condicional `if (isEditingAnamnese)` para após a execução incondicional de todos os hooks do componente (`useMemo`, `useState`, `useEffect`), assegurando estrita aderência às Regras dos Hooks do React.
+  - `AnamneseEditor.tsx`:
+    - Adição de proteção com operador de encadeamento opcional e fallbacks (`(sections?.campo || '').length`) em todas as 6 seções clínicas contra eventuais propriedades indefinidas em tempo de renderização.
+
 ### 🔘 Simplificação do Botão de Adicionar Anamnese
 - **Frontend Web (`apps/web`)**:
   - `PatientProfileView.tsx`:

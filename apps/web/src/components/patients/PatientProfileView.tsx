@@ -418,41 +418,6 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     setIsEditingAnamnese(true);
   };
 
-  // Se o usuário estiver preenchendo/editando uma anamnese, exibe a tela do editor completa protegida por ErrorBoundary
-  if (isEditingAnamnese) {
-    return (
-      <AnamneseErrorBoundary
-        onReset={() => {
-          setIsEditingAnamnese(false);
-          setEditingAnamneseData(null);
-        }}
-      >
-        <AnamneseEditor
-          patient={patient}
-          patientAgeString={patientAgeString}
-          initialData={editingAnamneseData}
-          onBack={() => {
-            setIsEditingAnamnese(false);
-            setEditingAnamneseData(null);
-          }}
-          onSave={(saved) => {
-            const index = anamnesesList.findIndex((a) => a.id === saved.id);
-            let updated: AnamneseData[];
-            if (index >= 0) {
-              updated = [...anamnesesList];
-              updated[index] = saved;
-            } else {
-              updated = [saved, ...anamnesesList];
-            }
-            saveAnamnesesToStorage(updated);
-            setIsEditingAnamnese(false);
-            setEditingAnamneseData(null);
-          }}
-        />
-      </AnamneseErrorBoundary>
-    );
-  }
-
   // Definição das seções do menu lateral
   const menuGroups = [
     {
@@ -574,6 +539,41 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       })
       .filter(Boolean) as typeof menuGroups;
   }, [sectionSearch]);
+
+  // Se o usuário estiver preenchendo/editando uma anamnese, exibe a tela do editor completa protegida por ErrorBoundary
+  if (isEditingAnamnese) {
+    return (
+      <AnamneseErrorBoundary
+        onReset={() => {
+          setIsEditingAnamnese(false);
+          setEditingAnamneseData(null);
+        }}
+      >
+        <AnamneseEditor
+          patient={patient}
+          patientAgeString={patientAgeString}
+          initialData={editingAnamneseData}
+          onBack={() => {
+            setIsEditingAnamnese(false);
+            setEditingAnamneseData(null);
+          }}
+          onSave={(saved) => {
+            const index = anamnesesList.findIndex((a) => a.id === saved.id);
+            let updated: AnamneseData[];
+            if (index >= 0) {
+              updated = [...anamnesesList];
+              updated[index] = saved;
+            } else {
+              updated = [saved, ...anamnesesList];
+            }
+            saveAnamnesesToStorage(updated);
+            setIsEditingAnamnese(false);
+            setEditingAnamneseData(null);
+          }}
+        />
+      </AnamneseErrorBoundary>
+    );
+  }
 
   return (
     <div
