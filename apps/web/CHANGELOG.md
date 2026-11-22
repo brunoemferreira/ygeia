@@ -5,6 +5,14 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Tela em Branco e Carregamento no Grid e Editor de Anamneses (`AnamneseEditor.tsx`, `PatientProfileView.tsx`)**:
+  - Eliminação da falha que causava visualização em branco ao clicar nas linhas do grid de anamneses ou no botão de adicionar nova anamnese.
+  - Implementação de cards bem definidos com bordas sutis (`#e2e8f0`), foco em `var(--primary)`, contagem de caracteres e áreas de digitação confortáveis para as 6 seções clínicas (*Queixa principal e objetivo*, *História clínica e medicamentos*, *Hábito intestinal*, *Hidratação*, *Rotina alimentar* e *Sono e atividade física*).
+  - Garantia de que novas anamneses com o modelo *Seções padrão* sejam pré-preenchidas com dados clínicos recomendados, e que anamneses anteriores de formatos legados sejam migradas e exibidas sem perda ou campos vazios.
+  - Inclusão do `AnamneseErrorBoundary` para blindar o editor contra erros de renderização em tempo de execução.
+  - Toda a extensão da linha no grid agora é clicável para abrir a edição, com destaque no hover e separação estrita de eventos (`stopPropagation`) para os botões de ações rápidas.
+
 ### Removido
 - **Itens e Módulos do Menu Principal (`Sidebar.tsx`, `AdminDashboard.tsx`)**:
   - Remoção dos módulos diretos: *Clube de Vantagens*, *Minha Conta Admin* e *Gestão de Contas*.

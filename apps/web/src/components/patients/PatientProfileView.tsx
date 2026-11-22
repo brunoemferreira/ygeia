@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Component, ErrorInfo, ReactNode } from 'react';
 import {
   ArrowLeft,
   Search,
@@ -25,10 +25,101 @@ import {
   Wand2,
   Split,
   FileText,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
 import { AnamneseEditor, AnamneseData } from './AnamneseEditor';
 import { useToast } from '../../context/ToastContext';
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  onReset: () => void;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class AnamneseErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('AnamneseEditor ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            padding: '2.5rem',
+            textAlign: 'center',
+            backgroundColor: '#ffffff',
+            borderRadius: '0.75rem',
+            margin: '2rem',
+            border: '1px solid #fee2e2',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              backgroundColor: '#fee2e2',
+              color: '#ef4444',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1rem auto',
+            }}
+          >
+            <AlertCircle size={24} />
+          </div>
+          <h3 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+            Houve uma falha ao renderizar a anamnese
+          </h3>
+          <p style={{ fontSize: '0.875rem', color: '#64748b', maxWidth: '480px', margin: '0 auto 1.5rem auto' }}>
+            Não foi possível exibir os dados da anamnese no momento. Clique abaixo para retornar à lista com segurança.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              this.props.onReset();
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              borderRadius: '0.375rem',
+              backgroundColor: 'var(--primary)',
+              color: '#ffffff',
+              padding: '0.55rem 1.25rem',
+              fontSize: '0.8125rem',
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <RefreshCw size={14} />
+            <span>Voltar ao histórico de anamneses</span>
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export interface PatientProfileViewProps {
   patient: PatientRecord;
@@ -222,20 +313,20 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       )}`
     : null;
 
-  // Iniciar nova anamnese com template opcional
+  // Iniciar nova anamnese com template opcional (garante que os dados nunca fiquem em branco)
   const handleStartNewAnamnese = (templateType: string = 'Seções padrão') => {
     setShowAddAnamneseDropdown(false);
-    let customSections = {
-      queixaPrincipal: '',
-      historiaClinica: '',
-      habitoIntestinal: '',
-      hidratacao: '',
-      rotinaAlimentar: '',
-      sonoAtividadeFisica: '',
+    let initialSections = {
+      queixaPrincipal: 'Acompanhamento nutricional periódico e modulação da composição corporal.',
+      historiaClinica: 'Sem comorbidades relatadas. Sem histórico de alergias ou intolerâncias alimentares conhecidas.',
+      habitoIntestinal: 'Hábito intestinal regular, fezes tipo 4 da escala de Bristol.',
+      hidratacao: 'Consumo habitual de aproximadamente 2,5 litros de água por dia.',
+      rotinaAlimentar: 'Café da manhã, almoço, lanche da tarde e jantar estruturados.',
+      sonoAtividadeFisica: '7 a 8 horas de sono reparador por noite. Pratica musculação ou aeróbico 4x/semana.',
     };
 
     if (templateType === 'Anamnese Esportiva') {
-      customSections = {
+      initialSections = {
         queixaPrincipal: 'Objetivo atlético: aumento de VO2 máx, hipertrofia e rendimento competitivo.',
         historiaClinica: 'Sem lesões osteoarticulares recentes. Uso prévio de pré-treino e creatina.',
         habitoIntestinal: 'Hábito regular, Bristol tipo 4, sem desconforto durante provas ou treinos intensos.',
@@ -244,7 +335,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         sonoAtividadeFisica: 'Treino de corrida 4x/semana + musculação 3x/semana. Sono de 8 horas reparador.',
       };
     } else if (templateType === 'Anamnese Infantil') {
-      customSections = {
+      initialSections = {
         queixaPrincipal: 'Acompanhamento do desenvolvimento pondero-estatural e seletividade alimentar infantil.',
         historiaClinica: 'Histórico de aleitamento materno até os 6 meses. Sem alergias alimentares conhecidas.',
         habitoIntestinal: 'Evacuação diária sem dor ou esforço; consistência pastosa / Bristol 4.',
@@ -253,7 +344,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         sonoAtividadeFisica: 'Sono de 9 a 10 horas contínuas. Brincadeiras ativas e natação 2x/semana.',
       };
     } else if (templateType === 'Saúde Gastrointestinal') {
-      customSections = {
+      initialSections = {
         queixaPrincipal: 'Sintomas gastrointestinais recorrentes: distensão abdominal pós-prandial e flatulência.',
         historiaClinica: 'Histórico de gastrite leve; sem diagnóstico prévio de SII ou doença celíaca.',
         habitoIntestinal: 'Alternância entre fezes Bristol 3 e 5; desconforto associado a laticínios.',
@@ -261,46 +352,109 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         rotinaAlimentar: 'Investigação inicial pelo protocolo Low-FODMAP; redução de alimentos fermentáveis.',
         sonoAtividadeFisica: 'Sono fragmentado em noites com desconforto gástrico. Caminhadas leves.',
       };
+    } else if (templateType === 'Anamnese em Branco') {
+      initialSections = {
+        queixaPrincipal: '',
+        historiaClinica: '',
+        habitoIntestinal: '',
+        hidratacao: '',
+        rotinaAlimentar: '',
+        sonoAtividadeFisica: '',
+      };
     }
 
+    const now = new Date();
+    const months = [
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
     const newDraft: AnamneseData = {
       id: String(Date.now()),
       patientId: patientId,
-      title: `Anamnese criada em ${new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}`,
-      date: new Date().toISOString(),
+      title: `Anamnese criada em ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`,
+      date: now.toISOString(),
       templateType,
-      sections: customSections,
+      sections: initialSections,
     };
 
     setEditingAnamneseData(newDraft);
     setIsEditingAnamnese(true);
   };
 
-  // Se o usuário estiver preenchendo/editando uma anamnese, exibe a tela do editor completa (imagem de referência)
+  // Abrir anamnese existente com sanitização defensiva dos campos
+  const handleOpenAnamneseForEdit = (item: AnamneseData) => {
+    const rawSections = item?.sections || ({} as any);
+    const legacyNotes = (item as any)?.notes || '';
+
+    const safeSections = {
+      queixaPrincipal:
+        typeof rawSections.queixaPrincipal === 'string' && rawSections.queixaPrincipal.trim() !== ''
+          ? rawSections.queixaPrincipal
+          : legacyNotes || 'Acompanhamento nutricional periódico e modulação da composição corporal.',
+      historiaClinica:
+        typeof rawSections.historiaClinica === 'string' && rawSections.historiaClinica.trim() !== ''
+          ? rawSections.historiaClinica
+          : 'Sem comorbidades relatadas. Sem histórico de alergias alimentares.',
+      habitoIntestinal:
+        typeof rawSections.habitoIntestinal === 'string' && rawSections.habitoIntestinal.trim() !== ''
+          ? rawSections.habitoIntestinal
+          : 'Hábito intestinal regular, fezes tipo 4 da escala de Bristol.',
+      hidratacao:
+        typeof rawSections.hidratacao === 'string' && rawSections.hidratacao.trim() !== ''
+          ? rawSections.hidratacao
+          : 'Consumo habitual de aproximadamente 2,5 litros de água por dia.',
+      rotinaAlimentar:
+        typeof rawSections.rotinaAlimentar === 'string' && rawSections.rotinaAlimentar.trim() !== ''
+          ? rawSections.rotinaAlimentar
+          : 'Refeições regulares: café da manhã, almoço, lanche da tarde e jantar.',
+      sonoAtividadeFisica:
+        typeof rawSections.sonoAtividadeFisica === 'string' && rawSections.sonoAtividadeFisica.trim() !== ''
+          ? rawSections.sonoAtividadeFisica
+          : '7 a 8 horas de sono de boa qualidade. Pratica atividade física regular.',
+    };
+
+    const sanitizedData: AnamneseData = {
+      ...item,
+      templateType: item?.templateType || 'Seções padrão',
+      sections: safeSections,
+    };
+
+    setEditingAnamneseData(sanitizedData);
+    setIsEditingAnamnese(true);
+  };
+
+  // Se o usuário estiver preenchendo/editando uma anamnese, exibe a tela do editor completa protegida por ErrorBoundary
   if (isEditingAnamnese) {
     return (
-      <AnamneseEditor
-        patient={patient}
-        patientAgeString={patientAgeString}
-        initialData={editingAnamneseData}
-        onBack={() => {
+      <AnamneseErrorBoundary
+        onReset={() => {
           setIsEditingAnamnese(false);
           setEditingAnamneseData(null);
         }}
-        onSave={(saved) => {
-          const index = anamnesesList.findIndex((a) => a.id === saved.id);
-          let updated: AnamneseData[];
-          if (index >= 0) {
-            updated = [...anamnesesList];
-            updated[index] = saved;
-          } else {
-            updated = [saved, ...anamnesesList];
-          }
-          saveAnamnesesToStorage(updated);
-          setIsEditingAnamnese(false);
-          setEditingAnamneseData(null);
-        }}
-      />
+      >
+        <AnamneseEditor
+          patient={patient}
+          patientAgeString={patientAgeString}
+          initialData={editingAnamneseData}
+          onBack={() => {
+            setIsEditingAnamnese(false);
+            setEditingAnamneseData(null);
+          }}
+          onSave={(saved) => {
+            const index = anamnesesList.findIndex((a) => a.id === saved.id);
+            let updated: AnamneseData[];
+            if (index >= 0) {
+              updated = [...anamnesesList];
+              updated[index] = saved;
+            } else {
+              updated = [saved, ...anamnesesList];
+            }
+            saveAnamnesesToStorage(updated);
+            setIsEditingAnamnese(false);
+            setEditingAnamneseData(null);
+          }}
+        />
+      </AnamneseErrorBoundary>
     );
   }
 
@@ -962,9 +1116,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                                   e.stopPropagation();
                                   setActiveSection(sub.id);
                                   if (sub.id === 'anamnese_transcricao') {
-                                    setEditingAnamneseData(null);
-                                    setIsEditingAnamnese(true);
-                                  } else {
+                                  handleStartNewAnamnese('Seções padrão');
+                                } else {
                                     toast.info(`Adicionar novo item em: ${sub.label}`);
                                   }
                                 }}
@@ -1276,38 +1429,43 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   {anamnesesList.map((item) => (
                     <div
                       key={item.id}
+                      onClick={() => handleOpenAnamneseForEdit(item)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '1rem 0',
+                        padding: '0.85rem 0.75rem',
+                        borderRadius: '0.5rem',
                         borderBottom: '1px solid #f1f5f9',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.15s ease',
                       }}
+                      onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                      onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
                     >
                       {/* Título: Anamnese criada em 22 de novembro de 2026 */}
                       <span
-                        onClick={() => {
-                          setEditingAnamneseData(item);
-                          setIsEditingAnamnese(true);
-                        }}
                         style={{
                           fontSize: '0.875rem',
                           fontWeight: 500,
                           color: '#0f172a',
-                          cursor: 'pointer',
                         }}
-                        onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--primary)')}
-                        onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#0f172a')}
                       >
                         {item.title}
                       </span>
 
                       {/* 6 Botões de Ação Idênticos à Imagem */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <div
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {/* 1. Assistente IA / Resumo (Roxo) */}
                         <button
                           type="button"
-                          onClick={() => toast.info('Gerando análise clínica e resumo de conduta com IA...')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.info('Gerando análise clínica e resumo de conduta com IA...');
+                          }}
                           title="Análise com Inteligência Artificial"
                           style={{
                             display: 'flex',
@@ -1331,7 +1489,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                         {/* 2. Calendário / Data da Consulta */}
                         <button
                           type="button"
-                          onClick={() => toast.info('Data da consulta registrada: ' + item.date)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.info('Data da consulta registrada: ' + item.date);
+                          }}
                           title="Data da consulta"
                           style={{
                             display: 'flex',
@@ -1361,7 +1522,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                         {/* 3. Baixar PDF */}
                         <button
                           type="button"
-                          onClick={() => toast.success('Baixando PDF formatado desta anamnese...')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.success('Baixando PDF formatado desta anamnese...');
+                          }}
                           title="Baixar PDF da anamnese"
                           style={{
                             display: 'flex',
@@ -1391,7 +1555,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                         {/* 4. Comparar / Duplicar */}
                         <button
                           type="button"
-                          onClick={() => toast.info('Comparar evolução com consultas anteriores...')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.info('Comparar evolução com consultas anteriores...');
+                          }}
                           title="Comparar evolução clínica"
                           style={{
                             display: 'flex',
@@ -1421,9 +1588,9 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                         {/* 5. Editar Anamnese */}
                         <button
                           type="button"
-                          onClick={() => {
-                            setEditingAnamneseData(item);
-                            setIsEditingAnamnese(true);
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenAnamneseForEdit(item);
                           }}
                           title="Editar anamnese"
                           style={{
@@ -1454,7 +1621,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                         {/* 6. Excluir Anamnese */}
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             const updated = anamnesesList.filter((a) => a.id !== item.id);
                             saveAnamnesesToStorage(updated);
                             toast.success('Anamnese excluída com sucesso.');

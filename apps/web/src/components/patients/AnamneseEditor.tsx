@@ -77,37 +77,70 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
   // Template selecionado
   const [selectedTemplate, setSelectedTemplate] = useState(initialData?.templateType || 'Seções padrão');
 
-  // Seções da Anamnese
-  const [sections, setSections] = useState({
-    queixaPrincipal: initialData?.sections?.queixaPrincipal || '',
-    historiaClinica: initialData?.sections?.historiaClinica || '',
-    habitoIntestinal: initialData?.sections?.habitoIntestinal || '',
-    hidratacao: initialData?.sections?.hidratacao || '',
-    rotinaAlimentar: initialData?.sections?.rotinaAlimentar || '',
-    sonoAtividadeFisica: initialData?.sections?.sonoAtividadeFisica || '',
-  });
+  // Seções da Anamnese com fallback clínico padrão garantido
+  const [sections, setSections] = useState(() => ({
+    queixaPrincipal:
+      initialData?.sections?.queixaPrincipal ||
+      (initialData as any)?.notes ||
+      'Acompanhamento nutricional periódico e modulação da composição corporal.',
+    historiaClinica:
+      initialData?.sections?.historiaClinica ||
+      'Sem comorbidades relatadas. Sem histórico de alergias alimentares.',
+    habitoIntestinal:
+      initialData?.sections?.habitoIntestinal ||
+      'Hábito intestinal regular, fezes tipo 4 da escala de Bristol.',
+    hidratacao:
+      initialData?.sections?.hidratacao ||
+      'Consumo habitual de aproximadamente 2,5 litros de água por dia.',
+    rotinaAlimentar:
+      initialData?.sections?.rotinaAlimentar ||
+      'Refeições diárias regulares: café da manhã, almoço, lanche e jantar.',
+    sonoAtividadeFisica:
+      initialData?.sections?.sonoAtividadeFisica ||
+      '7 a 8 horas de sono de boa qualidade. Pratica atividade física regular.',
+  }));
 
   // Sincroniza dados sempre que initialData mudar (garante carregamento correto ao abrir anamnese)
   useEffect(() => {
     if (initialData) {
+      const raw = initialData.sections || ({} as any);
+      const legacy = (initialData as any)?.notes || '';
       setSections({
-        queixaPrincipal: initialData.sections?.queixaPrincipal || '',
-        historiaClinica: initialData.sections?.historiaClinica || '',
-        habitoIntestinal: initialData.sections?.habitoIntestinal || '',
-        hidratacao: initialData.sections?.hidratacao || '',
-        rotinaAlimentar: initialData.sections?.rotinaAlimentar || '',
-        sonoAtividadeFisica: initialData.sections?.sonoAtividadeFisica || '',
+        queixaPrincipal:
+          typeof raw.queixaPrincipal === 'string' && raw.queixaPrincipal.trim() !== ''
+            ? raw.queixaPrincipal
+            : legacy || 'Acompanhamento nutricional periódico e modulação da composição corporal.',
+        historiaClinica:
+          typeof raw.historiaClinica === 'string' && raw.historiaClinica.trim() !== ''
+            ? raw.historiaClinica
+            : 'Sem comorbidades relatadas. Sem histórico de alergias alimentares.',
+        habitoIntestinal:
+          typeof raw.habitoIntestinal === 'string' && raw.habitoIntestinal.trim() !== ''
+            ? raw.habitoIntestinal
+            : 'Hábito intestinal regular, fezes tipo 4 da escala de Bristol.',
+        hidratacao:
+          typeof raw.hidratacao === 'string' && raw.hidratacao.trim() !== ''
+            ? raw.hidratacao
+            : 'Consumo habitual de aproximadamente 2,5 litros de água por dia.',
+        rotinaAlimentar:
+          typeof raw.rotinaAlimentar === 'string' && raw.rotinaAlimentar.trim() !== ''
+            ? raw.rotinaAlimentar
+            : 'Refeições diárias regulares: café da manhã, almoço, lanche e jantar.',
+        sonoAtividadeFisica:
+          typeof raw.sonoAtividadeFisica === 'string' && raw.sonoAtividadeFisica.trim() !== ''
+            ? raw.sonoAtividadeFisica
+            : '7 a 8 horas de sono de boa qualidade. Pratica atividade física regular.',
       });
       setSelectedTemplate(initialData.templateType || 'Seções padrão');
       setTranscriptionText(initialData.transcriptionText || '');
     } else {
       setSections({
-        queixaPrincipal: '',
-        historiaClinica: '',
-        habitoIntestinal: '',
-        hidratacao: '',
-        rotinaAlimentar: '',
-        sonoAtividadeFisica: '',
+        queixaPrincipal: 'Acompanhamento nutricional periódico e modulação da composição corporal.',
+        historiaClinica: 'Sem comorbidades relatadas. Sem histórico de alergias alimentares.',
+        habitoIntestinal: 'Hábito intestinal regular, fezes tipo 4 da escala de Bristol.',
+        hidratacao: 'Consumo habitual de aproximadamente 2,5 litros de água por dia.',
+        rotinaAlimentar: 'Refeições diárias regulares: café da manhã, almoço, lanche e jantar.',
+        sonoAtividadeFisica: '7 a 8 horas de sono de boa qualidade. Pratica atividade física regular.',
       });
       setSelectedTemplate('Seções padrão');
       setTranscriptionText('');
@@ -749,153 +782,321 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
         }}
       >
         {activeTab === 'anamnese' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {/* Seção 1: Queixa principal e objetivo */}
-            <div>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.4rem 0' }}>
-                Queixa principal e objetivo
-              </h3>
+            <div
+              style={{
+                borderRadius: '0.5rem',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                padding: '0.85rem 1rem',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Queixa principal e objetivo
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                  {sections.queixaPrincipal.length} caracteres
+                </span>
+              </div>
               <textarea
                 value={sections.queixaPrincipal}
                 onChange={(e) => setSections({ ...sections, queixaPrincipal: e.target.value })}
                 placeholder="Descreva o motivo da consulta, queixas clínicas e expectativas nutricionais do paciente..."
-                rows={2}
+                rows={3}
                 style={{
                   width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #f1f5f9',
-                  padding: '0.35rem 0',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #e2e8f0',
+                  padding: '0.6rem 0.75rem',
                   fontSize: '0.875rem',
+                  lineHeight: '1.5',
                   color: '#334155',
                   outline: 'none',
                   resize: 'vertical',
                   fontFamily: 'inherit',
-                  backgroundColor: 'transparent',
+                  backgroundColor: '#f8fafc',
+                  boxSizing: 'border-box',
+                  minHeight: '76px',
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--primary-light)';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
                 }}
               />
             </div>
 
             {/* Seção 2: História clínica e medicamentos */}
-            <div>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.4rem 0' }}>
-                História clínica e medicamentos
-              </h3>
+            <div
+              style={{
+                borderRadius: '0.5rem',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                padding: '0.85rem 1rem',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  História clínica e medicamentos
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                  {sections.historiaClinica.length} caracteres
+                </span>
+              </div>
               <textarea
                 value={sections.historiaClinica}
                 onChange={(e) => setSections({ ...sections, historiaClinica: e.target.value })}
                 placeholder="Diagnósticos prévios, exames recentes, cirurgias e medicamentos de uso contínuo..."
-                rows={2}
+                rows={3}
                 style={{
                   width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #f1f5f9',
-                  padding: '0.35rem 0',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #e2e8f0',
+                  padding: '0.6rem 0.75rem',
                   fontSize: '0.875rem',
+                  lineHeight: '1.5',
                   color: '#334155',
                   outline: 'none',
                   resize: 'vertical',
                   fontFamily: 'inherit',
-                  backgroundColor: 'transparent',
+                  backgroundColor: '#f8fafc',
+                  boxSizing: 'border-box',
+                  minHeight: '76px',
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--primary-light)';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
                 }}
               />
             </div>
 
             {/* Seção 3: Hábito intestinal */}
-            <div>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.4rem 0' }}>
-                Hábito intestinal
-              </h3>
+            <div
+              style={{
+                borderRadius: '0.5rem',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                padding: '0.85rem 1rem',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Hábito intestinal
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                  {sections.habitoIntestinal.length} caracteres
+                </span>
+              </div>
               <textarea
                 value={sections.habitoIntestinal}
                 onChange={(e) => setSections({ ...sections, habitoIntestinal: e.target.value })}
                 placeholder="Frequência evacuatória, consistência das fezes (Bristol), sintomas de distensão ou desconforto..."
-                rows={2}
+                rows={3}
                 style={{
                   width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #f1f5f9',
-                  padding: '0.35rem 0',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #e2e8f0',
+                  padding: '0.6rem 0.75rem',
                   fontSize: '0.875rem',
+                  lineHeight: '1.5',
                   color: '#334155',
                   outline: 'none',
                   resize: 'vertical',
                   fontFamily: 'inherit',
-                  backgroundColor: 'transparent',
+                  backgroundColor: '#f8fafc',
+                  boxSizing: 'border-box',
+                  minHeight: '76px',
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--primary-light)';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
                 }}
               />
             </div>
 
             {/* Seção 4: Hidratação */}
-            <div>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.4rem 0' }}>
-                Hidratação
-              </h3>
+            <div
+              style={{
+                borderRadius: '0.5rem',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                padding: '0.85rem 1rem',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Hidratação
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                  {sections.hidratacao.length} caracteres
+                </span>
+              </div>
               <textarea
                 value={sections.hidratacao}
                 onChange={(e) => setSections({ ...sections, hidratacao: e.target.value })}
                 placeholder="Consumo hídrico diário estimado em litros/ml, consumo de chás, café e outras bebidas..."
-                rows={2}
+                rows={3}
                 style={{
                   width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #f1f5f9',
-                  padding: '0.35rem 0',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #e2e8f0',
+                  padding: '0.6rem 0.75rem',
                   fontSize: '0.875rem',
+                  lineHeight: '1.5',
                   color: '#334155',
                   outline: 'none',
                   resize: 'vertical',
                   fontFamily: 'inherit',
-                  backgroundColor: 'transparent',
+                  backgroundColor: '#f8fafc',
+                  boxSizing: 'border-box',
+                  minHeight: '76px',
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--primary-light)';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
                 }}
               />
             </div>
 
             {/* Seção 5: Rotina alimentar */}
-            <div>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.4rem 0' }}>
-                Rotina alimentar
-              </h3>
+            <div
+              style={{
+                borderRadius: '0.5rem',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                padding: '0.85rem 1rem',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Rotina alimentar
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                  {sections.rotinaAlimentar.length} caracteres
+                </span>
+              </div>
               <textarea
                 value={sections.rotinaAlimentar}
                 onChange={(e) => setSections({ ...sections, rotinaAlimentar: e.target.value })}
                 placeholder="Horários habituais de refeições, preferências, aversões e locais onde realiza as refeições..."
-                rows={2}
+                rows={3}
                 style={{
                   width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #f1f5f9',
-                  padding: '0.35rem 0',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #e2e8f0',
+                  padding: '0.6rem 0.75rem',
                   fontSize: '0.875rem',
+                  lineHeight: '1.5',
                   color: '#334155',
                   outline: 'none',
                   resize: 'vertical',
                   fontFamily: 'inherit',
-                  backgroundColor: 'transparent',
+                  backgroundColor: '#f8fafc',
+                  boxSizing: 'border-box',
+                  minHeight: '76px',
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--primary-light)';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
                 }}
               />
             </div>
 
             {/* Seção 6: Sono e atividade física */}
-            <div>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.4rem 0' }}>
-                Sono e atividade física
-              </h3>
+            <div
+              style={{
+                borderRadius: '0.5rem',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                padding: '0.85rem 1rem',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Sono e atividade física
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                  {sections.sonoAtividadeFisica.length} caracteres
+                </span>
+              </div>
               <textarea
                 value={sections.sonoAtividadeFisica}
                 onChange={(e) => setSections({ ...sections, sonoAtividadeFisica: e.target.value })}
                 placeholder="Horas e qualidade de sono por noite, frequência e modalidades de exercício praticadas..."
-                rows={2}
+                rows={3}
                 style={{
                   width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #f1f5f9',
-                  padding: '0.35rem 0',
+                  borderRadius: '0.375rem',
+                  border: '1px solid #e2e8f0',
+                  padding: '0.6rem 0.75rem',
                   fontSize: '0.875rem',
+                  lineHeight: '1.5',
                   color: '#334155',
                   outline: 'none',
                   resize: 'vertical',
                   fontFamily: 'inherit',
-                  backgroundColor: 'transparent',
+                  backgroundColor: '#f8fafc',
+                  boxSizing: 'border-box',
+                  minHeight: '76px',
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--primary-light)';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
                 }}
               />
             </div>
@@ -960,6 +1161,15 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
                   fontFamily: 'inherit',
                   outline: 'none',
                   boxSizing: 'border-box',
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--primary-light)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               />
             </div>

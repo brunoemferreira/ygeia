@@ -9,6 +9,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🩹 Correção da Tela em Branco no Grid de Anamneses e Aprimoramento Visual do Editor
+- **Frontend Web (`apps/web`)**:
+  - `AnamneseEditor.tsx`:
+    - Resolução definitiva do problema de carregamento de anamnese e visualização vazia/em branco ao clicar em inserção ou edição.
+    - Transformação dos campos do canvas clínico em cards com bordas nítidas (`#e2e8f0`), background limpo, indicador de contagem de caracteres em tempo real e anel de foco dinâmico (`var(--primary)` e `var(--primary-light)`).
+    - Inicialização robusta e à prova de falhas: novas anamneses com template "Seções padrão" agora são pré-preenchidas com dados clínicos orientadores, e anamneses existentes vindas de formatos antigos têm suas seções recuperadas automaticamente.
+    - Aplicação de anel de foco e estados interativos com tema dinâmico no campo de transcrição de voz por inteligência artificial.
+  - `PatientProfileView.tsx`:
+    - Inclusão do componente de tratamento de exceções `AnamneseErrorBoundary` para proteger a interface contra quebras não tratadas em tempo de execução, oferecendo botão de recuperação segura.
+    - Implementação de sanitização e migração defensiva de anamneses na função `handleOpenAnamneseForEdit`, garantindo que todas as 6 seções sejam strings válidas antes de abrir o editor.
+    - Tornou toda a linha da anamnese no grid clicável (`cursor: pointer`), com feedback visual ao passar o mouse e isolamento de propagação de clique (`e.stopPropagation()`) nos botões de ação (IA, Calendário, Download, Comparar e Excluir).
+    - Ajuste no atalho de adição rápida `+` no menu lateral clínico para inicializar o rascunho com o template padrão estruturado.
+
 ### 🧹 Limpeza e Simplificação do Menu Principal
 - **Frontend Web (`apps/web`)**:
   - `Sidebar.tsx`:
