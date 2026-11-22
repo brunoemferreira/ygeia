@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   User,
   Stethoscope,
@@ -9,11 +9,73 @@ import {
   FileText,
   Receipt,
   ChevronLeft,
+  ChevronDown,
   Check,
   AlertCircle,
+  X,
+  Plus,
+  UserCheck,
+  Tag,
+  Activity,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { PatientRecord } from './PatientDirectory';
+
+export interface CountryDialCode {
+  code: string;
+  dialCode: string;
+  flag: string;
+  name: string;
+}
+
+export const COUNTRY_DIAL_CODES: CountryDialCode[] = [
+  { code: 'BR', dialCode: '+55', flag: '🇧🇷', name: 'Brasil' },
+  { code: 'US', dialCode: '+1', flag: '🇺🇸', name: 'Estados Unidos / Canadá' },
+  { code: 'PT', dialCode: '+351', flag: '🇵🇹', name: 'Portugal' },
+  { code: 'ES', dialCode: '+34', flag: '🇪🇸', name: 'Espanha' },
+  { code: 'AR', dialCode: '+54', flag: '🇦🇷', name: 'Argentina' },
+  { code: 'GB', dialCode: '+44', flag: '🇬🇧', name: 'Reino Unido' },
+  { code: 'FR', dialCode: '+33', flag: '🇫🇷', name: 'França' },
+  { code: 'DE', dialCode: '+49', flag: '🇩🇪', name: 'Alemanha' },
+  { code: 'IT', dialCode: '+39', flag: '🇮🇹', name: 'Itália' },
+  { code: 'UY', dialCode: '+598', flag: '🇺🇾', name: 'Uruguai' },
+  { code: 'PY', dialCode: '+595', flag: '🇵🇾', name: 'Paraguai' },
+  { code: 'CL', dialCode: '+56', flag: '🇨🇱', name: 'Chile' },
+  { code: 'CO', dialCode: '+57', flag: '🇨🇴', name: 'Colômbia' },
+  { code: 'MX', dialCode: '+52', flag: '🇲🇽', name: 'México' },
+  { code: 'CH', dialCode: '+41', flag: '🇨🇭', name: 'Suíça' },
+  { code: 'IE', dialCode: '+353', flag: '🇮🇪', name: 'Irlanda' },
+  { code: 'AO', dialCode: '+244', flag: '🇦🇴', name: 'Angola' },
+  { code: 'MZ', dialCode: '+258', flag: '🇲🇿', name: 'Moçambique' },
+  { code: 'AU', dialCode: '+61', flag: '🇦🇺', name: 'Austrália' },
+  { code: 'JP', dialCode: '+81', flag: '🇯🇵', name: 'Japão' },
+  { code: 'PE', dialCode: '+51', flag: '🇵🇪', name: 'Peru' },
+  { code: 'BO', dialCode: '+591', flag: '🇧🇴', name: 'Bolívia' },
+  { code: 'EC', dialCode: '+593', flag: '🇪🇨', name: 'Equador' },
+  { code: 'VE', dialCode: '+58', flag: '🇻🇪', name: 'Venezuela' },
+  { code: 'NL', dialCode: '+31', flag: '🇳🇱', name: 'Holanda' },
+  { code: 'BE', dialCode: '+32', flag: '🇧🇪', name: 'Bélgica' },
+  { code: 'SE', dialCode: '+46', flag: '🇸🇪', name: 'Suécia' },
+  { code: 'NO', dialCode: '+47', flag: '🇳🇴', name: 'Noruega' },
+  { code: 'DK', dialCode: '+45', flag: '🇩🇰', name: 'Dinamarca' },
+  { code: 'AE', dialCode: '+971', flag: '🇦🇪', name: 'Emirados Árabes' },
+  { code: 'ZA', dialCode: '+27', flag: '🇿🇦', name: 'África do Sul' },
+  { code: 'IN', dialCode: '+91', flag: '🇮🇳', name: 'Índia' },
+  { code: 'CN', dialCode: '+86', flag: '🇨🇳', name: 'China' },
+  { code: 'KR', dialCode: '+82', flag: '🇰🇷', name: 'Coreia do Sul' },
+  { code: 'NZ', dialCode: '+64', flag: '🇳🇿', name: 'Nova Zelândia' },
+  { code: 'IL', dialCode: '+972', flag: '🇮🇱', name: 'Israel' },
+  { code: 'RU', dialCode: '+7', flag: '🇷🇺', name: 'Rússia' },
+];
+
+export const OBJECTIVE_OPTIONS = [
+  'Emagrecimento',
+  'Hipertrofia',
+  'Manutenção',
+  'Performance Esportiva',
+  'Reeducação Alimentar',
+  'Saúde Digestiva',
+];
 
 export interface NewPatientViewProps {
   initialPatient?: PatientRecord | null;
@@ -126,7 +188,29 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
   const [birthDate, setBirthDate] = useState(initialPatient?.birthDate ? formatDate(initialPatient.birthDate) : '');
   const [gender, setGender] = useState(initialPatient?.gender || initialPatient?.sex || '');
   const [email, setEmail] = useState(initialPatient?.email || '');
-  const [phone, setPhone] = useState(initialPatient?.phone ? formatPhone(initialPatient.phone) : '');
+
+  // Phone with Country Dial Code Picker
+  const initialCountry = useMemo(() => {
+    if (initialPatient?.phone) {
+      const match = COUNTRY_DIAL_CODES.find((c) => initialPatient.phone?.startsWith(c.dialCode));
+      if (match) return match;
+    }
+    return COUNTRY_DIAL_CODES[0]; // Brasil (+55)
+  }, [initialPatient]);
+
+  const [selectedCountry, setSelectedCountry] = useState<CountryDialCode>(initialCountry);
+  const [isCountryPickerOpen, setIsCountryPickerOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
+
+  const [phone, setPhone] = useState(() => {
+    if (!initialPatient?.phone) return '';
+    let p = initialPatient.phone;
+    if (p.startsWith(initialCountry.dialCode)) {
+      p = p.replace(initialCountry.dialCode, '').trim();
+    }
+    return initialCountry.code === 'BR' ? formatPhone(p) : p;
+  });
+
   const [cpf, setCpf] = useState(initialPatient?.cpf ? formatCpf(initialPatient.cpf) : '');
   const [guardianName, setGuardianName] = useState(initialPatient?.guardianName || '');
   const [guardianCpf, setGuardianCpf] = useState(
@@ -139,11 +223,60 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
     initialPatient?.sendWelcomeWhatsapp !== undefined ? initialPatient.sendWelcomeWhatsapp : true
   );
 
-  // Step 2: Protocols
+  // Step 2: Protocols, Objective, Tags and Pathologies
+  const [objective, setObjective] = useState(
+    initialPatient?.objective || initialPatient?.goal || 'Emagrecimento'
+  );
   const [selectedProtocols, setSelectedProtocols] = useState<string[]>(
     initialPatient?.treatmentProtocols || ['Emagrecimento Saudável']
   );
-  const [protocolNotes, setProtocolNotes] = useState(initialPatient?.protocolNotes || initialPatient?.goal || '');
+  const [protocolNotes, setProtocolNotes] = useState(initialPatient?.protocolNotes || '');
+
+  const [tags, setTags] = useState<string[]>(
+    initialPatient?.tags || ['Atleta', 'Low Carb']
+  );
+  const [tagInput, setTagInput] = useState('');
+
+  const [pathologies, setPathologies] = useState<string[]>(
+    initialPatient?.pathologies || []
+  );
+  const [pathologyInput, setPathologyInput] = useState('');
+
+  const handleAddTag = () => {
+    const trimmed = tagInput.trim();
+    if (!trimmed) return;
+    if (!tags.includes(trimmed)) {
+      setTags((prev) => [...prev, trimmed]);
+      toast.success(`Tag "${trimmed}" adicionada.`);
+    }
+    setTagInput('');
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags((prev) => prev.filter((t) => t !== tagToRemove));
+  };
+
+  const handleAddPathology = () => {
+    const trimmed = pathologyInput.trim();
+    if (!trimmed) return;
+    if (!pathologies.includes(trimmed)) {
+      setPathologies((prev) => [...prev, trimmed]);
+      toast.success(`Patologia "${trimmed}" registrada.`);
+    }
+    setPathologyInput('');
+  };
+
+  const handleRemovePathology = (pathologyToRemove: string) => {
+    setPathologies((prev) => prev.filter((p) => p !== pathologyToRemove));
+  };
+
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch.trim()) return COUNTRY_DIAL_CODES;
+    const q = countrySearch.toLowerCase().trim();
+    return COUNTRY_DIAL_CODES.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.dialCode.includes(q) || c.code.toLowerCase().includes(q)
+    );
+  }, [countrySearch]);
 
   // Step 3: Insurance
   const [insuranceName, setInsuranceName] = useState(
@@ -248,18 +381,28 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
 
     setIsSubmitting(true);
     try {
+      const formattedPhoneValue = phone.trim()
+        ? phone.startsWith('+')
+          ? phone.trim()
+          : `${selectedCountry.dialCode} ${phone.trim()}`
+        : undefined;
+
       const payload = {
         id: initialPatient?.id || String(Date.now()),
         fullName: fullName.trim(),
         birthDate,
         gender: gender || 'Não informado',
         email: email.trim() || undefined,
-        phone: phone || undefined,
+        phone: formattedPhoneValue,
         cpf: cpf || undefined,
         guardianName: guardianName.trim() || undefined,
         guardianCpf: guardianCpf || undefined,
         sendWelcomeEmail,
         sendWelcomeWhatsapp,
+        objective: objective || undefined,
+        goal: objective || protocolNotes.trim() || undefined,
+        tags,
+        pathologies,
         treatmentProtocols: selectedProtocols,
         protocolNotes: protocolNotes.trim() || undefined,
         insurancePlan: insuranceName,
@@ -482,7 +625,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   />
                 </div>
 
-                {/* Data de Nascimento e Sexo */}
+                {/* Data de Nascimento e Sexo de referência para cálculos */}
                 <div className="ygeia-grid-1-2">
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
@@ -492,7 +635,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       type="text"
                       value={birthDate}
                       onChange={(e) => setBirthDate(formatDate(e.target.value))}
-                      placeholder="DD/MM/AAAA"
+                      placeholder="DD/MM/YYYY"
                       maxLength={10}
                       required
                       style={{
@@ -517,39 +660,26 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      Sexo <span style={{ color: 'var(--primary)' }}>*</span>
+                      Sexo de referência para cálculos <span style={{ color: 'var(--primary)' }}>*</span>
                     </label>
                     <select
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.625rem 0.875rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.875rem',
-                        backgroundColor: '#ffffff',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = 'var(--primary)';
-                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = '#cbd5e1';
-                        e.target.style.boxShadow = 'none';
-                      }}
+                      className="ygeia-select"
+                      required
                     >
                       <option value="">Selecione</option>
                       <option value="Feminino">Feminino</option>
                       <option value="Masculino">Masculino</option>
                       <option value="Outro">Outro</option>
                     </select>
+                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem', lineHeight: 1.4, margin: '0.35rem 0 0 0' }}>
+                      Usado nos cálculos e nas faixas de referência. Revise conforme a avaliação clínica.
+                    </p>
                   </div>
                 </div>
 
-                {/* E-mail e Telefone */}
+                {/* E-mail e Telefone com Bandeirinhas dos Países */}
                 <div className="ygeia-grid-1-2">
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
@@ -584,44 +714,158 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                       Telefone
                     </label>
-                    <div
-                      style={{
-                        display: 'flex',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        overflow: 'hidden',
-                      }}
-                    >
+                    <div style={{ position: 'relative' }}>
                       <div
                         style={{
                           display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.375rem',
-                          backgroundColor: '#f8fafc',
-                          borderRight: '1px solid #cbd5e1',
-                          padding: '0 0.75rem',
-                          fontSize: '0.875rem',
-                          color: '#475569',
-                          fontWeight: 600,
+                          borderRadius: '0.5rem',
+                          border: '1px solid #cbd5e1',
+                          backgroundColor: '#ffffff',
+                          transition: 'all 0.15s ease',
+                          overflow: 'visible',
                         }}
                       >
-                        <span>🇧🇷</span>
-                        <span>+55</span>
+                        {/* Botão com Bandeira e DDI */}
+                        <button
+                          type="button"
+                          onClick={() => setIsCountryPickerOpen((prev) => !prev)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.375rem',
+                            backgroundColor: '#f8fafc',
+                            border: 'none',
+                            borderRight: '1px solid #cbd5e1',
+                            padding: '0 0.75rem',
+                            fontSize: '0.875rem',
+                            color: '#334155',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            borderTopLeftRadius: '0.5rem',
+                            borderBottomLeftRadius: '0.5rem',
+                            outline: 'none',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
+                          }}
+                          title="Selecione o país do código de área telefônica"
+                        >
+                          <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{selectedCountry.flag}</span>
+                          <span>{selectedCountry.dialCode}</span>
+                          <ChevronDown size={14} color="#64748b" />
+                        </button>
+
+                        <input
+                          type="text"
+                          value={phone}
+                          onChange={(e) => setPhone(selectedCountry.code === 'BR' ? formatPhone(e.target.value) : e.target.value)}
+                          placeholder={selectedCountry.code === 'BR' ? '(00) 00000-0000' : 'Número do telefone'}
+                          maxLength={selectedCountry.code === 'BR' ? 15 : 20}
+                          style={{
+                            flex: 1,
+                            border: 'none',
+                            padding: '0.625rem 0.875rem',
+                            fontSize: '0.875rem',
+                            outline: 'none',
+                            borderTopRightRadius: '0.5rem',
+                            borderBottomRightRadius: '0.5rem',
+                            boxSizing: 'border-box',
+                            width: '100%',
+                          }}
+                          onFocus={(e) => {
+                            const parent = (e.target.parentElement as HTMLElement);
+                            if (parent) {
+                              parent.style.borderColor = 'var(--primary)';
+                              parent.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const parent = (e.target.parentElement as HTMLElement);
+                            if (parent) {
+                              parent.style.borderColor = '#cbd5e1';
+                              parent.style.boxShadow = 'none';
+                            }
+                          }}
+                        />
                       </div>
-                      <input
-                        type="text"
-                        value={phone}
-                        onChange={(e) => setPhone(formatPhone(e.target.value))}
-                        placeholder="(00) 00000-0000"
-                        maxLength={15}
-                        style={{
-                          flex: 1,
-                          border: 'none',
-                          padding: '0.625rem 0.875rem',
-                          fontSize: '0.875rem',
-                          outline: 'none',
-                        }}
-                      />
+
+                      {/* Dropdown com Busca de Países e Bandeirinhas */}
+                      {isCountryPickerOpen && (
+                        <>
+                          <div
+                            style={{ position: 'fixed', inset: 0, zIndex: 45 }}
+                            onClick={() => setIsCountryPickerOpen(false)}
+                          />
+                          <div className="ygeia-country-dropdown">
+                            <div style={{ padding: '0.5rem', borderBottom: '1px solid #f1f5f9', position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 2 }}>
+                              <input
+                                type="text"
+                                value={countrySearch}
+                                onChange={(e) => setCountrySearch(e.target.value)}
+                                placeholder="Pesquisar país ou DDI..."
+                                autoFocus
+                                style={{
+                                  width: '100%',
+                                  padding: '0.45rem 0.65rem',
+                                  borderRadius: '0.375rem',
+                                  border: '1px solid #cbd5e1',
+                                  fontSize: '0.8125rem',
+                                  outline: 'none',
+                                  boxSizing: 'border-box',
+                                }}
+                              />
+                            </div>
+                            <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                              {filteredCountries.map((c) => (
+                                <button
+                                  key={c.code}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedCountry(c);
+                                    setIsCountryPickerOpen(false);
+                                    setCountrySearch('');
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '0.5rem 0.75rem',
+                                    border: 'none',
+                                    background: selectedCountry.code === c.code ? 'var(--primary-light)' : 'transparent',
+                                    color: selectedCountry.code === c.code ? 'var(--primary)' : '#1e293b',
+                                    fontSize: '0.8125rem',
+                                    fontWeight: selectedCountry.code === c.code ? 700 : 500,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background 0.15s ease',
+                                  }}
+                                  onMouseOver={(e) => {
+                                    if (selectedCountry.code !== c.code) {
+                                      (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                                    }
+                                  }}
+                                  onMouseOut={(e) => {
+                                    if (selectedCountry.code !== c.code) {
+                                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                                    }
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ fontSize: '1.125rem' }}>{c.flag}</span>
+                                    <span>{c.name}</span>
+                                  </div>
+                                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{c.dialCode}</span>
+                                </button>
+                              ))}
+                              {filteredCountries.length === 0 && (
+                                <div style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8' }}>
+                                  Nenhum país encontrado
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -657,70 +901,92 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   />
                 </div>
 
-                {/* Responsável (Para menores) */}
-                <div className="ygeia-grid-1-2">
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      Nome do responsável
-                    </label>
-                    <input
-                      type="text"
-                      value={guardianName}
-                      onChange={(e) => setGuardianName(e.target.value)}
-                      placeholder="Nome completo do responsável"
-                      style={{
-                        width: '100%',
-                        padding: '0.625rem 0.875rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.875rem',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = 'var(--primary)';
-                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = '#cbd5e1';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                    />
+                {/* Card do Responsável Legal (Para menores de idade) */}
+                <div
+                  style={{
+                    borderRadius: '0.75rem',
+                    border: '1px solid #e2e8f0',
+                    backgroundColor: '#f8fafc',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <UserCheck size={16} color="var(--primary)" />
+                    <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#1e293b' }}>
+                      Dados do Responsável Legal
+                    </span>
                   </div>
 
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      CPF do responsável
-                    </label>
-                    <input
-                      type="text"
-                      value={guardianCpf}
-                      onChange={(e) => setGuardianCpf(formatCpf(e.target.value))}
-                      placeholder="000.000.000-00"
-                      maxLength={14}
-                      style={{
-                        width: '100%',
-                        padding: '0.625rem 0.875rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.875rem',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = 'var(--primary)';
-                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = '#cbd5e1';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                    />
+                  <div className="ygeia-grid-1-2">
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                        Nome do responsável
+                      </label>
+                      <input
+                        type="text"
+                        value={guardianName}
+                        onChange={(e) => setGuardianName(e.target.value)}
+                        placeholder="Nome completo do responsável"
+                        style={{
+                          width: '100%',
+                          padding: '0.625rem 0.875rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.875rem',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                          backgroundColor: '#ffffff',
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = 'var(--primary)';
+                          e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = '#cbd5e1';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                        CPF do responsável
+                      </label>
+                      <input
+                        type="text"
+                        value={guardianCpf}
+                        onChange={(e) => setGuardianCpf(formatCpf(e.target.value))}
+                        placeholder="000.000.000-00"
+                        maxLength={14}
+                        style={{
+                          width: '100%',
+                          padding: '0.625rem 0.875rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.875rem',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                          backgroundColor: '#ffffff',
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = 'var(--primary)';
+                          e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = '#cbd5e1';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
                   </div>
+
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>
+                    Para menores de idade — o recibo será emitido em nome do responsável.
+                  </p>
                 </div>
-                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '-0.5rem 0 0 0' }}>
-                  Para menores de idade — o recibo será emitido em nome do responsável.
-                </p>
 
                 {/* Mensagem de boas-vindas */}
                 <div style={{ marginTop: '0.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
@@ -926,10 +1192,30 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                     Tratamento e protocolos
                   </h3>
                   <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
-                    Defina os objetivos clínicos, protocolos ativos e metas terapêuticas do paciente.
+                    Defina o objetivo principal, protocolos clínicos, tags e patologias do paciente.
                   </p>
                 </div>
 
+                {/* Combobox: Objetivo Principal */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    Objetivo
+                  </label>
+                  <select
+                    value={objective}
+                    onChange={(e) => setObjective(e.target.value)}
+                    className="ygeia-select"
+                  >
+                    <option value="">Selecione o objetivo</option>
+                    {OBJECTIVE_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Protocolos e Metas Clínicas */}
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem' }}>
                     Protocolos e Metas Clínicas
@@ -965,6 +1251,221 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   </div>
                 </div>
 
+                {/* Campo Tags com Adição Dinâmica e Badges com 'X' */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    Tags do paciente
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddTag();
+                        }
+                      }}
+                      placeholder="Digite uma tag (ex: Atleta, Cetogênica, Intolerante a lactose)..."
+                      style={{
+                        flex: 1,
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddTag}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        backgroundColor: 'var(--primary)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '0.5rem',
+                        padding: '0.625rem 1rem',
+                        fontSize: '0.8125rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <Plus size={15} />
+                      <span>Adicionar</span>
+                    </button>
+                  </div>
+
+                  {/* Badges de Tags */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.5rem' }}>
+                    {tags.map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          backgroundColor: 'var(--primary-light)',
+                          border: '1px solid var(--primary-border)',
+                          color: 'var(--primary)',
+                          padding: '0.25rem 0.65rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <Tag size={12} />
+                        <span>{tag}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--primary)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: 0,
+                            marginLeft: '0.15rem',
+                          }}
+                          title={`Remover tag ${tag}`}
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                    {tags.length === 0 && (
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                        Nenhuma tag vinculada ainda.
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Campo Patologias com Adição Dinâmica e Badges com 'X' */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
+                    Patologias
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      value={pathologyInput}
+                      onChange={(e) => setPathologyInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddPathology();
+                        }
+                      }}
+                      placeholder="Digite uma patologia (ex: Diabetes Tipo 2, Hipertensão, SOP, Hipotireoidismo)..."
+                      style={{
+                        flex: 1,
+                        padding: '0.625rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = 'var(--primary)';
+                        e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#cbd5e1';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddPathology}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        backgroundColor: '#e11d48',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '0.5rem',
+                        padding: '0.625rem 1rem',
+                        fontSize: '0.8125rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <Plus size={15} />
+                      <span>Adicionar</span>
+                    </button>
+                  </div>
+
+                  {/* Badges de Patologias */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.5rem' }}>
+                    {pathologies.map((patho) => (
+                      <span
+                        key={patho}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          backgroundColor: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          color: '#e11d48',
+                          padding: '0.25rem 0.65rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <Activity size={12} />
+                        <span>{patho}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePathology(patho)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#e11d48',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: 0,
+                            marginLeft: '0.15rem',
+                          }}
+                          title={`Remover patologia ${patho}`}
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                    {pathologies.length === 0 && (
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                        Nenhuma patologia cadastrada para este paciente.
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Observações do tratamento */}
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
                     Observações do tratamento
@@ -1062,16 +1563,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   <select
                     value={insuranceName}
                     onChange={(e) => setInsuranceName(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.625rem 0.875rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      backgroundColor: '#ffffff',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                    }}
+                    className="ygeia-select"
                   >
                     {INSURANCE_OPTIONS.map((opt) => (
                       <option key={opt} value={opt}>

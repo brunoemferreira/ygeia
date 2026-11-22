@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### ✨ Melhorias Avançadas no Cadastro de Pacientes & Componentes de Formulário
+- **Frontend Web (`apps/web`)**:
+  - `NewPatientView.tsx`:
+    - **Seletor de DDI Internacional com Bandeirinhas**: Implementado botão seletor de país no campo de telefone com bandeiras emoji (37 países cobertos: Brasil 🇧🇷 +55, EUA 🇺🇸 +1, Portugal 🇵🇹 +351, Espanha 🇪🇸 +34, etc.), dropdown inteligente com campo de pesquisa em tempo real e fechamento ao clicar fora.
+    - **Comboboxes Modernos (`.ygeia-select`)**: Padronização visual de todos os selects do formulário com seta SVG personalizada, padding proporcional, foco suave com `--primary-glow` e bordas refinadas.
+    - **Campo de Sexo de Referência**: Título atualizado para `Sexo de referência para cálculos *` com indicação de obrigatoriedade e texto explicativo abaixo: *"Usado nos cálculos e nas faixas de referência. Revise conforme a avaliação clínica."*.
+    - **Placeholders Padronizados**: Data de nascimento ajustada para `DD/MM/YYYY` e CPFs para `000.000.000-00`.
+    - **Card de Responsável Legal**: Agrupamento em card isolado (`Dados do Responsável Legal`) contendo nome, CPF do responsável com máscara e nota explicativa para menores de idade.
+    - **Combo de Objetivo Principal na Aba de Tratamento**: Adicionado combobox com os objetivos: *Emagrecimento*, *Hipertrofia*, *Manutenção*, *Performance Esportiva*, *Reeducação Alimentar* e *Saúde Digestiva*.
+    - **Campo Dinâmico de Tags**: Input com botão `Adicionar Tag` e suporte à tecla Enter, renderizando badges coloridos com botão `X` para remoção individual.
+    - **Campo Dinâmico de Patologias**: Input com botão `Adicionar Patologia` e suporte à tecla Enter, renderizando badges clínicos com botão `X` para remoção individual.
+  - `PatientDirectory.tsx` & `AdminDashboard.tsx`: Atualização da interface `PatientRecord` e dos manipuladores de criação e edição para persistir `objective`, `tags` e `pathologies`.
+  - `styles.css`: Estilização utilitária de `.ygeia-select` e `.ygeia-country-dropdown`.
+
 ### 🔍 Tipografia Refinada e Densidade Compacta do Grid de Pacientes (Fiel ao Better Health)
 - **Frontend Web (`apps/web`)**:
   - `PatientDirectory.tsx`:

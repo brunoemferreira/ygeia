@@ -28,6 +28,9 @@ export interface PatientRecord {
   sex?: string;
   gender?: string;
   goal?: string;
+  objective?: string;
+  tags?: string[];
+  pathologies?: string[];
   status?: 'Ativo' | 'Inativo';
   lastConsult?: string;
   insurancePlan?: string;

@@ -5,6 +5,18 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Melhorias Visuais e Funcionais no Cadastro de Pacientes (`NewPatientView.tsx`, `styles.css`)**:
+  - **Telefone com Seletor de DDI e Bandeirinhas**: Seletor modal/popover com 37 países, bandeiras emoji, busca instantânea e fechamento ao clicar fora.
+  - **Componentes Combobox Modernos (`.ygeia-select`)**: Substituição de selects nativos rígidos por comboboxes estilizados com seta SVG, transição suave e foco com `--primary-glow`.
+  - **Aba de Tratamento e Protocolos Expandida**:
+    - Combobox de Objetivo Principal com as opções: *Emagrecimento*, *Hipertrofia*, *Manutenção*, *Performance Esportiva*, *Reeducação Alimentar* e *Saúde Digestiva*.
+    - Campo dinâmico de Tags com inclusão via botão ou tecla Enter e badges com botão `X` de exclusão.
+    - Campo dinâmico de Patologias com inclusão via botão ou tecla Enter e badges clínicos com botão `X` de exclusão.
+  - **Card de Responsável Legal**: Encapsulamento em cartão visual com título, campos de nome e CPF com máscara e aviso de emissão de recibo para menores.
+  - **Validação e Textos de Apoio em Sexo de Referência**: Título obrigatório `Sexo de referência para cálculos *` e texto explicativo clínico abaixo do combo.
+  - **Placeholders**: Data de nascimento em `DD/MM/YYYY` e CPF em `000.000.000-00`.
+
 ### Modificado
 - **Tipografia Compacta e Densidade Visual Idêntica ao Better Health (`PatientDirectory.tsx`, `AppTable.tsx`, `DataTablePagination.tsx`)**:
   - Calibragem tipográfica milimétrica na tabela de pacientes para corresponder com o Better Health:
