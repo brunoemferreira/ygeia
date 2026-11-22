@@ -1164,16 +1164,6 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                     {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Cadastrar'}
                   </button>
                 </div>
-
-                {/* Footer Help */}
-                <div style={{ paddingTop: '1rem', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>
-                  <p style={{ margin: 0 }}>
-                    Se precisar de ajuda,{' '}
-                    <span style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
-                      clique aqui 💬
-                    </span>
-                  </p>
-                </div>
               </div>
             )}
 

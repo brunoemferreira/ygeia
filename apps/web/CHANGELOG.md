@@ -6,8 +6,8 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Removido
-- **Chamada de Importação de Outro Software (`NewPatientView.tsx`, `NewPatientModal.tsx`)**:
-  - Remoção do texto e link *"Vindo de outro software? Clique aqui para importar"* do rodapé dos formulários de cadastro de novos pacientes.
+- **Links e Textos de Apoio no Rodapé (`NewPatientView.tsx`, `NewPatientModal.tsx`)**:
+  - Remoção de *"Vindo de outro software? Clique aqui para importar"* e *"Se precisar de ajuda, clique aqui 💬"*, proporcionando um encerramento mais limpo e desobstruído no cadastro de pacientes.
 
 ### Corrigido
 - **Ajuste Pixel-Perfect na Tela de Configurações (`SettingsModule.tsx`, `styles.css`)**:

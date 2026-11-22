@@ -12,7 +12,6 @@ import {
   Check,
   X,
   Upload,
-  MessageCircle,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -1092,30 +1091,6 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                     </>
                   )}
                 </button>
-              </div>
-
-              {/* Links de Rodapé */}
-              <div
-                style={{
-                  textAlign: 'center',
-                  fontSize: '0.75rem',
-                  color: '#64748b',
-                  marginTop: '0.75rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.35rem',
-                }}
-              >
-                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
-                  <span>Se precisar de ajuda,</span>
-                  <span
-                    onClick={() => toast.info('Suporte Ygeía: WhatsApp de plantão para clínicas ativas.')}
-                    style={{ color: '#0f172a', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
-                  >
-                    <span>clique aqui</span>
-                    <MessageCircle size={13} color="#059669" />
-                  </span>
-                </div>
               </div>
             </form>
           </main>

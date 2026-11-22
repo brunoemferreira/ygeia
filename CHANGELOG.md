@@ -9,9 +9,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
-### 🧹 Limpeza no Rodapé de Cadastro de Pacientes
+### 🧹 Limpeza nos Rodapés de Cadastro de Pacientes
 - **Frontend Web (`apps/web`)**:
-  - `NewPatientView.tsx` e `NewPatientModal.tsx`: Remoção do link e texto *"Vindo de outro software? Clique aqui para importar"*, mantendo o rodapé limpo e focado no suporte ao usuário.
+  - `NewPatientView.tsx` e `NewPatientModal.tsx`: Remoção completa dos textos e links de rodapé (*"Vindo de outro software? Clique aqui para importar"* e *"Se precisar de ajuda, clique aqui 💬"*), deixando os formulários mais concisos e com foco total nas etapas clínicas.
 
 ### 🛠️ Ajuste de Layout Pixel-Perfect da Tela de Configurações (Fidelidade Total à Imagem de Referência)
 - **Frontend Web (`apps/web`)**:
