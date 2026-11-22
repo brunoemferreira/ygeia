@@ -7,16 +7,18 @@
 [![React](https://img.shields.io/badge/React-19_Mobile--First-cyan?logo=react)](https://react.dev/)
 [![React Native](https://img.shields.io/badge/React_Native-Expo_CNG-61DAFB?logo=react)](https://reactnative.dev/)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-v1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Security Policy](https://img.shields.io/badge/Security-Policy_Active-success?logo=security)](./SECURITY.md)
 [![License](https://img.shields.io/badge/License-Proprietary-lightgrey.svg)](#)
 
 > **Ygeía (Υγεία)**: Do grego antigo *Saúde*. Plataforma SaaS White Label completa projetada para nutricionistas individuais, consultórios e clínicas nutricionais multiprofissionais, automatizando o controle de pacientes, anamnese, cálculos antropométricos e prescrição dietética.
 
 ---
 
-## 📖 Central de Documentação & Regras
+## 📖 Central de Documentação, Regras & Segurança
 
-A documentação completa, estudo de arquitetura, padrões e governança do projeto foram organizados no diretório oficial [`docs/`](./docs/README.md):
+A documentação completa, estudo de arquitetura, padrões, governança e política de segurança do projeto foram organizados no diretório oficial [`docs/`](./docs/README.md) e no documento institucional de segurança [`SECURITY.md`](./SECURITY.md):
 
+- 🛡️ **[Diretrizes de Segurança & Política Anti-Invasão](./SECURITY.md)**: Zero Trust, Matriz de Defesa OWASP para API, Web e Mobile, Isolamento Multi-Tenant com PostgreSQL RLS no Kernel, Criptografia Argon2id e Procedimento de Atualização Contínua.
 - 📐 **[Estudo de Arquitetura & Engenharia](./docs/arquitetura/DOCS_ARQUITETURA_YGEIA.md)**: Estudo aprofundado, DDD, Hexagonal, Roadmap e especificações de banco de dados e APIs.
 - 📋 **[Guia Central de Regras](./docs/regras/README.md)**:
   - 🔄 **[Fluxo de Desenvolvimento](./docs/regras/fluxo-desenvolvimento.md)**: Regra obrigatória `Plano > Autorização > Desenvolvimento > Testes > Versionamento > Publicação (Dev)`.
@@ -34,7 +36,9 @@ O ecossistema é organizado como um **Monólito Modular** baseado em **Clean Arc
 ```plaintext
 ygeia/
 ├── README.md                         # Documentação Raiz do Ecossistema
+├── SECURITY.md                       # Política Institucional de Segurança e Defesa Anti-Invasão
 ├── CHANGELOG.md                      # Histórico Global de Mudanças (SemVer)
+├── AGENTS.md                         # Regras e Diretrizes para Engenheiros e Agentes IA
 ├── package.json                      # Versão Única Central ("version": "x.y.z")
 │
 ├── docs/                             # Central de Documentação & Regras

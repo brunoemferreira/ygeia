@@ -5,6 +5,10 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Matriz de Segurança Web e Mitigações Anti-Invasão (`SECURITY.md`, `README.md`)**:
+  - Formalização dos requisitos de Content-Security-Policy (CSP), `frame-ancestors: 'none'`, sanitização de HTML clínico no editor contra Stored XSS e isolamento de credenciais com HttpOnly Cookies no `SECURITY.md`.
+
 ### Modificado
 - **Aprimoramentos de Layout e Navegação no Menu Principal (`Sidebar.tsx`, `Header.tsx`)**:
   - Trava rígida de proporção no container do logotipo (`34px x 34px`, `aspectRatio: 1 / 1`, `flexShrink: 0`) para eliminar qualquer esmagamento ou distorção visual durante transições de largura.

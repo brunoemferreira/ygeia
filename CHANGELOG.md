@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🛡️ Política e Arquitetura de Segurança Anti-Invasão (Defense-in-Depth)
+- **Governança & Ecossistema Geral**:
+  - Criação do documento institucional [`SECURITY.md`](./SECURITY.md) cobrindo a matriz anti-invasão Zero Trust nos 3 projetos (`apps/api`, `apps/web` e `apps/mobile`), política de divulgação responsável de vulnerabilidades e checklist de conformidade.
+  - Vínculo direto no [`README.md`](./README.md) com badge oficial de segurança ativa e documentação arquitetural.
+  - Atualização do [`AGENTS.md`](./AGENTS.md) com a regra mandatória de sincronização contínua do `SECURITY.md` a cada alteração de segurança, criptografia, autenticação ou isolamento multi-tenant.
+- **Backend API (`apps/api`)**:
+  - `main.ts`:
+    - Adicionado limite rígido de payload de requisição (`bodyLimit: 1MB`) no Fastify contra ataques de negação de serviço (DoS/DDoS).
+    - Fortalecimento dos cabeçalhos HTTP via Fastify Helmet com `frameguard: { action: 'deny' }` (Anti-Clickjacking), `noSniff: true` (Anti-MIME sniffing) e `hidePoweredBy: true`.
+- **Frontend Web (`apps/web`)**:
+  - Documentação e auditoria das diretrizes de isolamento de cookies HttpOnly com SameSite Strict, escape nativo contra XSS e bloqueio de iframes maliciosos.
+- **Mobile (`apps/mobile`)**:
+  - Definição da arquitetura de hardware-backed secure storage (iOS Keychain / Android Keystore AES-256), TLS Pinning e bloqueio de print/gravação de tela em dados médicos.
+
 ### 🧭 Correções de UX e Ícones no Menu Principal (Sidebar)
 - **Frontend Web (`apps/web`)**:
   - `Sidebar.tsx`:

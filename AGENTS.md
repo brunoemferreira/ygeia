@@ -15,3 +15,7 @@ Este documento estabelece as regras e padrões de engenharia para qualquer agent
 - Isolamento estrito entre Tenant e Usuários via Row-Level Security (RLS) no PostgreSQL.
 - Criptografia com Argon2id para senhas e tokens com rotação e detecção de reuso.
 - Nenhum usuário deslogado pode acessar áreas protegidas do Nutricionista ou Paciente.
+
+## 4. Manutenção Obrigatória do Documento de Segurança (`SECURITY.md`)
+- A cada nova funcionalidade, alteração em fluxos de autenticação, criptografia, cabeçalhos de rede, isolamento multi-tenant ou atualização/patch de segurança, é **obrigatório atualizar o arquivo `SECURITY.md`** na raiz do repositório.
+- Manter o inventário de proteções ativas e o plano de segurança anti-invasão sempre sincronizados com o código-fonte dos 3 projetos (`apps/api`, `apps/web` e `apps/mobile`).

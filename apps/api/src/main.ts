@@ -8,7 +8,10 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ logger: true }),
+    new FastifyAdapter({
+      logger: true,
+      bodyLimit: 1048576, // 1MB limite estrito de payload contra ataques DoS
+    }),
   );
 
   // Registro de Plugins Fastify
@@ -16,8 +19,12 @@ async function bootstrap() {
     secret: process.env.COOKIE_SECRET || 'cookie_secret_ygeia_dev_123456',
   });
 
+  // Cabeçalhos de Segurança HTTP (Defense-in-Depth)
   await app.register(fastifyHelmet as any, {
     contentSecurityPolicy: process.env.NODE_ENV === 'production',
+    frameguard: { action: 'deny' }, // Anti-Clickjacking
+    noSniff: true, // Anti-MIME sniffing
+    hidePoweredBy: true, // Oculta cabeçalho X-Powered-By
   });
 
   // Dynamic CORS

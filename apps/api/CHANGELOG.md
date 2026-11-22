@@ -5,6 +5,12 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Controles Anti-Invasão e Fortalecimento de Cabeçalhos HTTP (`main.ts`, `SECURITY.md`)**:
+  - Configuração de `bodyLimit: 1MB` no Fastify para prevenção de exaustão de memória e DoS por injeção de payloads maciços.
+  - Ativação de cabeçalhos de segurança estritos via Fastify Helmet (`frameguard: { action: 'deny' }` contra Clickjacking, `noSniff: true` contra MIME-sniffing e ocultação do cabeçalho `X-Powered-By`).
+  - Formalização do plano de conformidade com o OWASP API Security Top 10 e auditoria do PostgreSQL RLS no `SECURITY.md`.
+
 ### Modificado
 - **Resiliência do DatabaseService em Ambiente de Desenvolvimento**:
   - `DatabaseService`: Tratamento de indisponibilidade temporária do PostgreSQL em ambiente de desenvolvimento local, evitando encerramento forçado da API quando o container ou serviço do banco ainda estiver iniciando.
