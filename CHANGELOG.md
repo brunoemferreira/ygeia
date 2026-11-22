@@ -9,6 +9,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🧬 Ajuste em Sexo de Referência para Cálculos
+- **Frontend Web (`apps/web`)**:
+  - `NewPatientView.tsx`: Restrição estrita das opções do campo `Sexo de referência para cálculos *` exclusivamente para **Feminino** e **Masculino**, alinhando com as diretrizes e fórmulas bioenergéticas e de pregas cutâneas do CFN/OMS.
+
 ### 🎨 Restauração Fiel e Alinhamento da Tela de Configurações (Padrão Better Health)
 - **Frontend Web (`apps/web`)**:
   - `SettingsModule.tsx`:

@@ -5,6 +5,10 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Opções Restritas em Sexo de Referência para Cálculos (`NewPatientView.tsx`)**:
+  - Removida a opção genérica, mantendo estritamente as opções **Feminino** e **Masculino** necessárias para os cálculos metabólicos e faixas de referência clínica.
+
 ### Corrigido
 - **Restauração Fiel do Layout da Tela de Configurações (`SettingsModule.tsx`, `styles.css`)**:
   - Correção da estrutura visual e de layout que havia encapsulado indevidamente a navegação dentro de um único container branco.

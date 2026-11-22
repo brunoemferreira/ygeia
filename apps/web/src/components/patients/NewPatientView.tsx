@@ -671,7 +671,6 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       <option value="">Selecione</option>
                       <option value="Feminino">Feminino</option>
                       <option value="Masculino">Masculino</option>
-                      <option value="Outro">Outro</option>
                     </select>
                     <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem', lineHeight: 1.4, margin: '0.35rem 0 0 0' }}>
                       Usado nos cálculos e nas faixas de referência. Revise conforme a avaliação clínica.
