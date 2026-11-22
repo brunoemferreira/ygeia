@@ -5,6 +5,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Ajuste Pixel-Perfect na Tela de Configurações (`SettingsModule.tsx`, `styles.css`)**:
+  - Correção no breakpoint responsivo de `.ygeia-settings-layout`, mantendo a visualização em 2 colunas lado a lado a partir de `768px`.
+  - Remoção de badge verde em `CONFIGURAÇÃO`, aplicando o formato original em texto simples caixa alta com tracking.
+  - Ícone de `Idioma` atualizado para `Languages` (`文A`).
+  - Alinhamento de cores e tipografia dos botões e linhas de `IDENTIFICAÇÃO` e `ENDEREÇO` para match 1:1 com a imagem de referência.
+
 ### Modificado
 - **Opções Restritas em Sexo de Referência para Cálculos (`NewPatientView.tsx`)**:
   - Removida a opção genérica, mantendo estritamente as opções **Feminino** e **Masculino** necessárias para os cálculos metabólicos e faixas de referência clínica.

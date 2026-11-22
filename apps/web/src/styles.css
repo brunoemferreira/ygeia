@@ -701,16 +701,16 @@ p {
 /* Settings 2-Column Layout (Matching Better Health) */
 .ygeia-settings-layout {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
   align-items: flex-start;
   width: 100%;
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 768px) {
   .ygeia-settings-layout {
-    grid-template-columns: 240px 1fr;
-    gap: 2rem;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 }
 

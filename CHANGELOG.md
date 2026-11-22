@@ -9,6 +9,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🛠️ Ajuste de Layout Pixel-Perfect da Tela de Configurações (Fidelidade Total à Imagem de Referência)
+- **Frontend Web (`apps/web`)**:
+  - `styles.css`:
+    - Ajustado breakpoint do grid `.ygeia-settings-layout` para manter a estrutura em 2 colunas (`240px 1fr`) em telas a partir de `768px` (prevenindo quebra de layout prematura em resoluções intermediárias).
+  - `SettingsModule.tsx`:
+    - **Cabeçalho**: Removido badge com fundo verde de `CONFIGURAÇÃO`, adotando o texto superior sutil em cinza com tracking espaçado (`0.12em`), idêntico à imagem de referência.
+    - **Sidebar**:
+      - Substituição do ícone de `Idioma` pelo ícone `Languages` (`文A`).
+      - Neutralização visual da cor de `Zona de perigo` para manter a sobriedade idêntica ao design de referência.
+      - Ajuste da cor de destaque do item ativo para pílula suave `#f1f5f9` com texto escuro `#0f172a`.
+    - **Card de Dados Pessoais**:
+      - Botão `Editar` com cantos levemente arredondados (`rounded-md`) e verde esmeralda `#10b981`.
+      - Seção `Foto`: Container tracejado com avatar do profissional Bruno Ferreira (`/bruno-profile.jpg`), subtítulo `PNG, JPEG ou WEBP — máx. 10MB` e botões de ação `Alterar` e `Remover`.
+      - Seções `IDENTIFICAÇÃO` e `ENDEREÇO`: Alinhamento milimétrico das colunas (largura fixa de 220px para rótulos) com traço `—` para campos sem valor cadastrado.
+
 ### 🧬 Ajuste em Sexo de Referência para Cálculos
 - **Frontend Web (`apps/web`)**:
   - `NewPatientView.tsx`: Restrição estrita das opções do campo `Sexo de referência para cálculos *` exclusivamente para **Feminino** e **Masculino**, alinhando com as diretrizes e fórmulas bioenergéticas e de pregas cutâneas do CFN/OMS.

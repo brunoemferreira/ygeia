@@ -4,7 +4,7 @@ import {
   User,
   Key,
   ShieldCheck,
-  Globe,
+  Languages,
   AlertTriangle,
   MapPin,
   Tag,
@@ -79,8 +79,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
         { id: 'personal', label: 'Dados pessoais', icon: User },
         { id: 'password', label: 'Senha', icon: Key },
         { id: 'two_factor', label: 'Verificação em duas etapas', icon: ShieldCheck },
-        { id: 'language', label: 'Idioma', icon: Globe },
-        { id: 'danger_zone', label: 'Zona de perigo', icon: AlertTriangle, danger: true },
+        { id: 'language', label: 'Idioma', icon: Languages },
+        { id: 'danger_zone', label: 'Zona de perigo', icon: AlertTriangle },
       ],
     },
     {
@@ -131,34 +131,30 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem',
+        gap: '1.25rem',
         width: '100%',
-        maxWidth: '1280px',
+        maxWidth: '1240px',
         margin: '0 auto',
-        fontFamily: 'var(--font-sans)',
+        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
       }}
     >
-      {/* 1. Header Idêntico ao Better Health */}
-      <div>
-        <span
+      {/* 1. Header Idêntico ao Better Health (Imagem do usuário) */}
+      <div style={{ paddingLeft: '0.25rem' }}>
+        <div
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            borderRadius: '9999px',
-            backgroundColor: 'var(--primary-light)',
-            padding: '0.25rem 0.75rem',
-            fontSize: '0.75rem',
+            fontSize: '0.6875rem',
             fontWeight: 700,
-            letterSpacing: '0.05em',
-            color: 'var(--primary)',
+            letterSpacing: '0.12em',
+            color: '#64748b',
             textTransform: 'uppercase',
+            marginBottom: '0.35rem',
           }}
         >
           CONFIGURAÇÃO
-        </span>
+        </div>
         <h1
           style={{
-            marginTop: '0.5rem',
+            margin: '0 0 0.35rem 0',
             fontSize: '1.75rem',
             fontWeight: 800,
             letterSpacing: '-0.025em',
@@ -168,7 +164,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
         >
           Configurações
         </h1>
-        <p style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#64748b' }}>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
           Gerencie suas preferências, dados pessoais e configurações do sistema.
         </p>
       </div>
@@ -196,7 +192,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.5rem 0.75rem 0.5rem 2.25rem',
+                padding: '0.55rem 0.75rem 0.55rem 2.25rem',
                 borderRadius: '0.5rem',
                 border: '1px solid #e2e8f0',
                 backgroundColor: '#ffffff',
@@ -204,10 +200,11 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                 boxSizing: 'border-box',
                 outline: 'none',
                 color: '#0f172a',
+                transition: 'all 0.15s ease',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'var(--primary)';
-                e.target.style.boxShadow = '0 0 0 3px var(--primary-glow)';
+                e.target.style.borderColor = 'var(--primary, #10b981)';
+                e.target.style.boxShadow = '0 0 0 3px var(--primary-glow, rgba(16,185,129,0.15))';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = '#e2e8f0';
@@ -223,7 +220,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                 style={{
                   fontSize: '0.6875rem',
                   fontWeight: 700,
-                  color: '#94a3b8',
+                  color: '#64748b',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   padding: '0 0.5rem',
@@ -253,8 +250,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                         borderRadius: '0.5rem',
                         border: 'none',
                         backgroundColor: isActive ? '#f1f5f9' : 'transparent',
-                        color: isActive ? '#0f172a' : item.danger ? '#ef4444' : '#475569',
-                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? '#0f172a' : '#475569',
+                        fontWeight: isActive ? 600 : 500,
                         fontSize: '0.8125rem',
                         cursor: 'pointer',
                         textAlign: 'left',
@@ -270,10 +267,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                     >
                       <Icon
                         size={16}
-                        strokeWidth={isActive ? 2.2 : 1.75}
+                        strokeWidth={isActive ? 2 : 1.75}
                         style={{
                           flexShrink: 0,
-                          color: isActive ? '#0f172a' : item.danger ? '#ef4444' : '#64748b',
+                          color: isActive ? '#0f172a' : '#64748b',
                         }}
                       />
                       <span>{item.label}</span>
@@ -309,8 +306,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      borderRadius: '0.5rem',
-                      backgroundColor: 'var(--primary)',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#10b981',
                       padding: '0.45rem 1.15rem',
                       fontSize: '0.8125rem',
                       fontWeight: 600,
@@ -318,10 +315,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                       border: 'none',
                       cursor: 'pointer',
                       boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                      transition: 'all 0.15s ease',
+                      transition: 'background-color 0.15s ease',
                     }}
-                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
-                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#059669')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#10b981')}
                   >
                     Editar
                   </button>
@@ -332,7 +329,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                       onClick={() => setIsEditingPersonal(false)}
                       style={{
                         padding: '0.45rem 0.875rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.375rem',
                         border: '1px solid #cbd5e1',
                         backgroundColor: '#ffffff',
                         fontSize: '0.8125rem',
@@ -348,9 +345,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                       onClick={handleSavePersonal}
                       style={{
                         padding: '0.45rem 1rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.375rem',
                         border: 'none',
-                        backgroundColor: 'var(--primary)',
+                        backgroundColor: '#10b981',
                         fontSize: '0.8125rem',
                         fontWeight: 600,
                         color: '#ffffff',
@@ -375,7 +372,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                     <div
                       style={{
                         border: '1px dashed #cbd5e1',
-                        borderRadius: '0.75rem',
+                        borderRadius: '0.5rem',
                         padding: '1.25rem',
                         display: 'flex',
                         alignItems: 'center',
@@ -393,14 +390,14 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                           flexShrink: 0,
                         }}
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256';
+                          (e.currentTarget as HTMLImageElement).src = '/bruno-profile.jpg';
                         }}
                       />
                       <div>
                         <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>
                           Foto de perfil
                         </h4>
-                        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0.15rem 0 0.5rem 0' }}>
+                        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0.2rem 0 0.65rem 0' }}>
                           PNG, JPEG ou WEBP — máx. 10MB
                         </p>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -432,7 +429,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                               border: 'none',
                               backgroundColor: 'transparent',
                               fontSize: '0.75rem',
-                              fontWeight: 600,
+                              fontWeight: 500,
                               color: '#64748b',
                               cursor: 'pointer',
                             }}
@@ -452,8 +449,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
                         fontWeight: 700,
                         color: '#94a3b8',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        marginBottom: '0.5rem',
+                        letterSpacing: '0.08em',
+                        marginBottom: '0.35rem',
                       }}
                     >
                       IDENTIFICAÇÃO
@@ -461,42 +458,42 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
 
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>Nome completo</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>Nome completo</span>
                         <span style={{ color: '#334155' }}>{personalData.nomeCompleto}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>Email</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>Email</span>
                         <span style={{ color: '#334155' }}>{personalData.email}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>Telefone</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>Telefone</span>
                         <span style={{ color: '#334155' }}>{personalData.telefone}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>CRN</span>
-                        <span style={{ color: '#334155' }}>{personalData.crn || '—'}</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>CRN</span>
+                        <span style={{ color: '#94a3b8' }}>{personalData.crn || '—'}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>CPF / CNPJ</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>CPF / CNPJ</span>
                         <span style={{ color: '#334155' }}>{personalData.cpfCnpj}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>Especialidades</span>
-                        <span style={{ color: '#334155' }}>{personalData.especialidades || '—'}</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>Especialidades</span>
+                        <span style={{ color: '#94a3b8' }}>{personalData.especialidades || '—'}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Bloco ENDEREÇO */}
                   <div style={{ marginTop: '2rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                       <span
                         style={{
                           fontSize: '0.6875rem',
                           fontWeight: 700,
                           color: '#94a3b8',
                           textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
+                          letterSpacing: '0.08em',
                         }}
                       >
                         ENDEREÇO
@@ -506,16 +503,16 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
 
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>CEP</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>CEP</span>
                         <span style={{ color: '#334155' }}>{personalData.cep}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>Logradouro</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>Logradouro</span>
                         <span style={{ color: '#334155' }}>{personalData.logradouro}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0', fontSize: '0.8125rem' }}>
-                        <span style={{ width: '220px', fontWeight: 600, color: '#0f172a', flexShrink: 0 }}>Cidade / UF</span>
-                        <span style={{ color: '#334155' }}>{personalData.cidadeUf || '—'}</span>
+                        <span style={{ width: '220px', fontWeight: 500, color: '#0f172a', flexShrink: 0 }}>Cidade / UF</span>
+                        <span style={{ color: '#94a3b8' }}>{personalData.cidadeUf || '—'}</span>
                       </div>
                     </div>
                   </div>
