@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { YgeiaLogo } from '../ui';
 import {
   LayoutGrid,
   Users,
@@ -11,7 +12,6 @@ import {
   ChevronLeft,
   LogOut,
   Search,
-  Heart,
   Utensils,
   Droplets,
   Pill,
@@ -272,9 +272,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 justifyContent: 'center',
                 flexShrink: 0,
                 aspectRatio: '1 / 1',
+                boxShadow: '0 2px 6px var(--primary-border, rgba(5, 150, 105, 0.25))',
               }}
             >
-              <Heart size={18} fill="#ffffff" color="#ffffff" />
+              <YgeiaLogo size={22} inverted color={primaryColor} />
             </div>
 
             <button
@@ -327,9 +328,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   justifyContent: 'center',
                   flexShrink: 0,
                   aspectRatio: '1 / 1',
+                  boxShadow: '0 2px 6px var(--primary-border, rgba(5, 150, 105, 0.25))',
                 }}
               >
-                <Heart size={18} fill="#ffffff" color="#ffffff" />
+                <YgeiaLogo size={22} inverted color={primaryColor} />
               </div>
               <div style={{ overflow: 'hidden' }}>
                 <div

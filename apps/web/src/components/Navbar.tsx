@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { YgeiaLogo } from './ui';
 import {
   Menu,
   X,
@@ -48,10 +49,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className={`header-wrapper ${scrolled ? 'header-scrolled' : ''}`}>
       <div className="container header-container">
-        {/* Brand Lockup: Clean & Minimalist */}
-        <a href="#" className="brand-link">
-          <div className="brand-icon">
-            Υ
+        {/* Brand Lockup: Clean & Minimalist com Marca Registrada Ygeía */}
+        <a href="#" className="brand-link" style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', textDecoration: 'none' }}>
+          <div className="brand-icon" style={{ padding: '3px' }}>
+            <YgeiaLogo size={24} inverted color="#059669" />
           </div>
           <span className="brand-title">
             YGEÍA

@@ -6,3 +6,4 @@ export * from './AppModal';
 export * from './AppTable';
 export * from './DataTablePagination';
 export * from './ClinicalDataGrid';
+export * from './YgeiaLogo';

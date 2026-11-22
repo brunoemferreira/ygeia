@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { YgeiaLogo } from '../ui';
 import {
   ArrowLeft,
   Mail,
@@ -8,7 +9,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   Lock,
-  Heart,
   LogIn,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -133,7 +133,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 style={{ width: '26px', height: '26px', objectFit: 'contain' }}
               />
             ) : (
-              <Heart size={20} color="#ffffff" fill="rgba(255,255,255,0.2)" />
+              <YgeiaLogo size={24} color="#ffffff" pulseColor="#a7f3d0" />
             )}
           </div>
           <div>

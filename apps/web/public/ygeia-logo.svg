@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Folha / Lóbulo Esquerdo (Botânica + Escudo) -->
+  <path d="M 48 24 C 40 12, 22 8, 14 22 C 6 38, 11 62, 25 78 C 36 89, 46 95, 48 96 C 48 96, 48 30, 48 24 Z" 
+        fill="#059669" />
+  <!-- Folha / Lóbulo Direito (Botânica + Escudo) -->
+  <path d="M 52 24 C 60 12, 78 8, 86 22 C 94 38, 89 62, 75 78 C 64 89, 54 95, 52 96 C 52 96, 52 30, 52 24 Z" 
+        fill="#10b981" />
+  <!-- Linha de Pulso / Batimento Cardíaco (Vitalidade & Saúde Ygeía) -->
+  <path d="M 8 52 L 32 52 L 38 64 L 47 18 L 55 84 L 63 34 L 69 52 L 92 52" 
+        stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

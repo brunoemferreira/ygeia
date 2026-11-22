@@ -6,6 +6,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Logotipo Vetorial SVG e Marca Registrada Oficial Ygeía (`YgeiaLogo.tsx`, `Sidebar.tsx`, `Navbar.tsx`, `LoginPage.tsx`)**:
+  - Vetorização pura em SVG da marca oficial: composição com folhas botânicas (nutrição), escudo anatômico (segurança clínica) e linha de pulso vital / cardiograma (saúde/longevidade).
+  - Totalmente customizável em cores via props (`color`, `secondaryColor`, `pulseColor`, `inverted`) e integrado às variáveis CSS dinâmicas (`var(--primary)`, `var(--primary-hover)`).
+  - Três modos de exibição: `icon` (apenas o símbolo), `badge` (botão com container e sombra) e `full` (lockup completo com o nome "YGEÍA").
+  - Substituição de marcadores genéricos na barra lateral (`Sidebar.tsx`), no cabeçalho institucional (`Navbar.tsx`), na tela de login (`LoginPage.tsx`) e definição como favicon oficial em `index.html` e `public/ygeia-logo.svg`.
+
+### Adicionado
 - **Padrão de Grade Clínica de Dados e Redesign UX da Grade de Anamneses (`ClinicalDataGrid.tsx`, `PatientProfileView.tsx`)**:
   - Implementação do componente de alto nível `ClinicalDataGrid`, estabelecendo o novo padrão de UX/UI para visualização longitudinal de dados de prontuário (projetado para ser reutilizado em antropometria, exames e recordatórios).
   - **KPI Cards Strip**: Faixa de resumo clínico no topo calculando automaticamente total de consultas, primeira consulta, data e intervalo relativo do último retorno e frequência média de acompanhamento.

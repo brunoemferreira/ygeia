@@ -9,6 +9,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🌿 Identidade Visual & Marca Registrada Oficial Ygeía (Υγεία)
+- **Frontend Web (`apps/web`)**:
+  - `YgeiaLogo.tsx`:
+    - **Criação do Símbolo Vetorial SVG Oficial**: Vetorização precisa do emblema com folhas gêmeas botânicas (nutrição), escudo curvo de proteção e linha de batimento cardíaco / pulso vital (ECG).
+    - **Customização Total de Cores**: Propriedades dinâmicas para alteração de cores primárias, secundárias e do traço de pulso (`color`, `secondaryColor`, `pulseColor`, `inverted`), garantindo total aderência ao White Label Studio e paletas personalizadas de clínicas.
+    - **Variantes Flexíveis**: Suporte aos modos `icon` (apenas o símbolo vetorial), `badge` (com container arredondado e sombra de elevação) e `full` (com logotipo tipográfico "YGEÍA" e subtítulo opcional).
+  - **Adoção do Logotipo em Toda a Plataforma**:
+    - `Sidebar.tsx`: Substituição do ícone genérico pelo `YgeiaLogo` oficial tanto no modo expandido quanto no modo recolhido (`collapsed`).
+    - `Navbar.tsx`: Incorporação do `YgeiaLogo` no cabeçalho institucional e lockup de marca.
+    - `LoginPage.tsx`: Integração do `YgeiaLogo` com linhas menta no painel de login.
+    - `public/ygeia-logo.svg` & `index.html`: Arquivo SVG estático e favicon oficial do navegador configurado.
+    - `components/ui/index.ts`: Exportação de `YgeiaLogo` e `YgeiaLogoProps`.
+
 ### 🌟 Redesign UX/UI da Grade de Anamneses: Padrão Clinical Data Grid
 - **Frontend Web (`apps/web`)**:
   - `ClinicalDataGrid.tsx`:
