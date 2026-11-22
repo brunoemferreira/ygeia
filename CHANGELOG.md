@@ -9,6 +9,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 🔌 Reconfiguração e Isolamento das Portas de Desenvolvimento
+- **Monorepo & Infraestrutura (`docker-compose.yml`, `apps/api`, `apps/web`, `apps/mobile`)**:
+  - **Prevenção de Colisões**: Migração completa das portas padrão para faixas exclusivas e desimpedidas, evitando conflitos com outros projetos locais:
+    - **Frontend Web**: Migrado de `5173` para `5190` (`http://localhost:5190`).
+    - **Backend API**: Migrado de `3333` para `4333` (`http://localhost:4333`).
+    - **Mobile App Metro**: Migrado de `8082` para `8095` (`http://localhost:8095`).
+    - **PostgreSQL 16 (Docker)**: Porta externa mapeada de `5434` para `5440` (`localhost:5440`).
+    - **Redis 7 (Docker)**: Porta externa mapeada de `6379` para `6385` (`localhost:6385`).
+  - **Sincronização de Variáveis de Ambiente & Configurações**:
+    - Atualização dos arquivos `.env` e `.env.example` da API e da Web.
+    - Criação de `vite.config.ts` com tipagem de variáveis de ambiente em `src/vite-env.d.ts` para conexão com a nova porta da API.
+
 ### 🏥 Redesenho Executivo do Painel Administrativo & Menu Lateral Bidirecional
 - **Frontend Web (`apps/web`)**:
   - **Novo Menu Lateral Executivo (`Sidebar.tsx`)**:

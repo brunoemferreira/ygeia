@@ -17,7 +17,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     const connectionString =
-      process.env.DATABASE_URL || 'postgresql://ygeia_user:ygeia_password@localhost:5434/ygeia_db';
+      process.env.DATABASE_URL || 'postgresql://ygeia_user:ygeia_password@localhost:5440/ygeia_db';
 
     this.pool = new Pool({
       connectionString,
@@ -59,7 +59,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     const migrationUrl =
       process.env.DATABASE_MIGRATION_URL ||
-      'postgresql://ygeia_user:ygeia_password@localhost:5434/ygeia_db';
+      'postgresql://ygeia_user:ygeia_password@localhost:5440/ygeia_db';
 
     const migrationPool = new Pool({ connectionString: migrationUrl });
     const client = await migrationPool.connect();

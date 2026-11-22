@@ -36,7 +36,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const port = process.env.PORT || 3333;
+  const port = process.env.PORT || 4333;
   await app.listen(port, '0.0.0.0');
   console.log(`[YGEÍA API] Servidor em execução na porta ${port}`);
 }

@@ -5,7 +5,7 @@
   "description": "Frontend Web React Mobile-First da plataforma Ygeía",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5190 --host 0.0.0.0",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "clean": "rimraf dist"

@@ -5,6 +5,12 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-21
 
+### Modificado
+- **Isolamento de Portas Locais**:
+  - Servidor Vite configurado na porta `5190` via `vite.config.ts` e script `dev`.
+  - Conexão do cliente com a API reconfigurada para a porta `4333` via `VITE_API_URL`.
+  - Inclusão do arquivo de tipagens `vite-env.d.ts`.
+
 ### Adicionado
 - **Novo Painel Administrativo Executivo (`AdminDashboard.tsx`)**:
   - Layout dividido em 2 cards principais 50/50:
