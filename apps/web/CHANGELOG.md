@@ -6,6 +6,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Layout Clínico 1:1 DietSystem ao Visualizar Paciente (`PatientProfileView.tsx`)**:
+  - Implementação da tela exatamente conforme a imagem de referência do DietSystem:
+    - Top bar com dados do paciente (nome, idade em anos e meses, chave com cópia, status `• ATIVO`, botões `Financeiro`, `Linha do tempo` e menu `...`).
+    - Menu lateral esquerdo completo com busca de seções e 9 módulos clínicos colapsáveis (Avaliação nutricional, Antropometria, Prescrição dietética, Avaliação bioquímica, Pós-consulta, Arquivos do paciente, etc.) com botões `+` e badges `Novidade`.
+    - Painel direito de `Anamneses e transcrições` com botões `PDF unificado` e `+ Adicionar anamnese ⌄`, e empty state com ícone de pasta minimalista cinza.
 - **Ícone de Visualização no Grid de Pacientes (`PatientDirectory.tsx`)**:
   - Inclusão do botão de ação com ícone de olho (`Eye` do Lucide), posicionado imediatamente antes do botão de editar (lápis) na coluna de ações da tabela.
   - Estilização em cartão suave (`#ffffff`, borda `#e2e8f0`, raio de curvatura `0.375rem`), com feedback de foco e hover.

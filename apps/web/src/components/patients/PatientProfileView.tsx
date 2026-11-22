@@ -1,29 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ArrowLeft,
-  Calendar,
-  MapPin,
-  Edit2,
-  Trash2,
-  CheckCircle2,
-  Clock,
-  Activity,
-  FileText,
-  Utensils,
-  Scale,
-  ClipboardList,
-  Plus,
-  Share2,
-  Download,
-  AlertCircle,
-  MessageCircle,
-  Heart,
-  Sparkles,
+  Search,
+  ChevronDown,
   ChevronRight,
-  TrendingDown,
+  Plus,
+  Copy,
+  Clock,
+  DollarSign,
+  MoreHorizontal,
+  Folder,
+  User,
+  Utensils,
+  Activity,
+  Calendar,
+  CheckSquare,
+  Smartphone,
+  Download,
+  Link2,
+  Trash2,
+  Edit2,
+  MessageCircle,
+  Sparkles,
+  ClipboardList,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
-import { CountryFlag, COUNTRY_DIAL_CODES } from './countryDialCodes';
 import { useToast } from '../../context/ToastContext';
 
 export interface PatientProfileViewProps {
@@ -33,8 +34,6 @@ export interface PatientProfileViewProps {
   onDelete?: (patientId: string) => void;
 }
 
-type TabKey = 'timeline' | 'details' | 'meal_plan' | 'anthropometry' | 'anamnesis' | 'exams';
-
 export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   patient,
   onBack,
@@ -42,179 +41,402 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   onDelete,
 }) => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<TabKey>('timeline');
+
+  // Seção ativa
+  const [activeSection, setActiveSection] = useState<string>('anamnese_transcricao');
+
+  // Estado de grupos do menu expandidos
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    avaliacao_nutricional: true,
+    antropometria: true,
+    prescricao_dietetica: false,
+    avaliacao_bioquimica: false,
+    pos_consulta: false,
+    arquivos_paciente: false,
+  });
+
+  // Busca de seções no menu lateral
+  const [sectionSearch, setSectionSearch] = useState('');
+
+  // Dropdown de mais ações no topo
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Estado para nova anotação clínica rápida
-  const [newNote, setNewNote] = useState('');
-  const [noteType, setNoteType] = useState<'evolution' | 'alert' | 'whatsapp'>('evolution');
-  const [notesList, setNotesList] = useState<
-    Array<{ id: string; date: string; type: string; title: string; text: string; author: string }>
-  >([
-    {
-      id: '1',
-      date: 'Hoje, 09:30',
-      type: 'evolution',
-      title: 'Ajuste de Plano Alimentar & Hidratação',
-      text: 'Paciente relatou melhora significativa na disposição matinal e adesão de 90% ao cardápio proposto. Aumentada ingestão hídrica para 35ml/kg.',
-      author: 'Dra. Nutricionista',
-    },
-    {
-      id: '2',
-      date: '15/10/2026, 14:15',
-      type: 'evolution',
-      title: 'Consulta de Acompanhamento (Retorno)',
-      text: 'Perda de 1.8kg de gordura corporal aferida por bioimpedância e manutenção integral da massa muscular esquelética. Ajustados micronutrientes pré-treino.',
-      author: 'Dra. Nutricionista',
-    },
-    {
-      id: '3',
-      date: '10/09/2026, 10:00',
-      type: 'alert',
-      title: 'Primeira Consulta & Anamnese Clínica Inicial',
-      text: 'Definido protocolo de modulação metabólica e reeducação alimentar focada em hipertrofia e composição corporal sustentável.',
-      author: 'Dra. Nutricionista',
-    },
-  ]);
+  // Lista dinâmica de anamneses adicionadas
+  const [anamneses, setAnamneses] = useState<Array<{ id: string; date: string; title: string; notes: string }>>([]);
+  const [showAddAnamneseModal, setShowAddAnamneseModal] = useState(false);
+  const [newAnamneseTitle, setNewAnamneseTitle] = useState('');
+  const [newAnamneseNotes, setNewAnamneseNotes] = useState('');
 
-  const handleAddNote = (e: React.FormEvent) => {
+  // Cálculo de idade amigável a partir da data de nascimento
+  const patientAgeString = useMemo(() => {
+    if (!patient.birthDate) return '45 anos e 7 meses';
+    try {
+      let bDate: Date;
+      if (patient.birthDate.includes('/')) {
+        const [d, m, y] = patient.birthDate.split('/');
+        bDate = new Date(Number(y), Number(m) - 1, Number(d));
+      } else {
+        bDate = new Date(patient.birthDate);
+      }
+      if (isNaN(bDate.getTime())) return '45 anos e 7 meses';
+
+      const now = new Date();
+      let years = now.getFullYear() - bDate.getFullYear();
+      let months = now.getMonth() - bDate.getMonth();
+      if (months < 0 || (months === 0 && now.getDate() < bDate.getDate())) {
+        years--;
+        months += 12;
+      }
+      return `${years} anos e ${months} meses`;
+    } catch {
+      return '45 anos e 7 meses';
+    }
+  }, [patient.birthDate]);
+
+  // Chave identificadora do paciente (chave numérica idêntica ao DietSystem)
+  const patientKey = useMemo(() => {
+    const numeric = (patient.id || '').replace(/\D/g, '');
+    if (numeric.length >= 6) return numeric.slice(-8);
+    let hash = 0;
+    for (let i = 0; i < (patient.id || patient.name).length; i++) {
+      hash = ((hash << 5) - hash) + (patient.id || patient.name).charCodeAt(i);
+      hash |= 0;
+    }
+    return String(Math.abs(hash)).padStart(8, '7').slice(-8);
+  }, [patient.id, patient.name]);
+
+  const handleCopyKey = () => {
+    navigator.clipboard.writeText(patientKey);
+    toast.success(`Chave ${patientKey} copiada para a área de transferência!`);
+  };
+
+  const toggleGroup = (groupKey: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  };
+
+  const handleSaveAnamnese = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNote.trim()) return;
+    if (!newAnamneseTitle.trim()) return;
 
     const entry = {
       id: String(Date.now()),
-      date: 'Hoje, agora',
-      type: noteType,
-      title:
-        noteType === 'evolution'
-          ? 'Evolução Clínica'
-          : noteType === 'alert'
-          ? 'Alerta Nutricional'
-          : 'Registro de Contato',
-      text: newNote.trim(),
-      author: 'Você',
+      date: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      title: newAnamneseTitle.trim(),
+      notes: newAnamneseNotes.trim() || 'Consulta clínica geral e avaliação de recordatório.',
     };
 
-    setNotesList([entry, ...notesList]);
-    setNewNote('');
-    toast.success('Anotação clínica adicionada ao prontuário!');
+    setAnamneses([entry, ...anamneses]);
+    setNewAnamneseTitle('');
+    setNewAnamneseNotes('');
+    setShowAddAnamneseModal(false);
+    toast.success('Anamnese registrada com sucesso!');
   };
 
-  // Extrair número limpo de telefone para WhatsApp
+  // Extrair telefone para WhatsApp
   const phoneClean = (patient.phone || '').replace(/\D/g, '');
   const whatsappUrl = phoneClean
     ? `https://wa.me/${phoneClean.startsWith('55') ? phoneClean : '55' + phoneClean}?text=${encodeURIComponent(
-        `Olá, ${patient.name}! Aqui é da clínica de nutrição. Como você está hoje?`
+        `Olá, ${patient.name}! Aqui é do seu consultório de nutrição.`
       )}`
     : null;
 
-  // Encontrar bandeira do telefone
-  const detectedCountry = COUNTRY_DIAL_CODES.find((c) =>
-    (patient.phone || '').startsWith(c.dialCode)
-  ) || COUNTRY_DIAL_CODES[0];
+  // Definição das seções do menu lateral
+  const menuGroups = [
+    {
+      type: 'single',
+      id: 'perfil_integrado',
+      label: 'Perfil nutricional integrado',
+      icon: Sparkles,
+    },
+    {
+      type: 'group',
+      id: 'avaliacao_nutricional',
+      label: 'Avaliação nutricional',
+      icon: ClipboardList,
+      children: [
+        { id: 'anamnese_transcricao', label: 'Anamnese e transcrição', hasPlus: true },
+        { id: 'teia_interconexoes', label: 'Teia de interconexões', hasPlus: true },
+        { id: 'recordatorio_alimentar', label: 'Recordatório alimentar', hasPlus: true },
+        { id: 'prontuario', label: 'Prontuário', hasPlus: true },
+        { id: 'restricoes_alimentares', label: 'Restrições alimentares', hasPlus: false },
+        { id: 'medicamentos', label: 'Medicamentos', hasPlus: false, badge: 'Novidade' },
+      ],
+    },
+    {
+      type: 'group',
+      id: 'antropometria',
+      label: 'Antropometria',
+      icon: User,
+      children: [
+        { id: 'antropo_adulto', label: 'Adulto', hasPlus: true },
+        { id: 'antropo_crianca', label: 'Criança e adolescente', hasPlus: true },
+        { id: 'antropo_gestante', label: 'Gestante', hasPlus: true },
+        { id: 'antropo_bioimpedancia', label: 'Bioimpedância', hasPlus: true },
+        { id: 'antropo_bodyscan', label: 'BodyScan 3D', hasPlus: true },
+        { id: 'antropo_glp1', label: 'Reganho GLP-1', hasPlus: true, badge: 'Novidade' },
+      ],
+    },
+    {
+      type: 'group',
+      id: 'prescricao_dietetica',
+      label: 'Prescrição dietética',
+      icon: Utensils,
+      children: [
+        { id: 'gasto_calorico', label: 'Gasto calórico', hasPlus: true },
+        { id: 'plano_alimentar', label: 'Plano alimentar', hasPlus: true },
+        { id: 'orientacoes', label: 'Orientações', hasPlus: false },
+        { id: 'receitas', label: 'Receitas', hasPlus: false },
+        { id: 'produtos', label: 'Produtos', hasPlus: false },
+        { id: 'formulas', label: 'Fórmulas', hasPlus: true },
+      ],
+    },
+    {
+      type: 'group',
+      id: 'avaliacao_bioquimica',
+      label: 'Avaliação bioquímica',
+      icon: Activity,
+      children: [
+        { id: 'upload_exame', label: 'Upload de exame', hasPlus: true },
+        { id: 'solicitar_exames', label: 'Solicitar exames', hasPlus: true },
+        { id: 'exames_texto', label: 'Exames por texto', hasPlus: true },
+        { id: 'analise_ia', label: 'Análise de exames por IA', hasPlus: true },
+      ],
+    },
+    {
+      type: 'group',
+      id: 'pos_consulta',
+      label: 'Pós-consulta',
+      icon: Calendar,
+      children: [
+        { id: 'pos_hidratacao', label: 'Hidratação', hasPlus: true },
+        { id: 'foto_comparativa', label: 'Foto comparativa', hasPlus: false },
+        { id: 'pos_metas', label: 'Metas', hasPlus: false },
+        { id: 'formulario', label: 'Formulário', hasPlus: true },
+        { id: 'materiais_ebooks', label: 'Ebooks, imagens, etc', hasPlus: false },
+      ],
+    },
+    {
+      type: 'group',
+      id: 'arquivos_paciente',
+      label: 'Arquivos do paciente',
+      icon: Folder,
+      children: [
+        { id: 'arquivo_recibo', label: 'Recibo', hasPlus: true },
+        { id: 'arquivo_atestado', label: 'Atestado', hasPlus: true },
+        { id: 'arquivo_contrato', label: 'Contrato', hasPlus: false },
+        { id: 'arquivo_encaminhamento', label: 'Encaminhamento', hasPlus: true },
+        { id: 'docs_compartilhados', label: 'Documentos compartilhados', hasPlus: false },
+      ],
+    },
+    {
+      type: 'single',
+      id: 'checklist_condutas',
+      label: 'Checklist de condutas',
+      icon: CheckSquare,
+    },
+    {
+      type: 'single',
+      id: 'aplicativo_paciente',
+      label: 'Aplicativo do paciente',
+      icon: Smartphone,
+    },
+    {
+      type: 'single',
+      id: 'download_pdf',
+      label: "Download ou envio de PDF's",
+      icon: Download,
+    },
+  ];
+
+  // Filtro de seções pela busca
+  const filteredMenuGroups = useMemo(() => {
+    if (!sectionSearch.trim()) return menuGroups;
+    const q = sectionSearch.toLowerCase();
+    return menuGroups
+      .map((item) => {
+        if (item.type === 'single') {
+          return item.label.toLowerCase().includes(q) ? item : null;
+        }
+        const matchingChildren = item.children?.filter((c) => c.label.toLowerCase().includes(q));
+        if (item.label.toLowerCase().includes(q) || (matchingChildren && matchingChildren.length > 0)) {
+          return {
+            ...item,
+            children: matchingChildren && matchingChildren.length > 0 ? matchingChildren : item.children,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as typeof menuGroups;
+  }, [sectionSearch]);
 
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem',
-        fontFamily: 'var(--font-sans)',
-        width: '100%',
+        minHeight: '100vh',
+        backgroundColor: '#ffffff',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        margin: '-1rem -1.25rem',
         boxSizing: 'border-box',
       }}
     >
-      {/* 1. Barra de Navegação Superior (Breadcrumb + Ações) */}
-      <div
+      {/* ========================================================
+          1. HEADER SUPERIOR FIXO (MODELO DIETSYSTEM)
+         ======================================================== */}
+      <header
         style={{
           display: 'flex',
-          flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
+          padding: '0.75rem 1.5rem',
+          borderBottom: '1px solid #f1f5f9',
+          backgroundColor: '#ffffff',
+          position: 'sticky',
+          top: 0,
+          zIndex: 40,
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        {/* Esquerda: Botão Voltar + Avatar + Nome + Idade/Chave */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
           <button
             type="button"
             onClick={onBack}
+            title="Voltar para a lista de pacientes"
             style={{
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
-              borderRadius: '0.5rem',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              borderRadius: '0.375rem',
               border: '1px solid #e2e8f0',
               backgroundColor: '#ffffff',
-              padding: '0.45rem 0.85rem',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: '#475569',
+              color: '#64748b',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
             onMouseOver={(e) => {
               (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-              (e.currentTarget as HTMLElement).style.borderColor = '#cbd5e1';
+              (e.currentTarget as HTMLElement).style.color = '#0f172a';
             }}
             onMouseOut={(e) => {
               (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
-              (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
+              (e.currentTarget as HTMLElement).style.color = '#64748b';
             }}
           >
-            <ArrowLeft size={15} />
-            <span>Voltar para Pacientes</span>
+            <ArrowLeft size={16} />
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8125rem', color: '#94a3b8' }}>
-            <span>Pacientes</span>
-            <ChevronRight size={14} />
-            <span style={{ fontWeight: 600, color: '#0f172a' }}>{patient.name}</span>
+          {/* Avatar com iniciais */}
+          <div
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '0.5rem',
+              backgroundColor: '#f1f5f9',
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: '0.875rem',
+              color: '#334155',
+              flexShrink: 0,
+            }}
+          >
+            {patient.initials || 'JS'}
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#0f172a' }}>
+                {patient.name}
+              </span>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  borderRadius: '9999px',
+                  backgroundColor: '#ecfdf5',
+                  padding: '0.15rem 0.55rem',
+                  fontSize: '0.6875rem',
+                  fontWeight: 700,
+                  color: '#10b981',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                <span
+                  style={{
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#10b981',
+                  }}
+                />
+                {patient.status ? patient.status.toUpperCase() : 'ATIVO'}
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                fontSize: '0.75rem',
+                color: '#64748b',
+                marginTop: '0.1rem',
+              }}
+            >
+              <span>{patientAgeString}</span>
+              <span>•</span>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                <span>chave {patientKey}</span>
+                <button
+                  type="button"
+                  onClick={handleCopyKey}
+                  title="Copiar chave do paciente"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    color: '#94a3b8',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Copy size={12} />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Botões de Ação Principal */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
-          {whatsappUrl && (
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                borderRadius: '0.5rem',
-                backgroundColor: '#25d366',
-                color: '#ffffff',
-                padding: '0.45rem 0.9rem',
-                fontSize: '0.8125rem',
-                fontWeight: 700,
-                textDecoration: 'none',
-                boxShadow: '0 1px 2px rgba(37, 211, 102, 0.25)',
-                transition: 'transform 0.1s ease',
-              }}
-              onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.92')}
-              onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
-            >
-              <MessageCircle size={15} />
-              <span>WhatsApp</span>
-            </a>
-          )}
-
+        {/* Direita: Ações Rápidas (Financeiro, Linha do Tempo, Mais Ações) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
           <button
             type="button"
-            onClick={() => onEdit(patient)}
+            onClick={() => {
+              setActiveSection('arquivo_recibo');
+              setExpandedGroups((prev) => ({ ...prev, arquivos_paciente: true }));
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.45rem',
-              borderRadius: '0.5rem',
-              border: '1px solid #cbd5e1',
+              gap: '0.4rem',
+              borderRadius: '0.375rem',
+              border: '1px solid #e2e8f0',
               backgroundColor: '#ffffff',
-              padding: '0.45rem 0.9rem',
+              padding: '0.45rem 0.85rem',
               fontSize: '0.8125rem',
-              fontWeight: 600,
+              fontWeight: 500,
               color: '#334155',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
@@ -222,70 +444,767 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
             onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
           >
-            <Edit2 size={14} />
-            <span>Editar Cadastro</span>
+            <DollarSign size={14} color="#64748b" />
+            <span>Financeiro</span>
           </button>
 
           <button
             type="button"
             onClick={() => {
-              setActiveTab('timeline');
-              toast.info('Consulta iniciada! Você pode adicionar registros clínicos na aba Prontuário.');
+              setActiveSection('prontuario');
+              setExpandedGroups((prev) => ({ ...prev, avaliacao_nutricional: true }));
             }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.45rem',
-              borderRadius: '0.5rem',
-              backgroundColor: 'var(--primary)',
-              color: '#ffffff',
-              padding: '0.45rem 1rem',
+              gap: '0.4rem',
+              borderRadius: '0.375rem',
+              border: '1px solid #e2e8f0',
+              backgroundColor: '#ffffff',
+              padding: '0.45rem 0.85rem',
               fontSize: '0.8125rem',
-              fontWeight: 700,
-              border: 'none',
+              fontWeight: 500,
+              color: '#334155',
               cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              transition: 'all 0.15s ease',
             }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
+            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
           >
-            <Sparkles size={15} />
-            <span>Iniciar Consulta</span>
+            <Clock size={14} color="#64748b" />
+            <span>Linha do tempo</span>
           </button>
 
-          {onDelete && (
+          {/* Botão Dropdown Mais Ações (...) */}
+          <div style={{ position: 'relative' }}>
             <button
               type="button"
-              onClick={() => setConfirmDelete(true)}
-              title="Excluir paciente"
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              title="Mais opções do paciente"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: '0.5rem',
-                border: '1px solid #fee2e2',
-                backgroundColor: '#fff1f2',
-                color: '#e11d48',
-                padding: '0.45rem',
+                width: '32px',
+                height: '32px',
+                borderRadius: '0.375rem',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                color: '#64748b',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease',
               }}
-              onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#fecdd3')}
-              onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#fff1f2')}
             >
-              <Trash2 size={15} />
+              <MoreHorizontal size={16} />
             </button>
-          )}
+
+            {showMoreMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '110%',
+                  width: '200px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  padding: '0.35rem 0',
+                  zIndex: 50,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMoreMenu(false);
+                    onEdit(patient);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    width: '100%',
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.8125rem',
+                    color: '#334155',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                  onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                >
+                  <Edit2 size={14} />
+                  <span>Editar cadastro</span>
+                </button>
+
+                {whatsappUrl && (
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setShowMoreMenu(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      width: '100%',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.8125rem',
+                      color: '#16a34a',
+                      textDecoration: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f0fdf4')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                  >
+                    <MessageCircle size={14} />
+                    <span>WhatsApp</span>
+                  </a>
+                )}
+
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      setConfirmDelete(true);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      width: '100%',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.8125rem',
+                      color: '#e11d48',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      borderTop: '1px solid #f1f5f9',
+                    }}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#fff1f2')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                  >
+                    <Trash2 size={14} />
+                    <span>Excluir paciente</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+      </header>
+
+      {/* ========================================================
+          2. CORPO PRINCIPAL COM SIDEBAR À ESQUERDA E WORKSPACE À DIREITA
+         ======================================================== */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 65px)' }}>
+        {/* SIDEBAR DE NAVEGAÇÃO CLÍNICA (MODELO DIETSYSTEM) */}
+        <aside
+          style={{
+            width: '260px',
+            minWidth: '260px',
+            backgroundColor: '#ffffff',
+            borderRight: '1px solid #f1f5f9',
+            padding: '1rem 0.65rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.35rem',
+            overflowY: 'auto',
+            height: 'calc(100vh - 65px)',
+            position: 'sticky',
+            top: '65px',
+          }}
+        >
+          {/* Campo de Busca de Seção */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              borderRadius: '0.375rem',
+              border: '1px solid #e2e8f0',
+              padding: '0.45rem 0.65rem',
+              marginBottom: '0.65rem',
+              backgroundColor: '#ffffff',
+            }}
+          >
+            <Search size={14} color="#94a3b8" />
+            <input
+              type="text"
+              placeholder="Buscar seção..."
+              value={sectionSearch}
+              onChange={(e) => setSectionSearch(e.target.value)}
+              style={{
+                border: 'none',
+                outline: 'none',
+                fontSize: '0.78125rem',
+                color: '#0f172a',
+                width: '100%',
+                backgroundColor: 'transparent',
+              }}
+            />
+          </div>
+
+          {/* Itens do Menu Lateral */}
+          {filteredMenuGroups.map((item) => {
+            if (item.type === 'single') {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveSection(item.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.6rem',
+                    width: '100%',
+                    padding: '0.5rem 0.65rem',
+                    borderRadius: '0.375rem',
+                    border: 'none',
+                    background: isActive ? '#f0fdf4' : 'transparent',
+                    color: isActive ? '#10b981' : '#334155',
+                    fontWeight: isActive ? 600 : 500,
+                    fontSize: '0.8125rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.1s ease',
+                  }}
+                  onMouseOver={(e) => {
+                    if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <Icon size={15} color={isActive ? '#10b981' : '#64748b'} />
+                  <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {item.label}
+                  </span>
+                </button>
+              );
+            }
+
+            // Grupo com filhos colapsáveis
+            const GroupIcon = item.icon;
+            const isExpanded = expandedGroups[item.id] ?? false;
+            const hasActiveChild = item.children?.some((c) => c.id === activeSection);
+
+            return (
+              <div key={item.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(item.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    padding: '0.5rem 0.65rem',
+                    borderRadius: '0.375rem',
+                    border: 'none',
+                    background: 'transparent',
+                    color: hasActiveChild ? '#10b981' : '#334155',
+                    fontWeight: hasActiveChild ? 700 : 500,
+                    fontSize: '0.8125rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    position: 'relative',
+                  }}
+                  onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                  onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                >
+                  {/* Linha vertical verde indicadora do grupo ativo */}
+                  {hasActiveChild && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: '4px',
+                        bottom: '4px',
+                        width: '3px',
+                        borderRadius: '0 2px 2px 0',
+                        backgroundColor: '#10b981',
+                      }}
+                    />
+                  )}
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <GroupIcon size={15} color={hasActiveChild ? '#10b981' : '#64748b'} />
+                    <span>{item.label}</span>
+                  </div>
+
+                  {isExpanded ? (
+                    <ChevronDown size={14} color="#94a3b8" />
+                  ) : (
+                    <ChevronRight size={14} color="#94a3b8" />
+                  )}
+                </button>
+
+                {/* Subitens colapsáveis */}
+                {isExpanded && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      paddingLeft: '1.25rem',
+                      gap: '0.15rem',
+                      marginTop: '0.1rem',
+                    }}
+                  >
+                    {item.children?.map((sub) => {
+                      const isSubActive = activeSection === sub.id;
+                      return (
+                        <div
+                          key={sub.id}
+                          onClick={() => setActiveSection(sub.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '0.4rem 0.65rem',
+                            borderRadius: '0.375rem',
+                            backgroundColor: isSubActive ? '#ecfdf5' : 'transparent',
+                            color: isSubActive ? '#10b981' : '#475569',
+                            fontWeight: isSubActive ? 600 : 400,
+                            fontSize: '0.78125rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.1s ease',
+                          }}
+                          onMouseOver={(e) => {
+                            if (!isSubActive) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                          }}
+                          onMouseOut={(e) => {
+                            if (!isSubActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <span>•</span>
+                            <span>{sub.label}</span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                            {sub.badge && (
+                              <span
+                                style={{
+                                  fontSize: '0.625rem',
+                                  fontWeight: 700,
+                                  color: '#10b981',
+                                  backgroundColor: '#d1fae5',
+                                  borderRadius: '0.25rem',
+                                  padding: '0.1rem 0.35rem',
+                                }}
+                              >
+                                {sub.badge}
+                              </span>
+                            )}
+                            {sub.hasPlus && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveSection(sub.id);
+                                  if (sub.id === 'anamnese_transcricao') {
+                                    setShowAddAnamneseModal(true);
+                                  } else {
+                                    toast.info(`Adicionar novo item em: ${sub.label}`);
+                                  }
+                                }}
+                                title={`Adicionar em ${sub.label}`}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#10b981',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <Plus size={13} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </aside>
+
+        {/* WORKSPACE PRINCIPAL À DIREITA */}
+        <main
+          style={{
+            flex: 1,
+            backgroundColor: '#ffffff',
+            padding: '1.75rem 2rem',
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: 'auto',
+          }}
+        >
+          {/* ========================================================
+              SEÇÃO: ANAMNESE E TRANSCRIÇÃO (EXATA DA IMAGEM)
+             ======================================================== */}
+          {activeSection === 'anamnese_transcricao' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', flex: 1 }}>
+              {/* Cabeçalho da Seção */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
+                }}
+              >
+                <div>
+                  <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    Anamneses e transcrições
+                  </h2>
+                  <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                    Anamneses e gravações das consultas do paciente
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => toast.info('Gerando PDF unificado de anamneses do paciente...')}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      borderRadius: '0.375rem',
+                      border: '1px solid #e2e8f0',
+                      backgroundColor: '#ffffff',
+                      padding: '0.45rem 0.85rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 500,
+                      color: '#475569',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
+                  >
+                    <Link2 size={14} color="#64748b" />
+                    <span>PDF unificado</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowAddAnamneseModal(true)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      borderRadius: '0.375rem',
+                      backgroundColor: '#10b981',
+                      color: '#ffffff',
+                      padding: '0.45rem 0.95rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(16, 185, 129, 0.2)',
+                    }}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#059669')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#10b981')}
+                  >
+                    <Plus size={15} />
+                    <span>Adicionar anamnese</span>
+                    <ChevronDown size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Lista ou Empty State da Imagem do DietSystem */}
+              {anamneses.length === 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flex: 1,
+                    minHeight: '320px',
+                    gap: '0.85rem',
+                  }}
+                >
+                  {/* Ícone de pasta cinza minimalist da imagem */}
+                  <div
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#94a3b8',
+                    }}
+                  >
+                    <Folder size={48} strokeWidth={1.25} />
+                  </div>
+
+                  <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0, fontWeight: 500 }}>
+                    Nenhuma anamnese ou transcrição registrada.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {anamneses.map((item) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        borderRadius: '0.625rem',
+                        border: '1px solid #e2e8f0',
+                        backgroundColor: '#f8fafc',
+                        padding: '1rem 1.25rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a' }}>
+                          {item.title}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{item.date}</span>
+                      </div>
+                      <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.8125rem', color: '#475569', lineHeight: 1.5 }}>
+                        {item.notes}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ========================================================
+              SEÇÃO: PRONTUÁRIO & EVOLUÇÃO CLÍNICA
+             ======================================================== */}
+          {activeSection === 'prontuario' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  Prontuário & Linha do Tempo Clínica
+                </h2>
+                <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                  Evoluções registradas, histórico de condutas e anotações clínicas
+                </p>
+              </div>
+
+              <div
+                style={{
+                  borderRadius: '0.625rem',
+                  border: '1px solid #e2e8f0',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                }}
+              >
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+                  ✍️ Registro de Evolução Clínica Rápida
+                </h3>
+                <textarea
+                  placeholder="Digite a evolução clínica do paciente hoje..."
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    borderRadius: '0.375rem',
+                    border: '1px solid #cbd5e1',
+                    padding: '0.5rem',
+                    fontSize: '0.8125rem',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit',
+                  }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => toast.success('Evolução clínica adicionada ao prontuário!')}
+                    style={{
+                      backgroundColor: '#10b981',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      padding: '0.4rem 0.85rem',
+                      fontSize: '0.78125rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Salvar no Prontuário
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================
+              SEÇÃO: PLANO ALIMENTAR & GASTO CALÓRICO
+             ======================================================== */}
+          {(activeSection === 'plano_alimentar' || activeSection === 'gasto_calorico') && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    Plano Alimentar & Prescrição
+                  </h2>
+                  <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                    Metas calóricas diárias, distribuição de macronutrientes e refeições
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => toast.success('Gerando PDF do plano alimentar...')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    borderRadius: '0.375rem',
+                    border: '1px solid #e2e8f0',
+                    backgroundColor: '#ffffff',
+                    padding: '0.45rem 0.85rem',
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: '#334155',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Download size={14} />
+                  <span>Baixar PDF</span>
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
+                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#166534' }}>Meta Diária</span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#14532d', marginTop: '0.15rem' }}>2.150 kcal</div>
+                </div>
+                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#1e40af' }}>Carboidratos</span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a', marginTop: '0.15rem' }}>242g (45%)</div>
+                </div>
+                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#166534' }}>Proteínas</span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#14532d', marginTop: '0.15rem' }}>162g (30%)</div>
+                </div>
+                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a' }}>
+                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#92400e' }}>Lipídios</span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#78350f', marginTop: '0.15rem' }}>60g (25%)</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================
+              SEÇÃO: ANTROPOMETRIA & BIOIMPEDÂNCIA
+             ======================================================== */}
+          {activeSection.startsWith('antropo_') && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  Avaliação Antropométrica & Composição Corporal
+                </h2>
+                <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>
+                  Histórico de pesagem, bioimpedância, dobras cutâneas e perímetros
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '0.6875rem', color: '#64748b' }}>Peso Atual</span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>78.4 kg</div>
+                </div>
+                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '0.6875rem', color: '#64748b' }}>IMC</span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>24.2 kg/m²</div>
+                </div>
+                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '0.6875rem', color: '#64748b' }}>Gordura Corporal</span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>16.8%</div>
+                </div>
+                <div style={{ padding: '0.85rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '0.6875rem', color: '#64748b' }}>Massa Muscular</span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>65.2 kg</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================
+              QUALQUER OUTRA SEÇÃO SELECIONADA
+             ======================================================== */}
+          {!['anamnese_transcricao', 'prontuario', 'plano_alimentar', 'gasto_calorico'].includes(activeSection) &&
+            !activeSection.startsWith('antropo_') && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flex: 1,
+                  minHeight: '320px',
+                  gap: '0.85rem',
+                }}
+              >
+                <div
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#94a3b8',
+                  }}
+                >
+                  <Folder size={48} strokeWidth={1.25} />
+                </div>
+                <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0, fontWeight: 500 }}>
+                  Nenhum registro encontrado nesta seção.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => toast.info('Adicionar novo registro')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    backgroundColor: '#10b981',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '0.375rem',
+                    padding: '0.45rem 0.85rem',
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Plus size={14} />
+                  <span>Adicionar registro</span>
+                </button>
+              </div>
+            )}
+        </main>
       </div>
 
-      {/* Modal de Confirmação de Exclusão */}
-      {confirmDelete && (
+      {/* ========================================================
+          MODAL: ADICIONAR ANAMNESE (POPUP)
+         ======================================================== */}
+      {showAddAnamneseModal && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.5)',
+            backgroundColor: 'rgba(15, 23, 42, 0.4)',
             backdropFilter: 'blur(2px)',
             display: 'flex',
             alignItems: 'center',
@@ -297,32 +1216,144 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           <div
             style={{
               backgroundColor: '#ffffff',
-              borderRadius: '1rem',
-              maxWidth: '420px',
+              borderRadius: '0.75rem',
+              maxWidth: '520px',
               width: '100%',
               padding: '1.5rem',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+              Nova Anamnese ou Gravação
+            </h3>
+            <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0 0 1rem 0' }}>
+              Registre uma nova transcrição ou anotação de consulta para {patient.name}.
+            </p>
+
+            <form onSubmit={handleSaveAnamnese}>
+              <div style={{ marginBottom: '0.85rem' }}>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.25rem' }}>
+                  Título da Anamnese *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Primeira Consulta Nutricional, Retorno de 30 dias..."
+                  value={newAnamneseTitle}
+                  onChange={(e) => setNewAnamneseTitle(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    borderRadius: '0.375rem',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.8125rem',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.25rem' }}>
+                  Anotações / Transcrição Clínica
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Descreva o histórico, hábitos, queixas ou transcrição de áudio..."
+                  value={newAnamneseNotes}
+                  onChange={(e) => setNewAnamneseNotes(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    borderRadius: '0.375rem',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.8125rem',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddAnamneseModal(false)}
+                  style={{
+                    borderRadius: '0.375rem',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    padding: '0.45rem 0.85rem',
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: '#64748b',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    borderRadius: '0.375rem',
+                    border: 'none',
+                    backgroundColor: '#10b981',
+                    padding: '0.45rem 1rem',
+                    fontSize: '0.8125rem',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Salvar Anamnese
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
+      {confirmDelete && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.4)',
+            backdropFilter: 'blur(2px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '0.75rem',
+              maxWidth: '400px',
+              width: '100%',
+              padding: '1.5rem',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
             <h3 style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
               Confirmar Exclusão
             </h3>
-            <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '0 0 1.25rem 0', lineHeight: 1.5 }}>
-              Tem certeza que deseja remover o paciente <strong style={{ color: '#0f172a' }}>{patient.name}</strong>?
-              Esta ação removerá o prontuário associado.
+            <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '0 0 1.25rem 0', lineHeight: 1.5 }}>
+              Tem certeza que deseja remover o paciente <strong>{patient.name}</strong>?
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
                 style={{
-                  borderRadius: '0.5rem',
+                  borderRadius: '0.375rem',
                   border: '1px solid #cbd5e1',
                   backgroundColor: '#ffffff',
-                  padding: '0.5rem 1rem',
+                  padding: '0.45rem 0.85rem',
                   fontSize: '0.8125rem',
                   fontWeight: 600,
-                  color: '#475569',
+                  color: '#64748b',
                   cursor: 'pointer',
                 }}
               >
@@ -337,1359 +1368,18 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   onBack();
                 }}
                 style={{
-                  borderRadius: '0.5rem',
+                  borderRadius: '0.375rem',
                   border: 'none',
                   backgroundColor: '#e11d48',
-                  padding: '0.5rem 1rem',
+                  padding: '0.45rem 1rem',
                   fontSize: '0.8125rem',
                   fontWeight: 700,
                   color: '#ffffff',
                   cursor: 'pointer',
                 }}
               >
-                Confirmar Exclusão
+                Excluir
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2. Hero Card do Paciente (Identificação Completa Modelo DietSystem) */}
-      <div
-        style={{
-          borderRadius: '1rem',
-          border: '1px solid #e2e8f0',
-          backgroundColor: '#ffffff',
-          padding: '1.25rem 1.5rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1.25rem',
-          }}
-        >
-          {/* Avatar + Dados Principais */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-            {patient.photoUrl ? (
-              <img
-                src={patient.photoUrl}
-                alt={patient.name}
-                style={{
-                  width: '72px',
-                  height: '72px',
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  boxShadow: '0 0 0 3px var(--primary-border)',
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: '72px',
-                  height: '72px',
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--primary-soft)',
-                  color: 'var(--primary)',
-                  fontWeight: 800,
-                  fontSize: '1.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 0 0 3px var(--primary-border)',
-                  flexShrink: 0,
-                }}
-              >
-                {patient.initials || 'PA'}
-              </div>
-            )}
-
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
-                <h1 style={{ fontSize: '1.375rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  {patient.name}
-                </h1>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    borderRadius: '9999px',
-                    backgroundColor: 'var(--primary-light)',
-                    padding: '0.2rem 0.6rem',
-                    fontSize: '0.6875rem',
-                    fontWeight: 700,
-                    color: 'var(--primary)',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      backgroundColor: 'var(--primary)',
-                    }}
-                  />
-                  {patient.status || 'Ativo'}
-                </span>
-                {patient.insurancePlan && patient.insurancePlan !== 'Particular' && (
-                  <span
-                    style={{
-                      borderRadius: '9999px',
-                      backgroundColor: '#faf5ff',
-                      border: '1px solid #e9d5ff',
-                      padding: '0.2rem 0.6rem',
-                      fontSize: '0.6875rem',
-                      fontWeight: 600,
-                      color: '#9333ea',
-                    }}
-                  >
-                    {patient.insurancePlan}
-                  </span>
-                )}
-              </div>
-
-              {/* Informações clínicas secundárias */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  marginTop: '0.45rem',
-                  flexWrap: 'wrap',
-                  fontSize: '0.8125rem',
-                  color: '#64748b',
-                }}
-              >
-                {patient.birthDate && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Calendar size={14} color="#94a3b8" />
-                    <span>Nasc.: {patient.birthDate}</span>
-                  </div>
-                )}
-                {patient.sex && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Heart size={14} color="#94a3b8" />
-                    <span>Sexo biológico: {patient.sex}</span>
-                  </div>
-                )}
-                {patient.cpf && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontFamily: 'monospace' }}>
-                    <span>CPF: {patient.cpf}</span>
-                  </div>
-                )}
-                {patient.attendanceLocation && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <MapPin size={14} color="#94a3b8" />
-                    <span>{patient.attendanceLocation}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Objetivo & Badges de tags */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginTop: '0.6rem',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    backgroundColor: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    color: '#1d4ed8',
-                    borderRadius: '0.375rem',
-                    padding: '0.2rem 0.6rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                  }}
-                >
-                  🎯 Objetivo: {patient.objective || patient.goal || 'Performance & Composição Corporal'}
-                </span>
-
-                {(patient.tags || ['Adesão Alta', 'Rotina Intensa']).map((tag, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      borderRadius: '0.375rem',
-                      backgroundColor: '#f1f5f9',
-                      border: '1px solid #e2e8f0',
-                      padding: '0.15rem 0.5rem',
-                      fontSize: '0.6875rem',
-                      fontWeight: 600,
-                      color: '#475569',
-                    }}
-                  >
-                    #{tag}
-                  </span>
-                ))}
-
-                {(patient.pathologies || []).map((pathology, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      borderRadius: '0.375rem',
-                      backgroundColor: '#fff1f2',
-                      border: '1px solid #fecdd3',
-                      padding: '0.15rem 0.5rem',
-                      fontSize: '0.6875rem',
-                      fontWeight: 600,
-                      color: '#e11d48',
-                    }}
-                  >
-                    ⚠️ {pathology}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Metrics Cards (DietSystem Glance Bar) */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(105px, 1fr))',
-              gap: '0.65rem',
-              minWidth: '280px',
-              maxWidth: '460px',
-              width: '100%',
-            }}
-          >
-            <div
-              style={{
-                borderRadius: '0.75rem',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                padding: '0.65rem 0.85rem',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>Peso Atual</div>
-              <div style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', marginTop: '0.15rem' }}>
-                78.4 kg
-              </div>
-              <div style={{ fontSize: '0.6875rem', color: '#16a34a', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem' }}>
-                <TrendingDown size={12} />
-                <span>-2.1 kg</span>
-              </div>
-            </div>
-
-            <div
-              style={{
-                borderRadius: '0.75rem',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                padding: '0.65rem 0.85rem',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>IMC</div>
-              <div style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', marginTop: '0.15rem' }}>
-                24.2
-              </div>
-              <div style={{ fontSize: '0.6875rem', color: '#0284c7', fontWeight: 600 }}>Eutrofia</div>
-            </div>
-
-            <div
-              style={{
-                borderRadius: '0.75rem',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                padding: '0.65rem 0.85rem',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>Gordura %</div>
-              <div style={{ fontSize: '1.125rem', fontWeight: 800, color: '#0f172a', marginTop: '0.15rem' }}>
-                16.8%
-              </div>
-              <div style={{ fontSize: '0.6875rem', color: '#16a34a', fontWeight: 600 }}>Ideal</div>
-            </div>
-
-            <div
-              style={{
-                borderRadius: '0.75rem',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                padding: '0.65rem 0.85rem',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>Meta Calórica</div>
-              <div style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--primary)', marginTop: '0.15rem' }}>
-                2.150
-              </div>
-              <div style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>kcal / dia</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Abas de Navegação (Estrutura Completa DietSystem) */}
-      <div
-        style={{
-          display: 'flex',
-          borderBottom: '1px solid #e2e8f0',
-          gap: '0.5rem',
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        {[
-          { key: 'timeline', label: 'Prontuário & Linha do Tempo', icon: Clock },
-          { key: 'details', label: 'Dados Cadastrais & Contato', icon: ClipboardList },
-          { key: 'meal_plan', label: 'Plano Alimentar & Prescrição', icon: Utensils },
-          { key: 'anthropometry', label: 'Avaliação Antropométrica', icon: Scale },
-          { key: 'anamnesis', label: 'Anamnese & Hábitos', icon: Activity },
-          { key: 'exams', label: 'Exames & Documentos', icon: FileText },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.key;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveTab(tab.key as TabKey)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1rem',
-                fontSize: '0.8125rem',
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? 'var(--primary)' : '#64748b',
-                border: 'none',
-                background: 'transparent',
-                borderBottom: isActive ? '2px solid var(--primary)' : '2px solid transparent',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <Icon size={16} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 4. Conteúdo das Abas */}
-
-      {/* ========================================================
-          ABA 1: PRONTUÁRIO & LINHA DO TEMPO (DIETSYSTEM TIMELINE)
-         ======================================================== */}
-      {activeTab === 'timeline' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-          {/* Coluna Esquerda: Linha do Tempo de Atendimentos */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {/* Box Adicionar Nota Rápida */}
-            <div
-              style={{
-                borderRadius: '0.875rem',
-                border: '1px solid #e2e8f0',
-                backgroundColor: '#ffffff',
-                padding: '1.25rem',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-              }}
-            >
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.75rem 0' }}>
-                ✍️ Adicionar Evolução Clínica / Nota de Consulta
-              </h3>
-              <form onSubmit={handleAddNote}>
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => setNoteType('evolution')}
-                    style={{
-                      borderRadius: '0.375rem',
-                      padding: '0.25rem 0.65rem',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: noteType === 'evolution' ? 'var(--primary)' : '#e2e8f0',
-                      backgroundColor: noteType === 'evolution' ? 'var(--primary-light)' : '#ffffff',
-                      color: noteType === 'evolution' ? 'var(--primary)' : '#64748b',
-                    }}
-                  >
-                    Evolução
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNoteType('alert')}
-                    style={{
-                      borderRadius: '0.375rem',
-                      padding: '0.25rem 0.65rem',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: noteType === 'alert' ? '#e11d48' : '#e2e8f0',
-                      backgroundColor: noteType === 'alert' ? '#fff1f2' : '#ffffff',
-                      color: noteType === 'alert' ? '#e11d48' : '#64748b',
-                    }}
-                  >
-                    Alerta Clínico
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNoteType('whatsapp')}
-                    style={{
-                      borderRadius: '0.375rem',
-                      padding: '0.25rem 0.65rem',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: noteType === 'whatsapp' ? '#25d366' : '#e2e8f0',
-                      backgroundColor: noteType === 'whatsapp' ? '#dcfce7' : '#ffffff',
-                      color: noteType === 'whatsapp' ? '#15803d' : '#64748b',
-                    }}
-                  >
-                    Contato WhatsApp
-                  </button>
-                </div>
-
-                <textarea
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  placeholder="Descreva a evolução do paciente, relatos de apetite, sintomas ou ajustes realizados no plano alimentar..."
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    borderRadius: '0.5rem',
-                    border: '1px solid #cbd5e1',
-                    padding: '0.625rem',
-                    fontSize: '0.8125rem',
-                    outline: 'none',
-                    resize: 'vertical',
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit',
-                  }}
-                />
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.75rem' }}>
-                  <button
-                    type="submit"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      borderRadius: '0.5rem',
-                      backgroundColor: 'var(--primary)',
-                      color: '#ffffff',
-                      padding: '0.45rem 1rem',
-                      fontSize: '0.8125rem',
-                      fontWeight: 700,
-                      border: 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <Plus size={14} />
-                    <span>Salvar no Prontuário</span>
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Timeline Feed */}
-            <div
-              style={{
-                borderRadius: '0.875rem',
-                border: '1px solid #e2e8f0',
-                backgroundColor: '#ffffff',
-                padding: '1.25rem',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-              }}
-            >
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 1rem 0' }}>
-                Linha do Tempo de Atendimentos
-              </h3>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative' }}>
-                {notesList.map((item, idx) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      display: 'flex',
-                      gap: '0.85rem',
-                      position: 'relative',
-                      paddingBottom: idx !== notesList.length - 1 ? '0.75rem' : '0',
-                    }}
-                  >
-                    {/* Linha vertical conectora */}
-                    {idx !== notesList.length - 1 && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          left: '11px',
-                          top: '24px',
-                          bottom: 0,
-                          width: '2px',
-                          backgroundColor: '#e2e8f0',
-                        }}
-                      />
-                    )}
-
-                    {/* Ponto indicador */}
-                    <div
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '50%',
-                        backgroundColor:
-                          item.type === 'alert'
-                            ? '#fff1f2'
-                            : item.type === 'whatsapp'
-                            ? '#dcfce7'
-                            : 'var(--primary-light)',
-                        border: '2px solid',
-                        borderColor:
-                          item.type === 'alert'
-                            ? '#e11d48'
-                            : item.type === 'whatsapp'
-                            ? '#25d366'
-                            : 'var(--primary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        zIndex: 1,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor:
-                            item.type === 'alert'
-                              ? '#e11d48'
-                              : item.type === 'whatsapp'
-                              ? '#25d366'
-                              : 'var(--primary)',
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.8125rem', color: '#0f172a' }}>
-                          {item.title}
-                        </span>
-                        <span style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>{item.date}</span>
-                      </div>
-                      <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.8125rem', color: '#475569', lineHeight: 1.5 }}>
-                        {item.text}
-                      </p>
-                      <span style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.25rem', display: 'block' }}>
-                        Registrado por: {item.author}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Coluna Direita: Alertas Clínicos & Resumo de Protocolos */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div
-              style={{
-                borderRadius: '0.875rem',
-                border: '1px solid #e2e8f0',
-                backgroundColor: '#ffffff',
-                padding: '1.25rem',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-              }}
-            >
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.85rem 0' }}>
-                🚨 Alertas Clínicos & Restrições
-              </h3>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                <div
-                  style={{
-                    borderRadius: '0.5rem',
-                    backgroundColor: '#fffbeb',
-                    border: '1px solid #fde68a',
-                    padding: '0.75rem',
-                    fontSize: '0.8125rem',
-                    color: '#92400e',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <AlertCircle size={16} color="#b45309" style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <span style={{ fontWeight: 700 }}>Alergias & Intolerâncias:</span>
-                    <p style={{ margin: '0.2rem 0 0 0' }}>
-                      Nenhuma alergia medicamentosa severa declarada. Leve desconforto com lactose em altas doses.
-                    </p>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    borderRadius: '0.5rem',
-                    backgroundColor: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    padding: '0.75rem',
-                    fontSize: '0.8125rem',
-                    color: '#166534',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <CheckCircle2 size={16} color="#16a34a" style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <span style={{ fontWeight: 700 }}>Suplementação Ativa:</span>
-                    <p style={{ margin: '0.2rem 0 0 0' }}>
-                      Creatina monoidratada 5g/dia no pós-treino; Vitamina D3 2.000 UI com a refeição do almoço.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Informações Rápidas de Contato */}
-            <div
-              style={{
-                borderRadius: '0.875rem',
-                border: '1px solid #e2e8f0',
-                backgroundColor: '#ffffff',
-                padding: '1.25rem',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-              }}
-            >
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.85rem 0' }}>
-                📞 Contato & Notificações
-              </h3>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8125rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>Telefone / WhatsApp</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, color: '#0f172a' }}>
-                    <CountryFlag code={detectedCountry.code} flag={detectedCountry.flag} />
-                    <span>{patient.phone || 'Não informado'}</span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>E-mail</span>
-                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{patient.email || 'Não informado'}</span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>Local de Atendimento</span>
-                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{patient.attendanceLocation || 'Meu consultório'}</span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>Acesso ao Aplicativo</span>
-                  <span
-                    style={{
-                      borderRadius: '9999px',
-                      padding: '0.15rem 0.55rem',
-                      fontSize: '0.6875rem',
-                      fontWeight: 700,
-                      backgroundColor: patient.hasUserAccount ? 'var(--primary-light)' : '#f1f5f9',
-                      color: patient.hasUserAccount ? 'var(--primary)' : '#64748b',
-                    }}
-                  >
-                    {patient.hasUserAccount ? 'Ativo' : 'Não convidado'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          ABA 2: DADOS CADASTRAIS & CONTATO (COMPLETO)
-         ======================================================== */}
-      {activeTab === 'details' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Card 1: Identificação */}
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                👤 Dados Pessoais & Identificação
-              </h3>
-              <button
-                type="button"
-                onClick={() => onEdit(patient)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--primary)',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                }}
-              >
-                <Edit2 size={13} />
-                <span>Editar dados</span>
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Nome Completo</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
-                  {patient.name}
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>CPF</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', fontFamily: 'monospace', color: '#0f172a' }}>
-                  {patient.cpf || '—'}
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Data de Nascimento</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', color: '#0f172a' }}>
-                  {patient.birthDate || '—'}
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Sexo de Referência para Cálculos</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', color: '#0f172a' }}>
-                  {patient.sex || 'Não informado'}
-                </p>
-              </div>
-            </div>
-
-            {/* Responsável Legal (se menor de idade) */}
-            {(patient.guardianName || patient.guardianCpf) && (
-              <div
-                style={{
-                  marginTop: '1.25rem',
-                  padding: '0.875rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                }}
-              >
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>
-                  Dados do Responsável Legal (Menor de Idade)
-                </span>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
-                  <div>
-                    <span style={{ fontSize: '0.6875rem', color: '#64748b' }}>Nome do Responsável</span>
-                    <p style={{ margin: '0.1rem 0 0 0', fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a' }}>
-                      {patient.guardianName || '—'}
-                    </p>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '0.6875rem', color: '#64748b' }}>CPF do Responsável</span>
-                    <p style={{ margin: '0.1rem 0 0 0', fontSize: '0.8125rem', fontFamily: 'monospace', color: '#0f172a' }}>
-                      {patient.guardianCpf || '—'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Card 2: Endereço & Localização */}
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 1rem 0' }}>
-              📍 Endereço Residencial
-            </h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>CEP</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', fontFamily: 'monospace', color: '#0f172a' }}>
-                  {patient.address?.cep || '—'}
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Logradouro</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', color: '#0f172a' }}>
-                  {patient.address?.street
-                    ? `${patient.address.street}, ${patient.address.number || 'S/N'}`
-                    : '—'}
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Complemento / Bairro</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', color: '#0f172a' }}>
-                  {patient.address?.neighborhood || patient.address?.complement || '—'}
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Cidade / UF</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', color: '#0f172a' }}>
-                  {patient.address?.city ? `${patient.address.city} - ${patient.address.state || ''}` : '—'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Tratamento, Protocolos & Convênio */}
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 1rem 0' }}>
-              🏷️ Protocolos de Tratamento & Convênio
-            </h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Objetivo Principal</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', fontWeight: 600, color: 'var(--primary)' }}>
-                  {patient.objective || patient.goal || 'Performance & Composição Corporal'}
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Tipo de Atendimento / Convênio</span>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', color: '#0f172a' }}>
-                  {patient.insurancePlan || 'Particular'}
-                </p>
-              </div>
-
-              {patient.insuranceCardNumber && (
-                <div>
-                  <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Nº da Carteirinha</span>
-                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', fontFamily: 'monospace', color: '#0f172a' }}>
-                    {patient.insuranceCardNumber}
-                  </p>
-                </div>
-              )}
-
-              {patient.insuranceRepassAmount && (
-                <div>
-                  <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Valor de Repasse</span>
-                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.875rem', fontWeight: 700, color: '#16a34a' }}>
-                    R$ {patient.insuranceRepassAmount}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {patient.notes && (
-              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Observações Adicionais</span>
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8125rem', color: '#334155', lineHeight: 1.5 }}>
-                  {patient.notes}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          ABA 3: PLANO ALIMENTAR & PRESCRIÇÃO (DIETSYSTEM MEAL PLAN)
-         ======================================================== */}
-      {activeTab === 'meal_plan' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Card Resumo Nutricional & Macros */}
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase' }}>
-                  Plano Ativo: Hipertrofia Limpa & Performance
-                </span>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0.2rem 0 0 0' }}>
-                  2.150 kcal / dia
-                </h3>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                <button
-                  type="button"
-                  onClick={() => toast.success('Gerando PDF do plano alimentar para impressão...')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    padding: '0.45rem 0.85rem',
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: '#334155',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <Download size={14} />
-                  <span>Baixar PDF</span>
-                </button>
-
-                {whatsappUrl && (
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      borderRadius: '0.5rem',
-                      backgroundColor: '#25d366',
-                      color: '#ffffff',
-                      padding: '0.45rem 0.85rem',
-                      fontSize: '0.8125rem',
-                      fontWeight: 700,
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <Share2 size={14} />
-                    <span>Enviar no WhatsApp</span>
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* Barra de Distribuição de Macronutrientes */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '1.25rem' }}>
-              <div style={{ borderRadius: '0.5rem', backgroundColor: '#eff6ff', padding: '0.75rem', borderLeft: '4px solid #3b82f6' }}>
-                <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#1e40af' }}>Carboidratos</div>
-                <div style={{ fontSize: '1.125rem', fontWeight: 800, color: '#1e3a8a', marginTop: '0.15rem' }}>242g (45%)</div>
-                <div style={{ fontSize: '0.6875rem', color: '#60a5fa' }}>3.1g / kg</div>
-              </div>
-
-              <div style={{ borderRadius: '0.5rem', backgroundColor: '#f0fdf4', padding: '0.75rem', borderLeft: '4px solid #22c55e' }}>
-                <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#166534' }}>Proteínas</div>
-                <div style={{ fontSize: '1.125rem', fontWeight: 800, color: '#14532d', marginTop: '0.15rem' }}>162g (30%)</div>
-                <div style={{ fontSize: '0.6875rem', color: '#4ade80' }}>2.1g / kg</div>
-              </div>
-
-              <div style={{ borderRadius: '0.5rem', backgroundColor: '#fffbeb', padding: '0.75rem', borderLeft: '4px solid #f59e0b' }}>
-                <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#92400e' }}>Lipídios</div>
-                <div style={{ fontSize: '1.125rem', fontWeight: 800, color: '#78350f', marginTop: '0.15rem' }}>60g (25%)</div>
-                <div style={{ fontSize: '0.6875rem', color: '#fcd34d' }}>0.76g / kg</div>
-              </div>
-
-              <div style={{ borderRadius: '0.5rem', backgroundColor: '#f5f3ff', padding: '0.75rem', borderLeft: '4px solid #8b5cf6' }}>
-                <div style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#5b21b6' }}>Fibras & Água</div>
-                <div style={{ fontSize: '1.125rem', fontWeight: 800, color: '#4c1d95', marginTop: '0.15rem' }}>34g / 2.8L</div>
-                <div style={{ fontSize: '0.6875rem', color: '#a78bfa' }}>Ótima meta</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Lista de Refeições Diárias Modelo DietSystem */}
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 1rem 0' }}>
-              🍽️ Refeições Estruturadas
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              {[
-                {
-                  time: '07:30',
-                  name: 'Café da Manhã (Desjejum)',
-                  kcal: '420 kcal',
-                  items: [
-                    '3 unidades de Ovos mexidos preparados com azeite de oliva extra virgem',
-                    '2 fatias de Pão 100% integral ou 100g de Mandioca cozida',
-                    '1 fatia média de Mamão papaia com 1 colher de sopa de sementes de chia',
-                    'Café preto sem açúcar (opcional com canela)',
-                  ],
-                },
-                {
-                  time: '10:30',
-                  name: 'Colação / Lanche da Manhã',
-                  kcal: '210 kcal',
-                  items: [
-                    '1 pote (160g) de Iogurte natural desnatado',
-                    '20g de Farelo de aveia ou flocos finos',
-                    '1 maçã média picada',
-                  ],
-                },
-                {
-                  time: '13:00',
-                  name: 'Almoço Completo',
-                  kcal: '680 kcal',
-                  items: [
-                    '140g de Peito de frango grelhado ou filé de tilápia',
-                    '120g de Arroz integral cozido',
-                    '80g de Feijão preto ou carioca',
-                    'Salada à vontade (alface, rúcula, tomate, pepino) com 1 colher de sopa de azeite',
-                  ],
-                },
-                {
-                  time: '16:30',
-                  name: 'Lanche da Tarde / Pré-Treino',
-                  kcal: '340 kcal',
-                  items: [
-                    '1 unidade de Banana prata',
-                    '30g de Whey Protein Concentrado (sabor baunilha ou chocolate)',
-                    '15g de Pasta de amendoim integral',
-                  ],
-                },
-                {
-                  time: '20:00',
-                  name: 'Jantar',
-                  kcal: '500 kcal',
-                  items: [
-                    '130g de Patinho moído refogado ou carne magra grelhada',
-                    '150g de Batata doce cozida ou abóbora cabotiá assada',
-                    'Legumes no vapor (brócolis, cenoura e couve-flor à vontade)',
-                  ],
-                },
-              ].map((meal, index) => (
-                <div
-                  key={index}
-                  style={{
-                    borderRadius: '0.625rem',
-                    border: '1px solid #f1f5f9',
-                    backgroundColor: '#f8fafc',
-                    padding: '0.875rem 1rem',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span
-                        style={{
-                          borderRadius: '0.375rem',
-                          backgroundColor: 'var(--primary-light)',
-                          color: 'var(--primary)',
-                          padding: '0.15rem 0.45rem',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {meal.time}
-                      </span>
-                      <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>{meal.name}</span>
-                    </div>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>{meal.kcal}</span>
-                  </div>
-
-                  <ul style={{ margin: '0.25rem 0 0 1.25rem', padding: 0, fontSize: '0.8125rem', color: '#475569', lineHeight: 1.6 }}>
-                    {meal.items.map((it, idx) => (
-                      <li key={idx}>{it}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          ABA 4: AVALIAÇÃO ANTROPOMÉTRICA (DIETSYSTEM BODY COMP)
-         ======================================================== */}
-      {activeTab === 'anthropometry' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                📏 Medidas Antropométricas & Bioimpedância
-              </h3>
-              <button
-                type="button"
-                onClick={() => toast.info('Abrindo formulário de nova aferição antropométrica...')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: 'var(--primary)',
-                  color: '#ffffff',
-                  padding: '0.4rem 0.8rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                <Plus size={13} />
-                <span>Nova Aferição</span>
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-              <div style={{ padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Altura</span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginTop: '0.15rem' }}>180.0 cm</div>
-                <div style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Estatura constante</div>
-              </div>
-
-              <div style={{ padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Circunferência da Cintura</span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginTop: '0.15rem' }}>83.5 cm</div>
-                <div style={{ fontSize: '0.6875rem', color: '#16a34a', fontWeight: 600 }}>Baixo risco cardiovascular</div>
-              </div>
-
-              <div style={{ padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Circunferência do Quadril</span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginTop: '0.15rem' }}>98.0 cm</div>
-                <div style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>RCQ: 0.85</div>
-              </div>
-
-              <div style={{ padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600 }}>Massa Magra (LBM)</span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)', marginTop: '0.15rem' }}>65.2 kg</div>
-                <div style={{ fontSize: '0.6875rem', color: '#16a34a', fontWeight: 600 }}>83.2% de musculatura</div>
-              </div>
-            </div>
-
-            {/* Dobras Cutâneas (Protocolo Pollock 7 Dobras) */}
-            <div style={{ marginTop: '1.25rem' }}>
-              <h4 style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#334155', margin: '0 0 0.65rem 0' }}>
-                Dobras Cutâneas (Protocolo Pollock 7 Dobras)
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem' }}>
-                {[
-                  { label: 'Tríceps', value: '11.0 mm' },
-                  { label: 'Subescapular', value: '14.2 mm' },
-                  { label: 'Suprailíaca', value: '13.5 mm' },
-                  { label: 'Abdominal', value: '18.0 mm' },
-                  { label: 'Coxa', value: '15.4 mm' },
-                  { label: 'Peitoral', value: '9.8 mm' },
-                  { label: 'Axilar Média', value: '10.5 mm' },
-                ].map((skinfold, idx) => (
-                  <div key={idx} style={{ padding: '0.5rem 0.65rem', borderRadius: '0.375rem', backgroundColor: '#f1f5f9', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.6875rem', color: '#64748b' }}>{skinfold.label}</div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', marginTop: '0.1rem' }}>{skinfold.value}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          ABA 5: ANAMNESE & HÁBITOS DE VIDA
-         ======================================================== */}
-      {activeTab === 'anamnesis' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.85rem 0' }}>
-              🧬 Histórico Clínico & Queixa Principal
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8125rem' }}>
-              <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Queixa Principal:</span>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#64748b' }}>
-                  Busca por aumento de energia ao longo do dia, ganho de massa magra e redução da gordura visceral.
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Histórico Familiar:</span>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#64748b' }}>
-                  Pai com histórico de hipertensão arterial controlada; mãe sem histórico de doenças metabólicas.
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Medicamentos em Uso:</span>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#64748b' }}>
-                  Nenhum medicamento de uso contínuo no momento.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.85rem 0' }}>
-              🏃‍♂️ Rotina & Estilo de Vida
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8125rem' }}>
-              <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Atividade Física:</span>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#64748b' }}>
-                  Musculação 4 a 5 vezes por semana (treino de hipertrofia de 60 min) + 20 min cardio moderado.
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Sono & Descanso:</span>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#64748b' }}>
-                  Média de 7 horas por noite, sono reparador, acorda sem cansaço excessivo.
-                </p>
-              </div>
-
-              <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Saúde Intestinal:</span>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#64748b' }}>
-                  Hábito regular (1 a 2 vezes ao dia), Escala de Bristol tipo 3 e 4 (formato cilíndrico e normal).
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          ABA 6: EXAMES & DOCUMENTOS (DIETSYSTEM LABS)
-         ======================================================== */}
-      {activeTab === 'exams' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div
-            style={{
-              borderRadius: '0.875rem',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              padding: '1.25rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                🧪 Painel de Exames Laboratoriais Recentes
-              </h3>
-              <button
-                type="button"
-                onClick={() => toast.info('Anexar novo laudo laboratorial ou exame de sangue...')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: 'var(--primary)',
-                  color: '#ffffff',
-                  padding: '0.4rem 0.8rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                <Plus size={13} />
-                <span>Anexar Laudo / Exame</span>
-              </button>
-            </div>
-
-            <div style={{ overflowX: 'auto', width: '100%' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8125rem' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#64748b', fontSize: '0.75rem' }}>
-                    <th style={{ padding: '0.65rem 0.75rem' }}>Biomarcador</th>
-                    <th style={{ padding: '0.65rem 0.75rem' }}>Resultado</th>
-                    <th style={{ padding: '0.65rem 0.75rem' }}>Faixa de Referência Ideal</th>
-                    <th style={{ padding: '0.65rem 0.75rem' }}>Classificação</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { marker: 'Glicemia de Jejum', result: '86 mg/dL', ref: '70 a 99 mg/dL', status: 'Ótimo', color: '#16a34a' },
-                    { marker: 'Hemoglobina Glicada (HbA1c)', result: '5.1%', ref: '< 5.7%', status: 'Excelente', color: '#16a34a' },
-                    { marker: 'Colesterol Total', result: '172 mg/dL', ref: '< 190 mg/dL', status: 'Desejável', color: '#16a34a' },
-                    { marker: 'HDL (Bom Colesterol)', result: '58 mg/dL', ref: '> 40 mg/dL', status: 'Alto / Protetor', color: '#16a34a' },
-                    { marker: 'Triglicerídeos', result: '92 mg/dL', ref: '< 150 mg/dL', status: 'Excelente', color: '#16a34a' },
-                    { marker: 'Vitamina D (25-OH)', result: '38 ng/mL', ref: '30 a 60 ng/mL', status: 'Suficiente', color: '#16a34a' },
-                    { marker: 'Ferritina Sérica', result: '115 ng/mL', ref: '30 a 400 ng/mL', status: 'Normal', color: '#16a34a' },
-                  ].map((row, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '0.65rem 0.75rem', fontWeight: 600, color: '#0f172a' }}>{row.marker}</td>
-                      <td style={{ padding: '0.65rem 0.75rem', fontWeight: 700, color: '#0f172a' }}>{row.result}</td>
-                      <td style={{ padding: '0.65rem 0.75rem', color: '#64748b' }}>{row.ref}</td>
-                      <td style={{ padding: '0.65rem 0.75rem' }}>
-                        <span
-                          style={{
-                            borderRadius: '9999px',
-                            backgroundColor: '#f0fdf4',
-                            border: '1px solid #bbf7d0',
-                            padding: '0.15rem 0.5rem',
-                            fontSize: '0.6875rem',
-                            fontWeight: 700,
-                            color: row.color,
-                          }}
-                        >
-                          {row.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           </div>
         </div>

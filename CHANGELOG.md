@@ -9,6 +9,33 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🏥 Tela Completa de Visualização Clínica do Paciente (Layout 1:1 DietSystem)
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - Reestruturação completa da tela para corresponder 1:1 à interface de referência enviada pelo usuário:
+      - **Header Superior**:
+        - Avatar quadrado em cinza claro com as iniciais do paciente.
+        - Nome completo em destaque com pill verde `• ATIVO`.
+        - Subtítulo com idade amigável (`X anos e Y meses`) e `chave XXXXXXXX` com botão de cópia rápida.
+        - Botões de cabeçalho `[ 📄 Financeiro ]`, `[ ⏱️ Linha do tempo ]` e menu `[ ... ]` (com ações de editar cadastro, WhatsApp e exclusão).
+      - **Sidebar de Navegação Clínica**:
+        - Campo de busca instantânea `Buscar seção...`.
+        - Todos os agrupamentos clínicos originais com suporte a expansão/recolhimento e indicador vertical verde:
+          - *Perfil nutricional integrado*.
+          - *Avaliação nutricional* (Anamnese e transcrição, Teia de interconexões, Recordatório alimentar, Prontuário, Restrições alimentares, Medicamentos [Novidade]).
+          - *Antropometria* (Adulto, Criança e adolescente, Gestante, Bioimpedância, BodyScan 3D, Reganho GLP-1 [Novidade]).
+          - *Prescrição dietética* (Gasto calórico, Plano alimentar, Orientações, Receitas, Produtos, Fórmulas).
+          - *Avaliação bioquímica* (Upload de exame, Solicitar exames, Exames por texto, Análise de exames por IA).
+          - *Pós-consulta* (Hidratação, Foto comparativa, Metas, Formulário, Ebooks, imagens, etc).
+          - *Arquivos do paciente* (Recibo, Atestado, Contrato, Encaminhamento, Documentos compartilhados).
+          - *Checklist de condutas*, *Aplicativo do paciente*, *Download ou envio de PDF's*.
+        - Botões de atalho rápido `+` em cada subitem para inserção instantânea de registros.
+      - **Workspace Principal de Anamneses e Transcrições**:
+        - Título `Anamneses e transcrições` e subtítulo `Anamneses e gravações das consultas do paciente`.
+        - Botões de topo `[ 🔗 PDF unificado ]` e `[ + Adicionar anamnese ⌄ ]`.
+        - Estado vazio (empty state) idêntico à imagem de referência com ícone de pasta cinza e mensagem *"Nenhuma anamnese ou transcrição registrada."*.
+        - Modal para cadastro e registro de novas anamneses e transcrições com inserção imediata no histórico do paciente.
+
 ### 👁️ Ação de Visualização de Pacientes no Grid & Tela de Prontuário Completa (Modelo DietSystem)
 - **Frontend Web (`apps/web`)**:
   - `PatientDirectory.tsx`:
