@@ -18,7 +18,6 @@ import {
   FolderOpen,
   ChevronDown,
   ArrowUpDown,
-  Sparkles,
 } from 'lucide-react';
 import { DataTablePagination } from './DataTablePagination';
 import { AppModal } from './AppModal';
@@ -593,16 +592,13 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8125rem' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.75rem', fontWeight: 600 }}>
-                  <th style={{ padding: '0.75rem 1.25rem', width: '140px' }}>Data da Consulta</th>
-                  <th style={{ padding: '0.75rem 1.25rem', minWidth: '180px' }}>Título & Modelo</th>
-                  <th style={{ padding: '0.75rem 1.25rem' }}>Principais Queixas & Objetivos</th>
-                  <th style={{ padding: '0.75rem 1.25rem', width: '200px' }}>Tags Clínicas</th>
+                  <th style={{ padding: '0.85rem 1.25rem' }}>Data da Consulta</th>
                   <th
                     style={{
-                      padding: '0.75rem 1.25rem',
+                      padding: '0.85rem 1.25rem',
                       textAlign: 'right',
-                      width: '130px',
-                      minWidth: '130px',
+                      width: '180px',
+                      minWidth: '180px',
                       position: 'sticky',
                       right: 0,
                       backgroundColor: '#f8fafc',
@@ -630,102 +626,67 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
                       onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
                       onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
                     >
-                      {/* 1. Coluna Data com Badge */}
-                      <td style={{ padding: '0.85rem 1.25rem', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                          <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.8125rem' }}>
-                            {dateInfo.date}
-                          </span>
-                          <span
+                      {/* 1. Coluna Data da Consulta com Ícone, Título e Modelo */}
+                      <td style={{ padding: '0.85rem 1.25rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                          <div
                             style={{
-                              fontSize: '0.6875rem',
-                              fontWeight: 600,
-                              color: dateInfo.relative === 'Hoje' ? 'var(--primary)' : '#64748b',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '0.5rem',
+                              backgroundColor: 'var(--primary-light)',
+                              color: 'var(--primary)',
+                              border: '1px solid var(--primary-border)',
+                              flexShrink: 0,
                             }}
                           >
-                            {isFirstConsult ? 'Primeira consulta' : dateInfo.relative}
-                          </span>
-                        </div>
-                      </td>
+                            <Calendar size={18} />
+                          </div>
 
-                      {/* 2. Coluna Título & Modelo */}
-                      <td style={{ padding: '0.85rem 1.25rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                          <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.8125rem' }}>
-                            {item.title}
-                          </span>
-                          {item.templateType && (
-                            <span
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                borderRadius: '9999px',
-                                backgroundColor: 'var(--primary-light)',
-                                border: '1px solid var(--primary-border)',
-                                color: 'var(--primary)',
-                                padding: '0.15rem 0.5rem',
-                                fontSize: '0.6875rem',
-                                fontWeight: 600,
-                                width: 'fit-content',
-                              }}
-                            >
-                              {item.templateType}
-                            </span>
-                          )}
-                        </div>
-                      </td>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.875rem' }}>
+                                {item.title}
+                              </span>
+                              {item.templateType && (
+                                <span
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    borderRadius: '9999px',
+                                    backgroundColor: '#f1f5f9',
+                                    border: '1px solid #e2e8f0',
+                                    color: '#475569',
+                                    padding: '0.1rem 0.5rem',
+                                    fontSize: '0.6875rem',
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {item.templateType}
+                                </span>
+                              )}
+                            </div>
 
-                      {/* 3. Coluna Prévia da Queixa Principal & Objetivos */}
-                      <td style={{ padding: '0.85rem 1.25rem', color: '#334155' }}>
-                        <div
-                          style={{
-                            maxWidth: '380px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            lineHeight: 1.5,
-                            fontSize: '0.8125rem',
-                          }}
-                        >
-                          {item.previewText || (
-                            <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>
-                              Registro em texto livre. Clique para visualizar detalhes...
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* 4. Coluna Tags / Indicadores Clínicos */}
-                      <td style={{ padding: '0.85rem 1.25rem' }}>
-                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                          {item.tags && item.tags.length > 0 ? (
-                            item.tags.map((tag, tIdx) => (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#64748b' }}>
+                              <span style={{ fontWeight: 500 }}>{dateInfo.date}</span>
+                              <span>•</span>
                               <span
-                                key={tIdx}
                                 style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  borderRadius: '0.375rem',
-                                  backgroundColor: '#f1f5f9',
-                                  border: '1px solid #e2e8f0',
-                                  padding: '0.15rem 0.45rem',
-                                  fontSize: '0.6875rem',
-                                  fontWeight: 500,
-                                  color: '#475569',
+                                  fontWeight: 600,
+                                  color: dateInfo.relative === 'Hoje' ? 'var(--primary)' : '#64748b',
                                 }}
                               >
-                                {tag}
+                                {isFirstConsult ? 'Primeira consulta' : dateInfo.relative}
                               </span>
-                            ))
-                          ) : (
-                            <span style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>—</span>
-                          )}
+                            </div>
+                          </div>
                         </div>
                       </td>
 
-                      {/* 5. Coluna Ações Rápidas (Sticky) */}
+                      {/* 2. Coluna Ações Rápidas (Sticky) */}
                       <td
                         onClick={(e) => e.stopPropagation()}
                         style={{
@@ -738,7 +699,7 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
                           boxShadow: '-4px 0 6px -2px rgba(0,0,0,0.03)',
                         }}
                       >
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                           <button
                             type="button"
                             onClick={() => onEdit(item)}
@@ -979,37 +940,6 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
                       </button>
                     </div>
                   </div>
-
-                  {/* Resumo da Consulta */}
-                  <p style={{ fontSize: '0.875rem', color: '#334155', lineHeight: 1.6, margin: '0 0 0.85rem 0' }}>
-                    {item.previewText || 'Registro clínico detalhado disponível no editor.'}
-                  </p>
-
-                  {/* Badges / Indicadores Clínicos */}
-                  {item.tags && item.tags.length > 0 && (
-                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      {item.tags.map((t, idx) => (
-                        <span
-                          key={idx}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.25rem',
-                            backgroundColor: '#f1f5f9',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '0.375rem',
-                            padding: '0.2rem 0.5rem',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            color: '#475569',
-                          }}
-                        >
-                          <Sparkles size={11} color="var(--primary)" />
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             );

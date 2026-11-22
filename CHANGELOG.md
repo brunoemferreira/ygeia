@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📋 Simplificação da Grade de Anamneses: Foco em Data e Ações Rápidas
+- **Frontend Web (`apps/web`)**:
+  - `ClinicalDataGrid.tsx`:
+    - **Remoção de Colunas Secundárias**: Removida a coluna de prévia *"Principais Queixas & Objetivos"* e a coluna de *"Tags Clínicas"* da grade.
+    - **Foco na Data da Consulta**: A coluna principal agora destaca a data da consulta, título da anamnese, selo do modelo/template utilizado e tempo decorrido relativo com ícone de calendário.
+    - **Preservação Integral das Ações Rápidas**: Mantida a coluna de ações rápidas fixa à direita (*sticky*) com visualização/edição no editor Word (`Eye`), download/impressão de PDF (`Download`), comparação de evolução clínica (`Split`) e exclusão segura (`Trash2`).
+  - `PatientProfileView.tsx`:
+    - Otimizado o mapeamento `clinicalAnamnesesItems` para processamento ultrarrápido sem varredura de tags desnecessárias.
+
 ### 🌿 Identidade Visual & Marca Registrada Oficial Ygeía (Υγεία)
 - **Frontend Web (`apps/web`)**:
   - `YgeiaLogo.tsx`:

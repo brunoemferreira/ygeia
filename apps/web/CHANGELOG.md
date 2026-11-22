@@ -5,6 +5,12 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Simplificação e Otimização da Grade de Anamneses (`ClinicalDataGrid.tsx`, `PatientProfileView.tsx`)**:
+  - Remoção da coluna de texto *"Principais Queixas & Objetivos"* e das *"Tags Clínicas"*, conforme diretriz de usabilidade.
+  - Grade centralizada na coluna *"Data da Consulta"* (com ícone temático, título do encontro, selo de modelo/template e intervalo relativo) e na coluna de *"Ações Rápidas"* (visualizar/editar no editor Word, download de PDF, comparar evolução e exclusão com diálogo protetivo).
+  - Limpeza dos dados no perfil do paciente para carregamento instantâneo.
+
 ### Adicionado
 - **Logotipo Vetorial SVG e Marca Registrada Oficial Ygeía (`YgeiaLogo.tsx`, `Sidebar.tsx`, `Navbar.tsx`, `LoginPage.tsx`)**:
   - Vetorização pura em SVG da marca oficial: composição com folhas botânicas (nutrição), escudo anatômico (segurança clínica) e linha de pulso vital / cardiograma (saúde/longevidade).

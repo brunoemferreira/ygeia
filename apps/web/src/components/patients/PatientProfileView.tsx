@@ -248,59 +248,15 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     }
   };
 
-  // Itens mapeados e enriquecidos para o padrão ClinicalDataGrid
+  // Itens mapeados para o padrão ClinicalDataGrid (focado na Data da Consulta e Ações Rápidas)
   const clinicalAnamnesesItems: ClinicalRecordItem[] = useMemo(() => {
-    return anamnesesList.map((item) => {
-      let preview = item.sections?.queixaPrincipal || '';
-      if (!preview && item.sections?.rotinaAlimentar) {
-        preview = item.sections.rotinaAlimentar;
-      }
-      if (!preview && item.contentHtml) {
-        preview = item.contentHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-      }
-
-      const tags: string[] = [];
-      const fullText = (
-        (item.title || '') +
-        ' ' +
-        preview +
-        ' ' +
-        (item.sections?.habitoIntestinal || '') +
-        ' ' +
-        (item.sections?.sonoAtividadeFisica || '') +
-        ' ' +
-        (item.sections?.hidratacao || '')
-      ).toLowerCase();
-
-      if (fullText.includes('bristol') || fullText.includes('fezes')) {
-        tags.push('Bristol Tipo 4');
-      }
-      if (fullText.includes('sono') || fullText.includes('reparador') || fullText.includes('dormir')) {
-        tags.push('Sono Reparador');
-      }
-      if (fullText.includes('água') || fullText.includes('hidratação') || fullText.includes('2.5l') || fullText.includes('2.8l')) {
-        tags.push('Hidratação 2.5L+');
-      }
-      if (fullText.includes('musculação') || fullText.includes('hipertrofia') || fullText.includes('treino')) {
-        tags.push('Treino Resistido');
-      }
-      if (fullText.includes('emagrecimento') || fullText.includes('reeducação')) {
-        tags.push('Emagrecimento');
-      }
-      if (fullText.includes('intestino') || fullText.includes('microbiota') || fullText.includes('fodmap')) {
-        tags.push('Saúde Intestinal');
-      }
-
-      return {
-        id: item.id,
-        title: item.title,
-        date: item.date,
-        templateType: item.templateType || 'Seções padrão',
-        previewText: preview,
-        tags: tags.length > 0 ? tags.slice(0, 3) : ['Clínico Geral'],
-        raw: item,
-      };
-    });
+    return anamnesesList.map((item) => ({
+      id: item.id,
+      title: item.title,
+      date: item.date,
+      templateType: item.templateType || 'Seções padrão',
+      raw: item,
+    }));
   }, [anamnesesList]);
 
   // Cálculo de idade amigável a partir da data de nascimento
