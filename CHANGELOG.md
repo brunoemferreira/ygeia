@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📱 Formatação Automática de Telefones no Grid de Pacientes
+- **Frontend Web (`apps/web`)**:
+  - `countryDialCodes.tsx`:
+    - Criação da função utilitária `formatPhoneDisplay(rawPhone)` capaz de reconhecer e formatar números gravados com DDI internacional (`+55`, `+1`, `+351`, etc.), prefixos sem sinal, ou números nacionais brutos de 10 e 11 dígitos no padrão brasileiro `(XX) XXXXX-XXXX` ou `(XX) XXXX-XXXX`.
+  - `PatientDirectory.tsx`:
+    - Aplicação de `formatPhoneDisplay` na coluna de contato do grid de pacientes, assegurando que nenhum telefone seja exibido como sequência crua de dígitos sem máscara.
+    - Suporte à busca inteligente de pacientes por telefone: a busca agora encontra o paciente seja digitando o telefone com máscara/formatação ou apenas os dígitos limpos.
+  - `AdminDashboard.tsx`:
+    - Atualização do número inicial mockado do paciente principal para o formato padrão mascarado.
+
 ### 🩹 Correção da Tela em Branco no Grid de Anamneses e Aprimoramento Visual do Editor
 - **Frontend Web (`apps/web`)**:
   - `AnamneseEditor.tsx`:

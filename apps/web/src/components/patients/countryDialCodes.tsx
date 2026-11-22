@@ -243,6 +243,47 @@ export function formatPhoneNumber(value: string, countryCode: string): string {
 }
 
 /**
+ * Formata um número de telefone salvo (seja ele gravado com DDI, sem DDI,
+ * com formatação parcial ou apenas dígitos brutos) para exibição elegante no grid e em fichas.
+ */
+export function formatPhoneDisplay(rawPhone?: string | null): string {
+  if (!rawPhone || !rawPhone.trim()) return '';
+  const trimmed = rawPhone.trim();
+
+  // Verifica se inicia com DDI com "+" (ex: "+55 19992922054" ou "+55 (19) 99292-2054")
+  const matchedCountry = COUNTRY_DIAL_CODES.find((c) => trimmed.startsWith(c.dialCode));
+  const digitsOnly = trimmed.replace(/\D/g, '');
+
+  if (matchedCountry) {
+    const dialDigits = matchedCountry.dialCode.replace(/\D/g, '');
+    if (digitsOnly.startsWith(dialDigits)) {
+      const localDigits = digitsOnly.slice(dialDigits.length);
+      if (!localDigits) return matchedCountry.dialCode;
+      const formattedLocal = formatPhoneNumber(localDigits, matchedCountry.code);
+      return `${matchedCountry.dialCode} ${formattedLocal}`.trim();
+    }
+  }
+
+  // Se não tem prefixo "+" mas tem 12 ou 13 dígitos começando com "55" (Brasil sem "+")
+  if ((digitsOnly.length === 12 || digitsOnly.length === 13) && digitsOnly.startsWith('55')) {
+    const localDigits = digitsOnly.slice(2);
+    return `+55 ${formatPhoneNumber(localDigits, 'BR')}`;
+  }
+
+  // Se é número padrão nacional brasileiro com DDD (10 ou 11 dígitos, ex: 19992922054 ou 1133445566)
+  if (digitsOnly.length === 11 || digitsOnly.length === 10) {
+    return formatPhoneNumber(digitsOnly, 'BR');
+  }
+
+  // Se já possui formatação rica (parênteses, traços), preserva
+  if (trimmed.includes('(') || trimmed.includes('-') || trimmed.includes(' ')) {
+    return trimmed;
+  }
+
+  return trimmed;
+}
+
+/**
  * Componente que renderiza a bandeira colorida e nítida de QUALQUER país/prefixo,
  * funcionando perfeitamente em qualquer navegador e sistema operacional (incluindo Windows).
  */

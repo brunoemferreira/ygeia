@@ -6,6 +6,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Corrigido
+- **Formatação de Telefones no Grid e na Exibição de Pacientes (`PatientDirectory.tsx`, `countryDialCodes.tsx`, `AdminDashboard.tsx`)**:
+  - Implementação da função utilitária `formatPhoneDisplay` para garantir que telefones salvos no banco de dados (sejam eles gravados com código DDI internacional `+55`, com máscara ou em dígitos brutos como `19992922054`) sejam sempre exibidos formatados no grid de pacientes (`(19) 99292-2054` ou `+55 (19) 99292-2054`).
+  - Atualização do filtro de busca no diretório de pacientes para permitir busca tanto por dígitos numéricos quanto por telefone formatado.
+
+### Corrigido
 - **Tela em Branco e Carregamento no Grid e Editor de Anamneses (`AnamneseEditor.tsx`, `PatientProfileView.tsx`)**:
   - Eliminação da falha que causava visualização em branco ao clicar nas linhas do grid de anamneses ou no botão de adicionar nova anamnese.
   - Implementação de cards bem definidos com bordas sutis (`#e2e8f0`), foco em `var(--primary)`, contagem de caracteres e áreas de digitação confortáveis para as 6 seções clínicas (*Queixa principal e objetivo*, *História clínica e medicamentos*, *Hábito intestinal*, *Hidratação*, *Rotina alimentar* e *Sono e atividade física*).

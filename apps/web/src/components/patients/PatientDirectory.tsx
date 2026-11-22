@@ -17,6 +17,7 @@ import {
 import { useToast } from '../../context/ToastContext';
 import { getStoredBranding } from '../../utils/branding';
 import { DataTablePagination } from '../ui/DataTablePagination';
+import { formatPhoneDisplay } from './countryDialCodes';
 
 export interface PatientRecord {
   id: string;
@@ -100,7 +101,11 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
         patient.name.toLowerCase().includes(query) ||
         (patient.email && patient.email.toLowerCase().includes(query)) ||
         (patient.cpf && patient.cpf.includes(query)) ||
-        (patient.phone && patient.phone.includes(query));
+        (patient.phone && (
+          patient.phone.includes(query) ||
+          formatPhoneDisplay(patient.phone).toLowerCase().includes(query) ||
+          patient.phone.replace(/\D/g, '').includes(query.replace(/\D/g, ''))
+        ));
 
       const hasInsurance = Boolean(
         patient.insurancePlan &&
@@ -645,7 +650,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                           {patient.phone ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#475569' }}>
                               <Phone size={12} color="#94a3b8" />
-                              <span>{patient.phone}</span>
+                              <span>{formatPhoneDisplay(patient.phone)}</span>
                             </div>
                           ) : null}
                         </div>

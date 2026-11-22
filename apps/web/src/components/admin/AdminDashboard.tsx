@@ -84,7 +84,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       name: user?.fullName || 'Bruno Eduardo de Moura Ferreira',
       initials: 'BE',
       email: user?.email || 'brunoemf@gmail.com',
-      phone: '19992922054',
+      phone: '(19) 99292-2054',
       cpf: '218.980.718-29',
       birthDate: '15/04/1988',
       sex: 'Masculino',
