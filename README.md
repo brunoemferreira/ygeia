@@ -19,6 +19,7 @@
 A documentação completa, estudo de arquitetura, padrões, governança e política de segurança do projeto foram organizados no diretório oficial [`docs/`](./docs/README.md) e no documento institucional de segurança [`SECURITY.md`](./SECURITY.md):
 
 - 🛡️ **[Diretrizes de Segurança & Política Anti-Invasão](./SECURITY.md)**: Zero Trust, Matriz de Defesa OWASP para API, Web e Mobile, Isolamento Multi-Tenant com PostgreSQL RLS no Kernel, Criptografia Argon2id e Procedimento de Atualização Contínua.
+- ⚖️ **[Diretrizes de Desenvolvimento LGPD & Dados de Saúde](./docs/LGPD_GUIDELINES.md)**: Conformidade oficial com a Lei nº 13.709/2018, Privacy by Design & by Default da ANPD, Tratamento de Dados Sensíveis de Saúde (Art. 11), Atendimento aos Direitos do Titular e Rastreabilidade de Prontuários (CFN/CFM).
 - 📐 **[Estudo de Arquitetura & Engenharia](./docs/arquitetura/DOCS_ARQUITETURA_YGEIA.md)**: Estudo aprofundado, DDD, Hexagonal, Roadmap e especificações de banco de dados e APIs.
 - 📋 **[Guia Central de Regras](./docs/regras/README.md)**:
   - 🔄 **[Fluxo de Desenvolvimento](./docs/regras/fluxo-desenvolvimento.md)**: Regra obrigatória `Plano > Autorização > Desenvolvimento > Testes > Versionamento > Publicação (Dev)`.

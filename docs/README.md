@@ -28,6 +28,7 @@ docs/
 ## 🔗 Atalhos Rápidos
 
 - 📐 **[Estudo de Arquitetura & Engenharia (DOCS_ARQUITETURA_YGEIA.md)](./arquitetura/DOCS_ARQUITETURA_YGEIA.md)**
+- ⚖️ **[Diretrizes de Desenvolvimento LGPD & Dados de Saúde](./LGPD_GUIDELINES.md)**
 - 🚦 **[Regra de Fluxo de Desenvolvimento](./regras/fluxo-desenvolvimento.md)**
 - 🏢 **[Regras de Negócio & Compliance Nutricional](./regras/regras-negocio.md)**
 - 🛡️ **[Segurança das APIs & Criptografia](./regras/seguranca-apis.md)**

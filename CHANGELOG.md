@@ -9,6 +9,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### ⚖️ Diretrizes Oficiais de Desenvolvimento de Software para a LGPD (Lei 13.709/2018)
+- **Governança e Diretrizes de Engenharia (`docs/LGPD_GUIDELINES.md`, `AGENTS.md`)**:
+  - **Criação do Documento Mestre de Desenvolvimento LGPD**: Compilação de diretrizes técnicas e legais baseadas diretamente nas fontes oficiais da **Autoridade Nacional de Proteção de Dados (ANPD — gov.br/anpd)**, no **Framework PPSI (Programa de Privacidade e Segurança da Informação)** do Governo Federal e nas resoluções sanitárias e éticas do **CFN (nº 600/2018)** e **CFM (nº 1.821/2007)**.
+  - **Inclusão da Seção 7 no `AGENTS.md`**: Regra permanente e obrigatória para engenheiros e agentes de IA, impondo:
+    - *Privacy by Design* e *Privacy by Default* (Art. 46, § 2º) em 100% dos novos desenvolvimentos.
+    - Princípio da Minimização de Dados (*Data Minimization* — Art. 6º, III), proibindo campos ou coletas indiscriminadas sem justificativa dietoterápica ou fiscal.
+    - Tratamento restrito de dados sensíveis de saúde (Art. 11) sob a base legal de Tutela da Saúde ou consentimento destacado, com isolamento multi-tenant forçado via PostgreSQL RLS.
+    - Proibição absoluta de exposição de dados clínicos ou credenciais em logs de servidor, console ou telemetria.
+    - Registro obrigatório de acessos e modificações na tabela `audit_logs` (trilha de auditoria).
+    - Mecanismos técnicos para exercício dos Direitos do Titular (Art. 18: exportação aberta JSON/PDF, retificação, revogação de consentimento e harmonização de eliminação com a guarda legal de prontuários por 20 anos).
+    - Checklist de conformidade obrigatório (DoD) pré-entrega de qualquer PR ou funcionalidade.
+
+
 ### 🗄️ Regra Obrigatória de Engenharia de Banco de Dados & DBA Sênior PostgreSQL (AGENTS.md)
 - **Regras Globais de Engenharia (`AGENTS.md`)**:
   - **Inclusão da Seção 6**: Estabelecida regra obrigatória e permanente de auditoria DBA sênior de PostgreSQL para todo DDL, migração e SQL gerado ou alterado no repositório.

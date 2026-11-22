@@ -56,4 +56,15 @@ Este documento estabelece as regras e padrões de engenharia para qualquer agent
   - **Auditoria Obrigatória DBA Pré-Entrega**:
     - A cada nova migration, alteração de schema ou adição de query SQL, o agente/desenvolvedor DEVE verificar se os índices foram criados, se há risco de Seq Scan desnecessário e se as políticas de RLS e integridade referencial estão ativas e otimizadas.
 
+## 7. Regra Obrigatória de Conformidade com a LGPD e Proteção de Dados Sensíveis de Saúde
+- **Obrigatoriedade de Cumprimento das Diretrizes LGPD**: Todo desenvolvimento de software (APIs, telas, formulários, componentes mobile, banco de dados, relatórios e tarefas agendadas) DEVE seguir rigorosamente o documento [`docs/LGPD_GUIDELINES.md`](./docs/LGPD_GUIDELINES.md) e as normas oficiais da ANPD (gov.br/anpd).
+  - **Privacy by Design e by Default (Art. 46, § 2º)**: A privacidade e a proteção de dados sensíveis devem ser contempladas desde a concepção do requisito até a entrega em produção, com configurações mais protetivas ativadas por padrão.
+  - **Minimização de Dados (Art. 6º, III)**: É terminantemente proibido criar campos ou coletar dados desnecessários para a finalidade dietoterápica ou fiscal. Campos opcionais devem ser claramente identificados como `(opcional)`.
+  - **Isolamento de Dados Sensíveis de Saúde (Art. 11)**: Dados de prontuário, anamnese, antropometria, exames e recordatórios alimentares só podem ser acessados com base na Tutela da Saúde por profissional de saúde ou consentimento específico, sempre isolados via Row-Level Security (RLS) no PostgreSQL.
+  - **Higienização de Logs**: É expressamente proibido registrar dados pessoais sensíveis (CPFs, nomes, diagnósticos, prontuários ou senhas) em logs de console, arquivos de log de servidor ou plataformas de telemetria.
+  - **Trilha de Auditoria Obrigatória (`audit_logs`)**: Toda consulta, alteração ou exportação de dados clínicos deve registrar evento na tabela `audit_logs` com operador, timestamp com fuso, IP e recurso afetado.
+  - **Direitos do Titular (Art. 18)**: Garantir canais técnicos para exportação de dados (portabilidade JSON/PDF), retificação e cancelamento de comunicações, observando a obrigatoriedade legal de guarda do prontuário por 20 anos (Art. 16, I da LGPD c/c Resoluções CFN/CFM).
+  - **Auditoria Obrigatória LGPD Pré-Entrega**: Todo PR ou funcionalidade entregue deve passar pelo Checklist Obrigatório de Desenvolvimento constante em `docs/LGPD_GUIDELINES.md`.
+
+
 
