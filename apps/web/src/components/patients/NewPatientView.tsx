@@ -1168,12 +1168,6 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 {/* Footer Help */}
                 <div style={{ paddingTop: '1rem', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>
                   <p style={{ margin: 0 }}>
-                    Vindo de outro software?{' '}
-                    <span style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
-                      Clique aqui para importar
-                    </span>
-                  </p>
-                  <p style={{ margin: '0.25rem 0 0 0' }}>
                     Se precisar de ajuda,{' '}
                     <span style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
                       clique aqui 💬

@@ -1106,15 +1106,6 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                   gap: '0.35rem',
                 }}
               >
-                <div>
-                  Vindo de outro software?{' '}
-                  <span
-                    onClick={() => toast.info('Módulo de migração de prontuários em lote disponível nas Configurações.')}
-                    style={{ color: '#059669', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
-                  >
-                    Clique aqui para importar
-                  </span>
-                </div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
                   <span>Se precisar de ajuda,</span>
                   <span

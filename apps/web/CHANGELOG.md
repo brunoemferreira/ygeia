@@ -5,6 +5,10 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Removido
+- **Chamada de Importação de Outro Software (`NewPatientView.tsx`, `NewPatientModal.tsx`)**:
+  - Remoção do texto e link *"Vindo de outro software? Clique aqui para importar"* do rodapé dos formulários de cadastro de novos pacientes.
+
 ### Corrigido
 - **Ajuste Pixel-Perfect na Tela de Configurações (`SettingsModule.tsx`, `styles.css`)**:
   - Correção no breakpoint responsivo de `.ygeia-settings-layout`, mantendo a visualização em 2 colunas lado a lado a partir de `768px`.
