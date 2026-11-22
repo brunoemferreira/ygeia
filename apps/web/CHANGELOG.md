@@ -5,6 +5,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Responsividade e Fixação da Coluna de Ações na Tabela de Pacientes (`PatientDirectory.tsx`, `AppTable.tsx`)**:
+  - Correção do corte e compressão da coluna de Ações em telas menores e dispositivos móveis.
+  - Implementação de `minWidth: 850px` na tabela com contêiner `overflow-x: auto` e rolagem touch.
+  - Coluna de Ações configurada com posição fixa *sticky right* (`position: sticky; right: 0`) com transição suave de cor no hover e largura dedicada de 110px.
+  - Ajuste do espaçamento do contêiner em `AdminDashboard.tsx` para evitar compressão lateral de grids.
+
 ### Adicionado
 - **Arquitetura Mobile First Obrigatória em Telas e Componentes**:
   - `styles.css`: Novas classes utilitárias responsivas (`touch-target` com altura mínima 44px, `.ygeia-mobile-backdrop`, `.ygeia-sidebar-drawer`, `.ygeia-wizard-container`, `.ygeia-wizard-stepper`, `.ygeia-settings-container`, `.ygeia-settings-nav`, `.ygeia-grid-1-2`, `.ygeia-grid-1-3`, `.ygeia-grid-metrics`).

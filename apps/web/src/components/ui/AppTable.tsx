@@ -182,8 +182,8 @@ export function AppTable<T>({
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
         }}
       >
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', minWidth: '850px', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#ffffff' }}>
                 {columns.map((col) => (
@@ -198,6 +198,7 @@ export function AppTable<T>({
                       textTransform: 'uppercase',
                       textAlign: col.align || 'left',
                       width: col.width,
+                      whiteSpace: 'nowrap',
                       fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                     }}
                   >
@@ -214,6 +215,13 @@ export function AppTable<T>({
                       letterSpacing: '0.05em',
                       textTransform: 'uppercase',
                       textAlign: 'right',
+                      whiteSpace: 'nowrap',
+                      width: '110px',
+                      minWidth: '110px',
+                      position: 'sticky',
+                      right: 0,
+                      backgroundColor: '#ffffff',
+                      zIndex: 2,
                       fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                     }}
                   >
@@ -254,8 +262,16 @@ export function AppTable<T>({
                         cursor: onRowClick ? 'pointer' : 'default',
                         transition: 'background-color 0.12s ease',
                       }}
-                      onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                      onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
+                      onMouseOver={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                        const stickyCell = (e.currentTarget as HTMLElement).querySelector('.app-table-actions-cell') as HTMLElement;
+                        if (stickyCell) stickyCell.style.backgroundColor = '#f8fafc';
+                      }}
+                      onMouseOut={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                        const stickyCell = (e.currentTarget as HTMLElement).querySelector('.app-table-actions-cell') as HTMLElement;
+                        if (stickyCell) stickyCell.style.backgroundColor = '#ffffff';
+                      }}
                     >
                       {columns.map((col) => (
                         <td
@@ -265,6 +281,7 @@ export function AppTable<T>({
                             textAlign: col.align || 'left',
                             fontSize: '0.8125rem',
                             color: '#334155',
+                            whiteSpace: 'nowrap',
                             fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                           }}
                         >
@@ -274,9 +291,19 @@ export function AppTable<T>({
 
                       {actions && (
                         <td
+                          className="app-table-actions-cell"
                           style={{
                             padding: '0.875rem 1.25rem',
                             textAlign: 'right',
+                            whiteSpace: 'nowrap',
+                            width: '110px',
+                            minWidth: '110px',
+                            position: 'sticky',
+                            right: 0,
+                            backgroundColor: '#ffffff',
+                            zIndex: 1,
+                            boxShadow: '-4px 0 8px -2px rgba(0, 0, 0, 0.05)',
+                            transition: 'background-color 0.12s ease',
                           }}
                           onClick={(e) => e.stopPropagation()}
                         >

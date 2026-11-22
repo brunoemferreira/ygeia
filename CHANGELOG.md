@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🛠️ Correção e Responsividade Avançada no Grid de Pacientes (Padrão Better Health)
+- **Frontend Web (`apps/web`)**:
+  - `PatientDirectory.tsx`:
+    - Adicionada largura mínima explícita de `850px` na `<table>` com container `overflowX: 'auto'` e aceleração touch `-webkit-overflow-scrolling: touch`.
+    - Implementada fixação estática lateral (*sticky column*) para a coluna **Ações** (`position: sticky; right: 0; zIndex: 1`), com sombra suave de sobreposição e fundo consistente no hover da linha, garantindo que os botões de edição e exclusão jamais sejam cortados ou comprimidos em qualquer largura de tela ou dispositivo móvel.
+    - Prevenção de quebra de linha com `white-space: nowrap` e largura fixa de `110px` para a coluna de ações.
+  - `AppTable.tsx`: Aplicada a mesma padronização de `min-width: 850px` e coluna de ações *sticky right* para todos os grids genéricos do sistema.
+  - `AdminDashboard.tsx`: Ajuste no padding do contêiner da visualização para evitar margens duplas e compressão prematura da tabela.
+
 ### ⚙️ Resiliência da API Backend em Desenvolvimento Local
 - **Backend API (`apps/api`)**:
   - `DatabaseService`: Tratamento gracioso de indisponibilidade temporária de conexão com o PostgreSQL em modo de desenvolvimento local, mantendo a API em execução contínua para rotas e serviços auxiliares enquanto o contêiner ou serviço de banco de dados é iniciado.

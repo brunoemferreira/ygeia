@@ -294,8 +294,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       style={{
         minHeight: '100%',
         backgroundColor: '#f4f8f7',
-        padding: '1.75rem 2rem',
+        padding: '1rem 1.25rem',
         fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        width: '100%',
+        boxSizing: 'border-box',
       }}
     >
       {/* ========================================================

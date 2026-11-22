@@ -507,8 +507,16 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
             )}
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+          <div style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+            <table
+              style={{
+                width: '100%',
+                minWidth: '850px',
+                borderCollapse: 'collapse',
+                textAlign: 'left',
+                fontSize: '0.875rem',
+              }}
+            >
               <thead>
                 <tr
                   style={{
@@ -521,12 +529,26 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                     color: '#64748b',
                   }}
                 >
-                  <th style={{ padding: '0.875rem 1.5rem' }}>Paciente</th>
-                  <th style={{ padding: '0.875rem 1.5rem' }}>Contato</th>
-                  <th style={{ padding: '0.875rem 1.5rem' }}>CPF</th>
-                  <th style={{ padding: '0.875rem 1.5rem' }}>Convênio</th>
-                  <th style={{ padding: '0.875rem 1.5rem' }}>Acesso App</th>
-                  <th style={{ padding: '0.875rem 1.5rem', textAlign: 'right' }}>Ações</th>
+                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>Paciente</th>
+                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>Contato</th>
+                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>CPF</th>
+                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>Convênio</th>
+                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>Acesso App</th>
+                  <th
+                    style={{
+                      padding: '0.875rem 1.5rem',
+                      textAlign: 'right',
+                      whiteSpace: 'nowrap',
+                      width: '110px',
+                      minWidth: '110px',
+                      position: 'sticky',
+                      right: 0,
+                      backgroundColor: '#f8fafc',
+                      zIndex: 2,
+                    }}
+                  >
+                    Ações
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -545,11 +567,19 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                         cursor: 'pointer',
                         transition: 'background 0.15s ease',
                       }}
-                      onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                      onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                      onMouseOver={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                        const stickyCell = (e.currentTarget as HTMLElement).querySelector('.actions-sticky-cell') as HTMLElement;
+                        if (stickyCell) stickyCell.style.backgroundColor = '#f8fafc';
+                      }}
+                      onMouseOut={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                        const stickyCell = (e.currentTarget as HTMLElement).querySelector('.actions-sticky-cell') as HTMLElement;
+                        if (stickyCell) stickyCell.style.backgroundColor = '#ffffff';
+                      }}
                     >
                       {/* Paciente */}
-                      <td style={{ padding: '1rem 1.5rem' }}>
+                      <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           {patient.photoUrl ? (
                             <img
@@ -575,7 +605,6 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                                 fontSize: '0.8125rem',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifySelf: 'center',
                                 justifyContent: 'center',
                                 flexShrink: 0,
                               }}
@@ -595,7 +624,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                       </td>
 
                       {/* Contato */}
-                      <td style={{ padding: '1rem 1.5rem' }}>
+                      <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.75rem' }}>
                           {patient.email ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#475569' }}>
@@ -615,12 +644,12 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                       </td>
 
                       {/* CPF */}
-                      <td style={{ padding: '1rem 1.5rem', fontFamily: 'monospace', fontSize: '0.75rem', color: '#475569' }}>
+                      <td style={{ padding: '1rem 1.5rem', fontFamily: 'monospace', fontSize: '0.75rem', color: '#475569', whiteSpace: 'nowrap' }}>
                         {patient.cpf || '—'}
                       </td>
 
                       {/* Convênio */}
-                      <td style={{ padding: '1rem 1.5rem' }}>
+                      <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
                         {hasInsurance ? (
                           <span
                             style={{
@@ -656,7 +685,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                       </td>
 
                       {/* Acesso App */}
-                      <td style={{ padding: '1rem 1.5rem' }}>
+                      <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
                         {patient.hasUserAccount || patient.status === 'Ativo' ? (
                           <span
                             style={{
@@ -696,8 +725,23 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                         )}
                       </td>
 
-                      {/* Ações */}
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                      {/* Ações (Com Posição Fixa Sticky para Nunca Cortar) */}
+                      <td
+                        className="actions-sticky-cell"
+                        style={{
+                          padding: '0.75rem 1.5rem',
+                          textAlign: 'right',
+                          whiteSpace: 'nowrap',
+                          width: '110px',
+                          minWidth: '110px',
+                          position: 'sticky',
+                          right: 0,
+                          backgroundColor: '#ffffff',
+                          zIndex: 1,
+                          boxShadow: '-4px 0 8px -2px rgba(0, 0, 0, 0.05)',
+                          transition: 'background-color 0.15s ease',
+                        }}
+                      >
                         <div
                           style={{
                             display: 'inline-flex',
@@ -714,19 +758,25 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                             }}
                             title="Editar paciente"
                             style={{
-                              background: 'none',
+                              background: 'transparent',
                               border: 'none',
-                              padding: '0.35rem',
+                              padding: '0.45rem',
                               color: '#64748b',
-                              borderRadius: '0.375rem',
+                              borderRadius: '0.5rem',
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              transition: 'color 0.15s ease',
+                              transition: 'all 0.15s ease',
                             }}
-                            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--primary)')}
-                            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#64748b')}
+                            onMouseOver={(e) => {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9';
+                              (e.currentTarget as HTMLElement).style.color = '#0f172a';
+                            }}
+                            onMouseOut={(e) => {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                              (e.currentTarget as HTMLElement).style.color = '#64748b';
+                            }}
                           >
                             <Edit2 size={16} />
                           </button>
@@ -739,19 +789,25 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                             }}
                             title="Excluir paciente"
                             style={{
-                              background: 'none',
+                              background: 'transparent',
                               border: 'none',
-                              padding: '0.35rem',
+                              padding: '0.45rem',
                               color: '#64748b',
-                              borderRadius: '0.375rem',
+                              borderRadius: '0.5rem',
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              transition: 'color 0.15s ease',
+                              transition: 'all 0.15s ease',
                             }}
-                            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = '#ef4444')}
-                            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#64748b')}
+                            onMouseOver={(e) => {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = '#fef2f2';
+                              (e.currentTarget as HTMLElement).style.color = '#e11d48';
+                            }}
+                            onMouseOut={(e) => {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                              (e.currentTarget as HTMLElement).style.color = '#64748b';
+                            }}
                           >
                             <Trash2 size={16} />
                           </button>
