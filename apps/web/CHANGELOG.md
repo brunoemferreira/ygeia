@@ -5,6 +5,21 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Tipografia Compacta e Densidade Visual Idêntica ao Better Health (`PatientDirectory.tsx`, `AppTable.tsx`, `DataTablePagination.tsx`)**:
+  - Calibragem tipográfica milimétrica na tabela de pacientes para corresponder com o Better Health:
+    - Cabeçalhos (`th`): `fontSize: 0.6875rem` (11px), `fontWeight: 600`, tracking `0.05em`, padding `0.75rem 1.25rem`.
+    - Nome do paciente: `fontSize: 0.8125rem` (13px), `fontWeight: 600`.
+    - Subtítulo de localização: `fontSize: 0.6875rem` (11px).
+    - Avatar circular com iniciais: `36px` com tipografia em `0.75rem`.
+    - Linhas de contato (e-mail e telefone) e CPF: `fontSize: 0.75rem` (12px) com ícones em `12px`.
+    - Badges de Convênio e Acesso App: `fontSize: 0.6875rem` (11px) com padding compacto `0.2rem 0.55rem`.
+    - Padding vertical das células da tabela (`td`): Reduzido de `1rem` para `0.625rem 1.25rem` (10px vertical), alinhando a densidade de linhas.
+    - Botões de ações de edição e exclusão: Ícones em `14px`, padding `0.35rem` e coluna sticky ajustada para `90px`.
+    - Cards de KPIs superiores: Números de destaque ajustados para `1.375rem` (22px) com padding `1rem 1.25rem`.
+    - Paginação (`DataTablePagination.tsx`): Padding enxuto de `0.625rem 1.25rem`, botões de página em `24px` e ícones `14px`.
+    - Grid genérico (`AppTable.tsx`): Sincronizado para manter a mesma harmonia visual em todas as tabelas do sistema.
+
 ### Corrigido
 - **Responsividade e Fixação da Coluna de Ações na Tabela de Pacientes (`PatientDirectory.tsx`, `AppTable.tsx`)**:
   - Correção do corte e compressão da coluna de Ações em telas menores e dispositivos móveis.

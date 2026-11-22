@@ -70,17 +70,17 @@ export function DataTablePagination({
         flexWrap: 'wrap',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '1rem',
+        gap: '0.75rem',
         borderTop: '1px solid #e2e8f0',
         backgroundColor: '#f8fafc',
-        padding: '0.875rem 1.5rem',
+        padding: '0.625rem 1.25rem',
         fontSize: '0.75rem',
         color: '#64748b',
         fontFamily: 'var(--font-sans)',
       }}
     >
       {/* Informação e Seletor de Registros por Página */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}>
         <span>
           Exibindo{' '}
           <strong style={{ fontWeight: 600, color: '#1e293b' }}>
@@ -94,7 +94,7 @@ export function DataTablePagination({
         </span>
 
         {onPageSizeChange && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
             <label htmlFor="bh-pagination-pagesize" style={{ color: '#94a3b8' }}>
               Itens por página:
             </label>
@@ -103,11 +103,11 @@ export function DataTablePagination({
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
               style={{
-                borderRadius: '0.5rem',
+                borderRadius: '0.375rem',
                 border: '1px solid #cbd5e1',
                 backgroundColor: '#ffffff',
-                padding: '0.25rem 0.5rem',
-                fontSize: '0.75rem',
+                padding: '0.2rem 0.45rem',
+                fontSize: '0.6875rem',
                 fontWeight: 500,
                 color: '#334155',
                 outline: 'none',
@@ -124,7 +124,7 @@ export function DataTablePagination({
       </div>
 
       {/* Controles de Navegação de Páginas */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
         {/* Primeira Página */}
         <button
           type="button"
@@ -132,10 +132,10 @@ export function DataTablePagination({
           onClick={() => onPageChange(1)}
           title="Primeira Página"
           style={{
-            borderRadius: '0.5rem',
+            borderRadius: '0.375rem',
             border: '1px solid #cbd5e1',
             backgroundColor: '#ffffff',
-            padding: '0.25rem',
+            padding: '0.2rem',
             color: '#64748b',
             cursor: safePage <= 1 ? 'not-allowed' : 'pointer',
             opacity: safePage <= 1 ? 0.4 : 1,
@@ -144,7 +144,7 @@ export function DataTablePagination({
             justifyContent: 'center',
           }}
         >
-          <ChevronsLeft size={16} />
+          <ChevronsLeft size={14} />
         </button>
 
         {/* Página Anterior */}
@@ -154,10 +154,10 @@ export function DataTablePagination({
           onClick={() => onPageChange(safePage - 1)}
           title="Página Anterior"
           style={{
-            borderRadius: '0.5rem',
+            borderRadius: '0.375rem',
             border: '1px solid #cbd5e1',
             backgroundColor: '#ffffff',
-            padding: '0.25rem',
+            padding: '0.2rem',
             color: '#64748b',
             cursor: safePage <= 1 ? 'not-allowed' : 'pointer',
             opacity: safePage <= 1 ? 0.4 : 1,
@@ -166,17 +166,17 @@ export function DataTablePagination({
             justifyContent: 'center',
           }}
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={14} />
         </button>
 
         {/* Números das Páginas */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0 0.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', padding: '0 0.15rem' }}>
           {pageNumbers.map((p, idx) => {
             if (p === 'ellipsis') {
               return (
                 <span
                   key={`ellipsis-${idx}`}
-                  style={{ padding: '0 0.25rem', color: '#94a3b8', fontWeight: 600 }}
+                  style={{ padding: '0 0.2rem', color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem' }}
                 >
                   …
                 </span>
@@ -190,16 +190,20 @@ export function DataTablePagination({
                 type="button"
                 onClick={() => onPageChange(p)}
                 style={{
-                  minWidth: '28px',
-                  borderRadius: '0.5rem',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.75rem',
+                  minWidth: '24px',
+                  height: '24px',
+                  borderRadius: '0.375rem',
+                  padding: '0 0.35rem',
+                  fontSize: '0.6875rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   border: isActive ? 'none' : '1px solid #cbd5e1',
                   backgroundColor: isActive ? 'var(--primary)' : '#ffffff',
                   color: isActive ? '#ffffff' : '#334155',
                   transition: 'all 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {p}
@@ -215,10 +219,10 @@ export function DataTablePagination({
           onClick={() => onPageChange(safePage + 1)}
           title="Próxima Página"
           style={{
-            borderRadius: '0.5rem',
+            borderRadius: '0.375rem',
             border: '1px solid #cbd5e1',
             backgroundColor: '#ffffff',
-            padding: '0.25rem',
+            padding: '0.2rem',
             color: '#64748b',
             cursor: safePage >= totalPages ? 'not-allowed' : 'pointer',
             opacity: safePage >= totalPages ? 0.4 : 1,
@@ -227,7 +231,7 @@ export function DataTablePagination({
             justifyContent: 'center',
           }}
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={14} />
         </button>
 
         {/* Última Página */}
@@ -237,10 +241,10 @@ export function DataTablePagination({
           onClick={() => onPageChange(totalPages)}
           title="Última Página"
           style={{
-            borderRadius: '0.5rem',
+            borderRadius: '0.375rem',
             border: '1px solid #cbd5e1',
             backgroundColor: '#ffffff',
-            padding: '0.25rem',
+            padding: '0.2rem',
             color: '#64748b',
             cursor: safePage >= totalPages ? 'not-allowed' : 'pointer',
             opacity: safePage >= totalPages ? 0.4 : 1,
@@ -249,7 +253,7 @@ export function DataTablePagination({
             justifyContent: 'center',
           }}
         >
-          <ChevronsRight size={16} />
+          <ChevronsRight size={14} />
         </button>
       </div>
     </div>

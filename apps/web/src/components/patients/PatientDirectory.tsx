@@ -230,32 +230,32 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
             borderRadius: '1rem',
             border: '1px solid #e2e8f0',
             backgroundColor: '#ffffff',
-            padding: '1.25rem',
+            padding: '1rem 1.25rem',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+            <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>
               Total Pacientes
             </span>
             <div
               style={{
                 borderRadius: '0.5rem',
                 backgroundColor: 'var(--primary-light)',
-                padding: '0.5rem',
+                padding: '0.45rem',
                 color: 'var(--primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Users size={16} />
+              <Users size={15} />
             </div>
           </div>
-          <p style={{ marginTop: '0.5rem', fontSize: '1.625rem', fontWeight: 800, color: '#0f172a' }}>
+          <p style={{ marginTop: '0.4rem', fontSize: '1.375rem', fontWeight: 700, color: '#0f172a' }}>
             {totalPatients}
           </p>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Cadastros ativos</span>
+          <span style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Cadastros ativos</span>
         </div>
 
         {/* Card 2: App Conectado */}
@@ -264,32 +264,32 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
             borderRadius: '1rem',
             border: '1px solid #e2e8f0',
             backgroundColor: '#ffffff',
-            padding: '1.25rem',
+            padding: '1rem 1.25rem',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+            <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>
               App Conectado
             </span>
             <div
               style={{
                 borderRadius: '0.5rem',
                 backgroundColor: '#eff6ff',
-                padding: '0.5rem',
+                padding: '0.45rem',
                 color: '#2563eb',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Smartphone size={16} />
+              <Smartphone size={15} />
             </div>
           </div>
-          <p style={{ marginTop: '0.5rem', fontSize: '1.625rem', fontWeight: 800, color: '#0f172a' }}>
+          <p style={{ marginTop: '0.4rem', fontSize: '1.375rem', fontWeight: 700, color: '#0f172a' }}>
             {appActivePatients}
           </p>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Usuários criados</span>
+          <span style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Usuários criados</span>
         </div>
 
         {/* Card 3: Com Convênio */}
@@ -298,32 +298,32 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
             borderRadius: '1rem',
             border: '1px solid #e2e8f0',
             backgroundColor: '#ffffff',
-            padding: '1.25rem',
+            padding: '1rem 1.25rem',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+            <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>
               Com Convênio
             </span>
             <div
               style={{
                 borderRadius: '0.5rem',
                 backgroundColor: '#faf5ff',
-                padding: '0.5rem',
+                padding: '0.45rem',
                 color: '#9333ea',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <ShieldCheck size={16} />
+              <ShieldCheck size={15} />
             </div>
           </div>
-          <p style={{ marginTop: '0.5rem', fontSize: '1.625rem', fontWeight: 800, color: '#0f172a' }}>
+          <p style={{ marginTop: '0.4rem', fontSize: '1.375rem', fontWeight: 700, color: '#0f172a' }}>
             {insuranceCount}
           </p>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Repasses vinculados</span>
+          <span style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Repasses vinculados</span>
         </div>
 
         {/* Card 4: Particulares */}
@@ -332,32 +332,32 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
             borderRadius: '1rem',
             border: '1px solid #e2e8f0',
             backgroundColor: '#ffffff',
-            padding: '1.25rem',
+            padding: '1rem 1.25rem',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+            <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>
               Particulares
             </span>
             <div
               style={{
                 borderRadius: '0.5rem',
                 backgroundColor: '#fffbeb',
-                padding: '0.5rem',
+                padding: '0.45rem',
                 color: '#d97706',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Building size={16} />
+              <Building size={15} />
             </div>
           </div>
-          <p style={{ marginTop: '0.5rem', fontSize: '1.625rem', fontWeight: 800, color: '#0f172a' }}>
+          <p style={{ marginTop: '0.4rem', fontSize: '1.375rem', fontWeight: 700, color: '#0f172a' }}>
             {privateCount}
           </p>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Atendimento direto</span>
+          <span style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Atendimento direto</span>
         </div>
       </div>
 
@@ -372,14 +372,14 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
           borderRadius: '1rem',
           border: '1px solid #e2e8f0',
           backgroundColor: '#ffffff',
-          padding: '0.875rem 1rem',
+          padding: '0.75rem 1rem',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
           flexWrap: 'wrap',
         }}
       >
         <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
           <Search
-            size={16}
+            size={15}
             style={{
               position: 'absolute',
               left: '0.875rem',
@@ -397,8 +397,8 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
               width: '100%',
               borderRadius: '0.75rem',
               border: '1px solid #cbd5e1',
-              padding: '0.5rem 1rem 0.5rem 2.5rem',
-              fontSize: '0.875rem',
+              padding: '0.45rem 1rem 0.45rem 2.35rem',
+              fontSize: '0.8125rem',
               color: '#0f172a',
               outline: 'none',
               boxSizing: 'border-box',
@@ -415,7 +415,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+          <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#64748b' }}>
             Filtrar:
           </span>
           <select
@@ -425,7 +425,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
               borderRadius: '0.75rem',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
-              padding: '0.5rem 0.75rem',
+              padding: '0.45rem 0.75rem',
               fontSize: '0.75rem',
               fontWeight: 600,
               color: '#334155',
@@ -514,7 +514,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                 minWidth: '850px',
                 borderCollapse: 'collapse',
                 textAlign: 'left',
-                fontSize: '0.875rem',
+                fontSize: '0.8125rem',
               }}
             >
               <thead>
@@ -522,25 +522,25 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                   style={{
                     borderBottom: '1px solid #e2e8f0',
                     backgroundColor: '#f8fafc',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
+                    fontSize: '0.6875rem',
+                    fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     color: '#64748b',
                   }}
                 >
-                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>Paciente</th>
-                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>Contato</th>
-                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>CPF</th>
-                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>Convênio</th>
-                  <th style={{ padding: '0.875rem 1.5rem', whiteSpace: 'nowrap' }}>Acesso App</th>
+                  <th style={{ padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }}>Paciente</th>
+                  <th style={{ padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }}>Contato</th>
+                  <th style={{ padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }}>CPF</th>
+                  <th style={{ padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }}>Convênio</th>
+                  <th style={{ padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }}>Acesso App</th>
                   <th
                     style={{
-                      padding: '0.875rem 1.5rem',
+                      padding: '0.75rem 1.25rem',
                       textAlign: 'right',
                       whiteSpace: 'nowrap',
-                      width: '110px',
-                      minWidth: '110px',
+                      width: '90px',
+                      minWidth: '90px',
                       position: 'sticky',
                       right: 0,
                       backgroundColor: '#f8fafc',
@@ -579,15 +579,15 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                       }}
                     >
                       {/* Paciente */}
-                      <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '0.625rem 1.25rem', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           {patient.photoUrl ? (
                             <img
                               src={patient.photoUrl}
                               alt={patient.name}
                               style={{
-                                width: '40px',
-                                height: '40px',
+                                width: '36px',
+                                height: '36px',
                                 borderRadius: '50%',
                                 objectFit: 'cover',
                                 boxShadow: '0 0 0 2px var(--primary-border)',
@@ -596,13 +596,13 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                           ) : (
                             <div
                               style={{
-                                width: '40px',
-                                height: '40px',
+                                width: '36px',
+                                height: '36px',
                                 borderRadius: '50%',
                                 backgroundColor: 'var(--primary-soft)',
                                 color: 'var(--primary)',
-                                fontWeight: 700,
-                                fontSize: '0.8125rem',
+                                fontWeight: 600,
+                                fontSize: '0.75rem',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -613,10 +613,10 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                             </div>
                           )}
                           <div>
-                            <p style={{ fontWeight: 700, color: '#0f172a', margin: 0, fontSize: '0.875rem' }}>
+                            <p style={{ fontWeight: 600, color: '#0f172a', margin: 0, fontSize: '0.8125rem' }}>
                               {patient.name}
                             </p>
-                            <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '0.15rem 0 0 0' }}>
+                            <p style={{ fontSize: '0.6875rem', color: '#94a3b8', margin: '0.1rem 0 0 0' }}>
                               {patient.attendanceLocation || 'Meu consultório'}
                             </p>
                           </div>
@@ -624,19 +624,19 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                       </td>
 
                       {/* Contato */}
-                      <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.75rem' }}>
+                      <td style={{ padding: '0.625rem 1.25rem', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', fontSize: '0.75rem' }}>
                           {patient.email ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#475569' }}>
-                              <Mail size={13} color="#94a3b8" />
+                              <Mail size={12} color="#94a3b8" />
                               <span>{patient.email}</span>
                             </div>
                           ) : (
-                            <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Sem e-mail</span>
+                            <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.6875rem' }}>Sem e-mail</span>
                           )}
                           {patient.phone ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#475569' }}>
-                              <Phone size={13} color="#94a3b8" />
+                              <Phone size={12} color="#94a3b8" />
                               <span>{patient.phone}</span>
                             </div>
                           ) : null}
@@ -644,12 +644,12 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                       </td>
 
                       {/* CPF */}
-                      <td style={{ padding: '1rem 1.5rem', fontFamily: 'monospace', fontSize: '0.75rem', color: '#475569', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '0.625rem 1.25rem', fontFamily: 'monospace', fontSize: '0.75rem', color: '#475569', whiteSpace: 'nowrap' }}>
                         {patient.cpf || '—'}
                       </td>
 
                       {/* Convênio */}
-                      <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '0.625rem 1.25rem', whiteSpace: 'nowrap' }}>
                         {hasInsurance ? (
                           <span
                             style={{
@@ -658,9 +658,9 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                               borderRadius: '9999px',
                               backgroundColor: '#faf5ff',
                               border: '1px solid #e9d5ff',
-                              padding: '0.25rem 0.625rem',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
+                              padding: '0.2rem 0.55rem',
+                              fontSize: '0.6875rem',
+                              fontWeight: 500,
                               color: '#9333ea',
                             }}
                           >
@@ -673,9 +673,9 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                               alignItems: 'center',
                               borderRadius: '9999px',
                               backgroundColor: '#f1f5f9',
-                              padding: '0.25rem 0.625rem',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
+                              padding: '0.2rem 0.55rem',
+                              fontSize: '0.6875rem',
+                              fontWeight: 500,
                               color: '#475569',
                             }}
                           >
@@ -685,23 +685,23 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                       </td>
 
                       {/* Acesso App */}
-                      <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '0.625rem 1.25rem', whiteSpace: 'nowrap' }}>
                         {patient.hasUserAccount || patient.status === 'Ativo' ? (
                           <span
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '0.35rem',
+                              gap: '0.3rem',
                               borderRadius: '9999px',
                               backgroundColor: 'var(--primary-light)',
                               border: '1px solid var(--primary-border)',
-                              padding: '0.25rem 0.625rem',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
+                              padding: '0.2rem 0.55rem',
+                              fontSize: '0.6875rem',
+                              fontWeight: 500,
                               color: 'var(--primary)',
                             }}
                           >
-                            <CheckCircle2 size={13} />
+                            <CheckCircle2 size={12} />
                             <span>App Ativo</span>
                           </span>
                         ) : (
@@ -709,17 +709,17 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '0.35rem',
+                              gap: '0.3rem',
                               borderRadius: '9999px',
                               backgroundColor: '#fffbeb',
                               border: '1px solid #fde68a',
-                              padding: '0.25rem 0.625rem',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
+                              padding: '0.2rem 0.55rem',
+                              fontSize: '0.6875rem',
+                              fontWeight: 500,
                               color: '#b45309',
                             }}
                           >
-                            <Clock size={13} />
+                            <Clock size={12} />
                             <span>Pendente</span>
                           </span>
                         )}
@@ -729,11 +729,11 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                       <td
                         className="actions-sticky-cell"
                         style={{
-                          padding: '0.75rem 1.5rem',
+                          padding: '0.625rem 1.25rem',
                           textAlign: 'right',
                           whiteSpace: 'nowrap',
-                          width: '110px',
-                          minWidth: '110px',
+                          width: '90px',
+                          minWidth: '90px',
                           position: 'sticky',
                           right: 0,
                           backgroundColor: '#ffffff',
@@ -747,7 +747,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                             display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'flex-end',
-                            gap: '0.5rem',
+                            gap: '0.35rem',
                           }}
                         >
                           <button
@@ -760,9 +760,9 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                             style={{
                               background: 'transparent',
                               border: 'none',
-                              padding: '0.45rem',
+                              padding: '0.35rem',
                               color: '#64748b',
-                              borderRadius: '0.5rem',
+                              borderRadius: '0.375rem',
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
@@ -778,7 +778,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                               (e.currentTarget as HTMLElement).style.color = '#64748b';
                             }}
                           >
-                            <Edit2 size={16} />
+                            <Edit2 size={14} />
                           </button>
 
                           <button
@@ -791,9 +791,9 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                             style={{
                               background: 'transparent',
                               border: 'none',
-                              padding: '0.45rem',
+                              padding: '0.35rem',
                               color: '#64748b',
-                              borderRadius: '0.5rem',
+                              borderRadius: '0.375rem',
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
@@ -809,7 +809,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                               (e.currentTarget as HTMLElement).style.color = '#64748b';
                             }}
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

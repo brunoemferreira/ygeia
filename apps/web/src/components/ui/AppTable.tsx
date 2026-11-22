@@ -190,9 +190,9 @@ export function AppTable<T>({
                   <th
                     key={col.id}
                     style={{
-                      padding: '0.875rem 1.25rem',
+                      padding: '0.625rem 1.25rem',
                       fontSize: '0.6875rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: '#64748b',
                       letterSpacing: '0.05em',
                       textTransform: 'uppercase',
@@ -208,16 +208,16 @@ export function AppTable<T>({
                 {actions && (
                   <th
                     style={{
-                      padding: '0.875rem 1.25rem',
+                      padding: '0.625rem 1.25rem',
                       fontSize: '0.6875rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: '#64748b',
                       letterSpacing: '0.05em',
                       textTransform: 'uppercase',
                       textAlign: 'right',
                       whiteSpace: 'nowrap',
-                      width: '110px',
-                      minWidth: '110px',
+                      width: '90px',
+                      minWidth: '90px',
                       position: 'sticky',
                       right: 0,
                       backgroundColor: '#ffffff',
@@ -236,7 +236,7 @@ export function AppTable<T>({
                   <td
                     colSpan={columns.length + (actions ? 1 : 0)}
                     style={{
-                      padding: '3.5rem 1rem',
+                      padding: '3rem 1rem',
                       textAlign: 'center',
                       color: '#64748b',
                       fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -277,9 +277,9 @@ export function AppTable<T>({
                         <td
                           key={col.id}
                           style={{
-                            padding: '0.875rem 1.25rem',
+                            padding: '0.625rem 1.25rem',
                             textAlign: col.align || 'left',
-                            fontSize: '0.8125rem',
+                            fontSize: '0.75rem',
                             color: '#334155',
                             whiteSpace: 'nowrap',
                             fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -293,11 +293,11 @@ export function AppTable<T>({
                         <td
                           className="app-table-actions-cell"
                           style={{
-                            padding: '0.875rem 1.25rem',
+                            padding: '0.625rem 1.25rem',
                             textAlign: 'right',
                             whiteSpace: 'nowrap',
-                            width: '110px',
-                            minWidth: '110px',
+                            width: '90px',
+                            minWidth: '90px',
                             position: 'sticky',
                             right: 0,
                             backgroundColor: '#ffffff',

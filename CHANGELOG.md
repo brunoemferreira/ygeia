@@ -9,6 +9,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🔍 Tipografia Refinada e Densidade Compacta do Grid de Pacientes (Fiel ao Better Health)
+- **Frontend Web (`apps/web`)**:
+  - `PatientDirectory.tsx`:
+    - Redução e calibragem precisa dos tamanhos de fontes e paddings para coincidir 1:1 com o padrão estético compacto do Better Health (`AdminRoutinePatientsSection.tsx`).
+    - Cabeçalhos de coluna (`thead th`): Reduzidos para `fontSize: '0.6875rem'` (11px), `fontWeight: 600`, tracking `0.05em`, caixa alta e padding enxuto de `0.75rem 1.25rem`.
+    - Nome do paciente: Reduzido de `0.875rem` / bold 700 para `fontSize: '0.8125rem'` (13px), `fontWeight: 600` e cor `#0f172a`.
+    - Subtítulo de localização do atendimento: Ajustado para `fontSize: '0.6875rem'` (11px) com cor `#94a3b8`.
+    - Avatar do paciente / iniciais: Dimensionamento refinado de `40px` para `36px` (`fontSize: 0.75rem`).
+    - Informações de contato (e-mail e telefone) e CPF: Tipografia compacta em `fontSize: '0.75rem'` (12px) com ícones em `12px`.
+    - Badges de Convênio e Acesso App: Tipografia reduzida para `fontSize: '0.6875rem'` (11px), `fontWeight: 500` e padding de `0.2rem 0.55rem`.
+    - Células da tabela (`tbody td`): Padding vertical reduzido de `1rem` para `0.625rem 1.25rem` (10px vertical), proporcionando altura de linha elegante e compacta.
+    - Botões de ações: Redução do padding para `0.35rem`, ícones em `14px` e largura da coluna sticky ajustada para `90px`.
+    - Cards de métricas superiores: Ajuste do número de destaque de `1.625rem` para `1.375rem` (22px) com padding interno de `1rem 1.25rem`.
+    - Barra de busca e filtro: Input em `fontSize: '0.8125rem'` (13px) e seletor em `0.75rem`.
+  - `DataTablePagination.tsx`:
+    - Altura e padding do rodapé de paginação ajustados para `0.625rem 1.25rem`.
+    - Botões numéricos e de navegação compactados para `24px` de altura, com ícones em `14px` e tipografia `0.6875rem`.
+  - `AppTable.tsx`:
+    - Alinhamento de todos os grids genéricos do sistema para a mesma densidade visual enxuta (`fontSize: 0.6875rem` no cabeçalho e `0.75rem` nas células, padding `0.625rem 1.25rem`).
+
 ### 🛠️ Correção e Responsividade Avançada no Grid de Pacientes (Padrão Better Health)
 - **Frontend Web (`apps/web`)**:
   - `PatientDirectory.tsx`:
