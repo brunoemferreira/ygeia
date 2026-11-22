@@ -6,6 +6,15 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Validação Global de Payloads com Zod (`ZodValidationPipe`, `zod-validation.pipe.spec.ts`)**:
+  - Implementação de pipe transformador com introspecção de schemas Zod e rejeição estruturada de campos maliciosos (HTTP 400).
+  - Cobertura com testes unitários em `zod-validation.pipe.spec.ts`.
+  - Injeção global como `APP_PIPE` no `AppModule`.
+- **Trilha de Auditoria LGPD Assíncrona (`AuditLogInterceptor.ts`)**:
+  - Criação de interceptor global registrando consultas e modificações em prontuários e dados de pacientes na tabela `audit_logs` (tenant, usuário, método/ação, IP e user-agent) via RxJS `tap` não-bloqueante.
+  - Injeção global como `APP_INTERCEPTOR` no `AppModule`.
+
+### Adicionado
 - **Filtro Global de Exceções HTTP RFC 7807 & Probes de Liveness/Readiness (`http-exception.filter.ts`, `health.controller.ts`, `main.ts`)**:
   - Implementação de `HttpExceptionFilter` interceptando todas as exceções da API, sanitizando mensagens e formatando respostas de erro em JSON padronizado com código HTTP semântico, prevenindo vazamento de dados internos de infraestrutura.
   - Adição do método `ping()` no `DatabaseService` para medição de latência da conexão com o PostgreSQL em tempo real.

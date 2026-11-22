@@ -1,4 +1,6 @@
-import { z } from 'zod';
+import { z, ZodSchema, ZodError, ZodIssue } from 'zod';
+
+export { z, ZodSchema, ZodError, ZodIssue };
 
 export const loginSchema = z.object({
   email: z.string().email('E-mail em formato inválido'),

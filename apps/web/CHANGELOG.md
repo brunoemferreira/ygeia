@@ -5,6 +5,18 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Refatorado
+- **Modularização Arquitetural de `PatientProfileView.tsx` (`components/patients/tabs/`)**:
+  - Desacoplamento do componente monolítico de pacientes (de 2.583 linhas para 498 linhas), criando submódulos dedicados:
+    - `PatientHeaderCard.tsx`: Cabeçalho, avatar, dados pessoais, chave do paciente, WhatsApp e ações rápidas.
+    - `PatientSidebarNav.tsx`: Navegação lateral por categorias expansíveis e filtro de seções.
+    - `PatientAnamneseTab.tsx`: Grade clínica e editor de anamnese tipo Word com proteção de ErrorBoundary.
+    - `PatientRecallsTab.tsx`: Grade e modal de recordatórios alimentares.
+    - `PatientMedicalRecordsTab.tsx`: Grade e modal de evoluções do prontuário.
+    - `PatientRestrictionsTab.tsx`: Tabela com badges temáticos e filtros padronizados via `AppSelect`.
+    - `PatientAnthropometryTab.tsx`: Nova aba com abordagem dual adaptativa (Clínico Geral vs. Esportivo de Alta Performance).
+    - `tabs/index.ts`: Barrel de exportação limpo.
+
 ### Modificado
 - **Alinhamento de UX/UI para Abordagem Dual Adaptativa (Clínico Geral & Alta Performance)**:
   - Atualização dos padrões de design da aplicação web para atender tanto o público convencional (reeducação, emagrecimento saudável, dislipidemias, sem atrito ou jargões assustadores) quanto praticantes de exercícios e atletas de rendimento (g/kg/dia, nutrient timing e antropometria avançada).

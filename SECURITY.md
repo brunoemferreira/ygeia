@@ -118,8 +118,14 @@ Configuração obrigatória no Fastify com:
 - A API valida a origem contra a tabela de domínios cadastrados de cada clínica White Label (`tenant_domains`) e os domínios corporativos (`ygeia.app`).
 - Requisições provenientes de origens não registradas são sumariamente recusadas pelo middleware de CORS.
 
-### 2.7. Validação Estrita de Entrada com Zod
-- Validação no `@ygeia/validation-schemas`: Todos os dados de entrada passam por esquemas tipados que rejeitam campos não declarados (*strip unknown fields*), prevenindo ataques de **Mass Assignment** e injeção de parâmetros maliciosos.
+### 2.7. Validação Estrita de Entrada com Zod & ZodValidationPipe Global
+- **ZodValidationPipe no NestJS**: Implementação e registro de pipe global no bootstrap da aplicação (`ZodValidationPipe`), garantindo sanitização e rejeição automática de payloads maliciosos, tipos incorretos e injeção de parâmetros não mapeados com respostas padronizadas `400 Bad Request`.
+- Validação no `@ygeia/validation-schemas`: Todos os dados de entrada passam por esquemas tipados que rejeitam campos não declarados (*strip unknown fields*), prevenindo ataques de **Mass Assignment** e injeção de parâmetros maliciosos (OWASP API Security API1, API2 e API3).
+
+### 2.8. Trilha de Auditoria LGPD Assíncrona (`AuditLogInterceptor`)
+- **Compliance com Tutela da Saúde & Art. 11/18 da LGPD**: Interceptor global (`AuditLogInterceptor`) que intercepta requisições a dados clínicos e de pacientes, registrando eventos na tabela `audit_logs`.
+- **Rastreabilidade Não-Bloqueante**: O evento registra `tenant_id`, `user_id`, método/ação semântica (`READ`, `CREATE`, `UPDATE`, `DELETE`), recurso (`resource`), identificador (`resource_id`), IP de origem e `User-Agent`.
+- **Isolamento de Erros**: O registro de auditoria é executado de forma não bloqueante via RxJS `tap`, garantindo que eventuais oscilações no pipeline de log nunca interrompam a experiência do usuário ou degradem a latência das APIs.
 
 ---
 

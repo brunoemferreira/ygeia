@@ -9,6 +9,27 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🚀 Conclusão da Fase 1: Modularização da UI de Pacientes & Validação Estrita com Zod e Auditoria LGPD
+- **Frontend Web (`apps/web`)**:
+  - **Decomposição do Monólito `PatientProfileView.tsx`**:
+    - Redução drástica de 2.583 linhas para 498 linhas desacopladas, transferindo responsabilidades específicas para submódulos dedicados em `components/patients/tabs/`.
+    - `PatientHeaderCard.tsx`: Gerenciamento do cabeçalho, dados pessoais, chave do paciente com cópia, link do WhatsApp e ações rápidas.
+    - `PatientSidebarNav.tsx`: Navegação de submenus por categorias clínicas expansíveis com busca dinâmica.
+    - `PatientAnamneseTab.tsx`: Grade de anamneses com `ClinicalDataGrid`, dropdown de templates e integração protegida com `AnamneseEditor` via `AnamneseErrorBoundary`.
+    - `PatientRecallsTab.tsx`: Grade clínica e modal padronizado de recordatórios alimentares (24h, QFA, habitual).
+    - `PatientMedicalRecordsTab.tsx`: Linha do tempo e modal de evoluções e condutas clínicas do prontuário.
+    - `PatientRestrictionsTab.tsx`: Tabela com badges temáticos de alergias, intolerâncias e recusas, busca textual e filtros unificados com `AppSelect`.
+    - `PatientAnthropometryTab.tsx`: Aba com a nova **Abordagem Dual Adaptativa** (seletor inteligente de modo Clínico Geral vs. Esportivo/Alta Performance, IMC, RCQ e dobras cutâneas).
+- **Backend API (`apps/api`)**:
+  - **Validação Global de Payloads com Zod (`ZodValidationPipe`)**:
+    - Criação de pipe NestJS para Fastify com tipagem estrita de schemas Zod, formatando rejeições de validação com erros detalhados por campo em HTTP 400.
+    - Testes unitários com 100% de cobertura em `zod-validation.pipe.spec.ts`.
+  - **Interceptor de Auditoria LGPD Assíncrono (`AuditLogInterceptor`)**:
+    - Interceptor global registrando acessos e alterações em dados sensíveis de pacientes na tabela `audit_logs` (operador, ação semântica, rota, IP e user-agent) sem degradar a latência da API.
+  - Registro de `ZodValidationPipe` e `AuditLogInterceptor` como provedores globais (`APP_PIPE` e `APP_INTERCEPTOR`) no `AppModule`.
+- **Governança de Segurança (`SECURITY.md`)**:
+  - Atualização do inventário com as seções 2.7 (ZodValidationPipe) e 2.8 (AuditLogInterceptor e conformidade com a LGPD).
+
 ### 🥗🏋️‍♂️ Balanceamento Obrigatório entre Nutrição Clínica Geral e Nutrição Esportiva (AGENTS.md & Plano Estratégico)
 - **Regras Globais de Engenharia (`AGENTS.md`)**:
   - **Refinamento da Seção 5**: Estabelecido explicitamente o princípio de **Abordagem Dual Adaptativa**. O Ygeía atende com idêntico rigor e excelência:
