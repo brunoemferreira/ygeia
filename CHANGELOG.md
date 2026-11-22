@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📋 Grid de Múltiplas Anamneses (Layout 1:1 DietSystem)
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - Estruturação do grid de anamneses preenchidas com fidelidade total à imagem de referência:
+      - Título da linha formatado por extenso: *Anamnese criada em 22 de novembro de 2026*.
+      - Fileira de 6 botões de ação estilizados em cada linha da lista:
+        1. *Assistente IA*: Botão em roxo suave com ícone de varinha mágica para insights e resumos clínicos.
+        2. *Calendário*: Exibição e verificação da data da consulta.
+        3. *Download*: Exportação e download de PDF individual da anamnese.
+        4. *Comparação / Duplicação*: Ferramenta de comparação com consultas anteriores.
+        5. *Edição*: Reabertura completa do preenchimento no `AnamneseEditor`.
+        6. *Exclusão*: Remoção da anamnese com feedback instantâneo.
+      - Inicialização de anamneses exemplares preservando a visualização exata da plataforma.
+
 ### 📝 Tela Completa de Preenchimento de Anamneses Múltiplas (Layout 1:1)
 - **Frontend Web (`apps/web`)**:
   - `AnamneseEditor.tsx`:

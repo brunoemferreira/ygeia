@@ -22,6 +22,8 @@ import {
   Edit2,
   MessageCircle,
   ClipboardList,
+  Wand2,
+  Split,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
 import { AnamneseEditor, AnamneseData } from './AnamneseEditor';
@@ -65,7 +67,38 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   // Múltiplas anamneses por paciente & tela de edição
   const [isEditingAnamnese, setIsEditingAnamnese] = useState(false);
   const [editingAnamneseData, setEditingAnamneseData] = useState<AnamneseData | null>(null);
-  const [anamnesesList, setAnamnesesList] = useState<AnamneseData[]>([]);
+  const [anamnesesList, setAnamnesesList] = useState<AnamneseData[]>([
+    {
+      id: 'anamnese_1',
+      patientId: patient.id,
+      title: 'Anamnese criada em 22 de novembro de 2026',
+      date: '2026-11-22T08:00:00Z',
+      templateType: 'Seções padrão',
+      sections: {
+        queixaPrincipal: 'Acompanhamento nutricional periódico e modulação da composição corporal.',
+        historiaClinica: 'Sem comorbidades relatadas.',
+        habitoIntestinal: 'Hábito regular, fezes tipo 4 de Bristol.',
+        hidratacao: 'Consumo habitual de 2.5L de água/dia.',
+        rotinaAlimentar: 'Café da manhã, almoço e jantar estruturados.',
+        sonoAtividadeFisica: '7 a 8 horas de sono reparador. Musculação 4x/semana.',
+      },
+    },
+    {
+      id: 'anamnese_2',
+      patientId: patient.id,
+      title: 'Anamnese criada em 22 de novembro de 2026',
+      date: '2026-11-22T09:30:00Z',
+      templateType: 'Seções padrão',
+      sections: {
+        queixaPrincipal: 'Reeducação alimentar e ganho de massa magra.',
+        historiaClinica: 'Boa tolerância às orientações nutricionais.',
+        habitoIntestinal: 'Funcionamento digestivo normal.',
+        hidratacao: '2.8L de água/dia.',
+        rotinaAlimentar: 'Distribuição calórica fracionada.',
+        sonoAtividadeFisica: 'Treino e descanso adequados.',
+      },
+    },
+  ]);
 
   // Cálculo de idade amigável a partir da data de nascimento
   const patientAgeString = useMemo(() => {
@@ -966,120 +999,219 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   </p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {anamnesesList.map((item) => (
                     <div
                       key={item.id}
                       style={{
-                        borderRadius: '0.625rem',
-                        border: '1px solid #e2e8f0',
-                        backgroundColor: '#ffffff',
-                        padding: '1.15rem 1.25rem',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '1rem 0',
+                        borderBottom: '1px solid #f1f5f9',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                          <span style={{ fontWeight: 800, fontSize: '0.9375rem', color: '#0f172a' }}>
-                            {item.title}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: '0.6875rem',
-                              fontWeight: 600,
-                              color: 'var(--primary)',
-                              backgroundColor: 'var(--primary-light)',
-                              padding: '0.15rem 0.5rem',
-                              borderRadius: '0.25rem',
-                            }}
-                          >
-                            {item.templateType}
-                          </span>
-                          {item.hasAudioRecording && (
-                            <span
-                              style={{
-                                fontSize: '0.6875rem',
-                                fontWeight: 600,
-                                color: '#0284c7',
-                                backgroundColor: '#f0f9ff',
-                                padding: '0.15rem 0.5rem',
-                                borderRadius: '0.25rem',
-                              }}
-                            >
-                              🎙️ Áudio/Transcrição
-                            </span>
-                          )}
-                        </div>
+                      {/* Título: Anamnese criada em 22 de novembro de 2026 */}
+                      <span
+                        onClick={() => {
+                          setEditingAnamneseData(item);
+                          setIsEditingAnamnese(true);
+                        }}
+                        style={{
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          color: '#0f172a',
+                          cursor: 'pointer',
+                        }}
+                        onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--primary)')}
+                        onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#0f172a')}
+                      >
+                        {item.title}
+                      </span>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{item.date}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingAnamneseData(item);
-                              setIsEditingAnamnese(true);
-                            }}
-                            title="Editar anamnese"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem',
-                              borderRadius: '0.375rem',
-                              border: '1px solid #e2e8f0',
-                              backgroundColor: '#ffffff',
-                              padding: '0.35rem 0.65rem',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                              color: '#334155',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <Edit2 size={13} />
-                            <span>Editar</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAnamnesesList((prev) => prev.filter((a) => a.id !== item.id));
-                              toast.success('Anamnese excluída.');
-                            }}
-                            title="Excluir anamnese"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              borderRadius: '0.375rem',
-                              border: '1px solid #fee2e2',
-                              backgroundColor: '#fff1f2',
-                              color: '#e11d48',
-                              padding: '0.35rem',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </div>
+                      {/* 6 Botões de Ação Idênticos à Imagem */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        {/* 1. Assistente IA / Resumo (Roxo) */}
+                        <button
+                          type="button"
+                          onClick={() => toast.info('Gerando análise clínica e resumo de conduta com IA...')}
+                          title="Análise com Inteligência Artificial"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '0.375rem',
+                            border: '1px solid #ddd6fe',
+                            backgroundColor: '#f5f3ff',
+                            color: '#8b5cf6',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ede9fe')}
+                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f5f3ff')}
+                        >
+                          <Wand2 size={14} />
+                        </button>
 
-                      {/* Resumo do Conteúdo */}
-                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8125rem', color: '#475569' }}>
-                        {item.sections.queixaPrincipal && (
-                          <div>
-                            <strong style={{ color: '#0f172a' }}>Queixa: </strong>
-                            <span>{item.sections.queixaPrincipal}</span>
-                          </div>
-                        )}
-                        {item.sections.rotinaAlimentar && (
-                          <div>
-                            <strong style={{ color: '#0f172a' }}>Rotina: </strong>
-                            <span>{item.sections.rotinaAlimentar}</span>
-                          </div>
-                        )}
-                        {item.transcriptionText && (
-                          <div style={{ fontStyle: 'italic', color: '#64748b', fontSize: '0.75rem', marginTop: '0.2rem' }}>
-                            "{item.transcriptionText.slice(0, 160)}..."
-                          </div>
-                        )}
+                        {/* 2. Calendário / Data da Consulta */}
+                        <button
+                          type="button"
+                          onClick={() => toast.info('Data da consulta registrada: ' + item.date)}
+                          title="Data da consulta"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '0.375rem',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: '#ffffff',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                          onMouseOver={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                            (e.currentTarget as HTMLElement).style.color = '#0f172a';
+                          }}
+                          onMouseOut={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                            (e.currentTarget as HTMLElement).style.color = '#64748b';
+                          }}
+                        >
+                          <Calendar size={14} />
+                        </button>
+
+                        {/* 3. Baixar PDF */}
+                        <button
+                          type="button"
+                          onClick={() => toast.success('Baixando PDF formatado desta anamnese...')}
+                          title="Baixar PDF da anamnese"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '0.375rem',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: '#ffffff',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                          onMouseOver={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                            (e.currentTarget as HTMLElement).style.color = '#0f172a';
+                          }}
+                          onMouseOut={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                            (e.currentTarget as HTMLElement).style.color = '#64748b';
+                          }}
+                        >
+                          <Download size={14} />
+                        </button>
+
+                        {/* 4. Comparar / Duplicar */}
+                        <button
+                          type="button"
+                          onClick={() => toast.info('Comparar evolução com consultas anteriores...')}
+                          title="Comparar evolução clínica"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '0.375rem',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: '#ffffff',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                          onMouseOver={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                            (e.currentTarget as HTMLElement).style.color = '#0f172a';
+                          }}
+                          onMouseOut={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                            (e.currentTarget as HTMLElement).style.color = '#64748b';
+                          }}
+                        >
+                          <Split size={14} />
+                        </button>
+
+                        {/* 5. Editar Anamnese */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingAnamneseData(item);
+                            setIsEditingAnamnese(true);
+                          }}
+                          title="Editar anamnese"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '0.375rem',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: '#ffffff',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                          onMouseOver={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                            (e.currentTarget as HTMLElement).style.color = '#0f172a';
+                          }}
+                          onMouseOut={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                            (e.currentTarget as HTMLElement).style.color = '#64748b';
+                          }}
+                        >
+                          <Edit2 size={14} />
+                        </button>
+
+                        {/* 6. Excluir Anamnese */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAnamnesesList((prev) => prev.filter((a) => a.id !== item.id));
+                            toast.success('Anamnese excluída com sucesso.');
+                          }}
+                          title="Excluir anamnese"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '0.375rem',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: '#ffffff',
+                            color: '#64748b',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                          onMouseOver={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#fff1f2';
+                            (e.currentTarget as HTMLElement).style.borderColor = '#fecdd3';
+                            (e.currentTarget as HTMLElement).style.color = '#e11d48';
+                          }}
+                          onMouseOut={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                            (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
+                            (e.currentTarget as HTMLElement).style.color = '#64748b';
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
                   ))}

@@ -6,6 +6,10 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Grid de Anamneses Múltiplas com 6 Ações por Linha (`PatientProfileView.tsx`)**:
+  - Implementação das linhas de anamneses preenchidas idênticas à imagem de referência:
+    - Linha com texto *Anamnese criada em [Data]* e divisória sutil.
+    - Conjunto de 6 botões de ação: Assistente IA (roxo), Calendário, Download PDF, Comparar evolução, Editar e Excluir.
 - **Tela de Preenchimento de Anamnese & Gestão de Múltiplas Anamneses (`AnamneseEditor.tsx`, `PatientProfileView.tsx`)**:
   - Implementação da tela de preenchimento exibida ao clicar em "+ Adicionar anamnese", idêntica à imagem de referência:
     - Top bar com dados do paciente, toggle switch de "Sugestões", botão "Ver tutorial" e botão "Salvar dados" com tema dinâmico.

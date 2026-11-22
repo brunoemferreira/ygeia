@@ -120,11 +120,18 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
   };
 
   const handleSave = () => {
+    const now = new Date();
+    const months = [
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+    const defaultTitle = `Anamnese criada em ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`;
+
     const anamneseRecord: AnamneseData = {
       id: initialData?.id || String(Date.now()),
       patientId: patient.id,
-      title: selectedTemplate === 'Seções padrão' ? 'Anamnese Nutricional Clínica' : selectedTemplate,
-      date: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      title: initialData?.title || defaultTitle,
+      date: now.toISOString(),
       templateType: selectedTemplate,
       sections,
       transcriptionText,
