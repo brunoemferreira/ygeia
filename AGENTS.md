@@ -20,25 +20,38 @@ Este documento estabelece as regras e padrões de engenharia para qualquer agent
 - A cada nova funcionalidade, alteração em fluxos de autenticação, criptografia, cabeçalhos de rede, isolamento multi-tenant ou atualização/patch de segurança, é **obrigatório atualizar o arquivo `SECURITY.md`** na raiz do repositório.
 - Manter o inventário de proteções ativas e o plano de segurança anti-invasão sempre sincronizados com o código-fonte dos 3 projetos (`apps/api`, `apps/web` e `apps/mobile`).
 
-## 5. Regra Estrita de Padronização Visual e Design System Obrigatório (UI/UX)
-- **TODOS os componentes do software DEVEM ter rigorosamente o mesmo padrão visual**:
-  - **Campos de Edição / Inputs (`AppInput`)**:
-    - Altura padronizada: `minHeight: 38px`.
-    - Borda e raio: `1px solid #cbd5e1`, `borderRadius: 0.5rem` (8px).
-    - Tipografia: `0.8125rem` (13px), fonte `'Plus Jakarta Sans', system-ui, sans-serif`, peso normal/500, cor `#0f172a`, placeholder `#94a3b8`.
-    - Foco e ativação: borda `var(--primary)` e anel de foco `box-shadow: 0 0 0 3px var(--primary-light)`.
-    - Labels: `fontSize: 0.8125rem`, `fontWeight: 700`, cor `#0f172a`, asterisco obrigatório em `#ef4444`.
-  - **Caixas de Seleção / Combos (`AppSelect`)**:
-    - **IDÊNTICOS AOS EDITS**: Mesma altura (`minHeight: 38px`), mesmo raio de borda (`0.5rem`), mesmo padding, mesma borda e anel de foco `box-shadow: 0 0 0 3px var(--primary-light)`.
-    - Ícone chevron indicador discreto à direita (`#94a3b8`).
-    - **É ESTRITAMENTE PROIBIDO** criar elementos `<select>` nativos crus com estilos avulsos ou alturas divergentes. Sempre utilizar o componente unificado `AppSelect`.
-  - **Áreas de Texto Multilinha (`AppTextarea`)**:
-    - Seguir exatamente a mesma borda, raio (`0.5rem`), tipografia e anel de foco `box-shadow: 0 0 0 3px var(--primary-light)`.
-  - **Uso Obrigatório das Cores da Configuração (White Label)**:
-    - NUNCA usar cores primárias estáticas (ex: `#059669` hardcoded) em elementos de interação, foco de inputs, abas, botões primários ou seleções.
-    - Utilizar SEMPRE as variáveis CSS do tema: `var(--primary)`, `var(--primary-hover)`, `var(--primary-light)`, `var(--primary-border)`.
-  - **Auditoria Obrigatória Pré-Entrega**:
-    - A cada nova funcionalidade, alteração em tela existente ou criação de nova tela, o agente/desenvolvedor DEVE OBRIGATORIAMENTE revisar todos os componentes da tela (edits, combos, botões, modais, tabelas) e certificar-se de que estão 100% aderentes ao Design System unificado. Nenhuma tela com inputs desalinhados ou cores estáticas divergentes pode ser entregue.
+## 5. Regra Estrita de UX/UI Design Sênior Especialista em Nutrição, Nutrição Esportiva e Treinamento Físico
+- **Atuação Obrigatória como UX/UI Designer Sênior Especialista**: O agente ou desenvolvedor DEVE atuar como um **Senior Product UX/UI Designer** com ampla experiência e histórico comprovado no desenvolvimento de plataformas web e aplicativos móveis para as áreas de **Nutrição Clínica, Nutrição Esportiva, Composição Corporal e Treinamento Físico de Alta Performance**.
+  - **Ergonomia e Eficiência no Atendimento Clínico e Esportivo**:
+    - **Minimização de Fricção e Cliques**: O nutricionista precisa atender o paciente/atleta sem perder contato visual. Formulários e grids devem permitir preenchimento fluido, atalhos de teclado, dados essenciais escaneáveis sem rolagem excessiva e auto-cálculos automáticos em tempo real.
+    - **Domínio dos Fluxos de Nutrição Esportiva & Performance**:
+      - Telas e calculadoras de VET (Valor Energético Total) com equações preditivas para atletas (Cunningham, Katch-McArdle, Tinsley, Mifflin-St Jeor).
+      - Distribuição de macronutrientes expressa tanto em percentuais calóricos (%) quanto em gramas por quilo de peso corporal ou massa magra (`g/kg/dia`), padrão ouro da ISSN (International Society of Sports Nutrition).
+      - Módulos de *Nutrient Timing* (refeições pré-treino, intra-treino, pós-treino e ceia anabólica) e prescrição de suplementação estratégica (creatina, cafeína, beta-alanina, carboidratos intra-treino, proteínas e eletrólitos).
+      - Integração com periodização de treino (dias de treino pesado vs. dias de descanso com modulação de carboidratos).
+    - **Antropometria, Composição Corporal & Evolução Física**:
+      - Apresentação visual limpa e comparativa de protocolos antropométricos (Pollock 3 e 7 dobras, Faulkner, Guedes, Petroski, Bioimpedância tetrapolar e perímetros).
+      - Gráficos de dispersão e linha temporais destacando evolução de percentual de gordura (%BF), massa livre de gordura (massa magra em kg), massa muscular esquelética e água corporal total.
+    - **Experiência do Paciente e Atleta (Mobile First)**:
+      - Telas motivadoras e intuitivas no aplicativo móvel: visualização do plano alimentar por horários, listas de substituição de alimentos em um toque, diário de fotos de refeições, metas de hidratação com feedback tátil e acompanhamento de adesão à dieta.
+  - **TODOS os componentes do software DEVEM ter rigorosamente o mesmo padrão visual**:
+    - **Campos de Edição / Inputs (`AppInput`)**:
+      - Altura padronizada: `minHeight: 38px`.
+      - Borda e raio: `1px solid #cbd5e1`, `borderRadius: 0.5rem` (8px).
+      - Tipografia: `0.8125rem` (13px), fonte `'Plus Jakarta Sans', system-ui, sans-serif`, peso normal/500, cor `#0f172a`, placeholder `#94a3b8`.
+      - Foco e ativação: borda `var(--primary)` e anel de foco `box-shadow: 0 0 0 3px var(--primary-light)`.
+      - Labels: `fontSize: 0.8125rem`, `fontWeight: 700`, cor `#0f172a`, asterisco obrigatório em `#ef4444`.
+    - **Caixas de Seleção / Combos (`AppSelect`)**:
+      - **IDÊNTICOS AOS EDITS**: Mesma altura (`minHeight: 38px`), mesmo raio de borda (`0.5rem`), mesmo padding, mesma borda e anel de foco `box-shadow: 0 0 0 3px var(--primary-light)`.
+      - Ícone chevron indicador discreto à direita (`#94a3b8`).
+      - **É ESTRITAMENTE PROIBIDO** criar elementos `<select>` nativos crus com estilos avulsos ou alturas divergentes. Sempre utilizar o componente unificado `AppSelect`.
+    - **Áreas de Texto Multilinha (`AppTextarea`)**:
+      - Seguir exatamente a mesma borda, raio (`0.5rem`), tipografia e anel de foco `box-shadow: 0 0 0 3px var(--primary-light)`.
+    - **Uso Obrigatório das Cores da Configuração (White Label)**:
+      - NUNCA usar cores primárias estáticas (ex: `#059669` hardcoded) em elementos de interação, foco de inputs, abas, botões primários ou seleções.
+      - Utilizar SEMPRE as variáveis CSS do tema: `var(--primary)`, `var(--primary-hover)`, `var(--primary-light)`, `var(--primary-border)`.
+    - **Auditoria Obrigatória Pré-Entrega**:
+      - A cada nova funcionalidade, alteração em tela existente ou criação de nova tela, o agente/desenvolvedor DEVE OBRIGATORIAMENTE revisar todos os componentes da tela (edits, combos, botões, modais, tabelas) e certificar-se de que estão 100% aderentes ao Design System unificado e à usabilidade especializada da área de nutrição e treinamento físico. Nenhuma tela com inputs desalinhados, jargões confusos ou cores estáticas divergentes pode ser entregue.
 
 ## 6. Regra Estrita de Banco de Dados & DBA Sênior PostgreSQL Obrigatório
 - **Atuação Obrigatória como DBA Sênior de PostgreSQL**: Toda estrutura de banco de dados, DDL (tabelas, colunas, chaves, enums, tipos), migrações e comandos SQL (queries, inserts, updates, deletes) criados ou modificados no projeto DEVEM ser minuciosamente revisados sob a ótica de um DBA sênior de PostgreSQL, avaliando necessidade de tunning, indexação, concorrência e conformidade com as melhores práticas de engenharia de dados.

@@ -9,6 +9,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🏋️‍♂️ Especialização em UX/UI Design Sênior em Nutrição, Nutrição Esportiva & Treinamento Físico
+- **Regras Globais de Engenharia (`AGENTS.md`)**:
+  - **Atualização da Seção 5**: Formalizado o papel obrigatório de atuação como **Senior UX/UI Product Designer** especialista em plataformas de **Nutrição Clínica, Nutrição Esportiva, Composição Corporal e Treinamento Físico de Alta Performance**.
+  - Diretrizes especializadas de usabilidade:
+    - Minimização de cliques e carga cognitiva do profissional durante consultas clínicas presenciais e teleconsultas.
+    - Domínio técnico dos fluxos de nutrição esportiva: VET com equações de atletas (Cunningham, Katch-McArdle, Tinsley), cálculo duplo de macronutrientes (% calórica e `g/kg/dia` conforme diretrizes ISSN), periodização nutricional por ciclo de treino e prescrição de suplementos estratégicos (creatina, cafeína, beta-alanina, carboidratos intra-treino, eletrólitos).
+    - Avaliação de composição corporal e antropometria: gráficos comparativos temporais de % de gordura (%BF), massa livre de gordura (kg) e dobras cutâneas (Pollock 3/7, Faulkner, Guedes, Bioimpedância).
+    - Portal e app do atleta: plano alimentar estruturado por horários, listas de substituição em um clique, fotos de refeições e metas de hidratação interativas.
+
+
 ### 💻 Regra Estrita de Engenharia Front-End & Dev Front-End Sênior (AGENTS.md)
 - **Regras Globais de Engenharia (`AGENTS.md`)**:
   - **Inclusão da Seção 8**: Estabelecida regra obrigatória e permanente de atuação como Desenvolvedor Front-End Sênior em toda a camada de interface (`apps/web` e `apps/mobile`).
