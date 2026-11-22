@@ -24,7 +24,6 @@ import {
   ClipboardList,
   Wand2,
   Split,
-  FileText,
   AlertCircle,
   RefreshCw,
 } from 'lucide-react';
@@ -172,9 +171,6 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Dropdown do botão "+ Adicionar anamnese"
-  const [showAddAnamneseDropdown, setShowAddAnamneseDropdown] = useState(false);
-
   // Múltiplas anamneses por paciente & tela de edição
   const [isEditingAnamnese, setIsEditingAnamnese] = useState(false);
   const [editingAnamneseData, setEditingAnamneseData] = useState<AnamneseData | null>(null);
@@ -313,9 +309,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
       )}`
     : null;
 
-  // Iniciar nova anamnese com template opcional (garante que os dados nunca fiquem em branco)
+  // Iniciar nova anamnese com template padrão garantido
   const handleStartNewAnamnese = (templateType: string = 'Seções padrão') => {
-    setShowAddAnamneseDropdown(false);
     let initialSections = {
       queixaPrincipal: 'Acompanhamento nutricional periódico e modulação da composição corporal.',
       historiaClinica: 'Sem comorbidades relatadas. Sem histórico de alergias ou intolerâncias alimentares conhecidas.',
@@ -1206,189 +1201,30 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     <span>PDF unificado</span>
                   </button>
 
-                  <div style={{ position: 'relative' }}>
-                    <div style={{ display: 'inline-flex', borderRadius: '0.375rem', overflow: 'hidden', boxShadow: '0 1px 2px var(--primary-border)' }}>
-                      <button
-                        type="button"
-                        onClick={() => handleStartNewAnamnese('Seções padrão')}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.45rem',
-                          backgroundColor: 'var(--primary)',
-                          color: '#ffffff',
-                          padding: '0.45rem 0.85rem',
-                          fontSize: '0.8125rem',
-                          fontWeight: 600,
-                          border: 'none',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.15s ease',
-                        }}
-                        onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
-                        onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
-                      >
-                        <Plus size={15} />
-                        <span>Adicionar anamnese</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowAddAnamneseDropdown(!showAddAnamneseDropdown)}
-                        title="Escolher modelo de anamnese"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: 'var(--primary)',
-                          color: '#ffffff',
-                          padding: '0.45rem 0.5rem',
-                          border: 'none',
-                          borderLeft: '1px solid rgba(255, 255, 255, 0.25)',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.15s ease',
-                        }}
-                        onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
-                        onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
-                      >
-                        <ChevronDown size={14} />
-                      </button>
-                    </div>
-
-                    {/* Dropdown de Modelos de Anamnese */}
-                    {showAddAnamneseDropdown && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          right: 0,
-                          top: '110%',
-                          backgroundColor: '#ffffff',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #e2e8f0',
-                          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                          minWidth: '220px',
-                          zIndex: 60,
-                          padding: '0.35rem 0',
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => handleStartNewAnamnese('Seções padrão')}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            width: '100%',
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.8125rem',
-                            color: '#334155',
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                          }}
-                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-                        >
-                          <FileText size={14} color="var(--primary)" />
-                          <span>Seções padrão</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleStartNewAnamnese('Anamnese Esportiva')}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            width: '100%',
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.8125rem',
-                            color: '#334155',
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                          }}
-                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-                        >
-                          <Activity size={14} color="#8b5cf6" />
-                          <span>Anamnese esportiva</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleStartNewAnamnese('Saúde Gastrointestinal')}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            width: '100%',
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.8125rem',
-                            color: '#334155',
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                          }}
-                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-                        >
-                          <Utensils size={14} color="#0284c7" />
-                          <span>Saúde gastrointestinal</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleStartNewAnamnese('Anamnese Infantil')}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            width: '100%',
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.8125rem',
-                            color: '#334155',
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                          }}
-                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-                        >
-                          <User size={14} color="#eab308" />
-                          <span>Anamnese infantil</span>
-                        </button>
-
-                        <div style={{ height: '1px', backgroundColor: '#f1f5f9', margin: '0.25rem 0' }} />
-
-                        <button
-                          type="button"
-                          onClick={() => handleStartNewAnamnese('Anamnese em Branco')}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            width: '100%',
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.8125rem',
-                            color: '#64748b',
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                          }}
-                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-                        >
-                          <Plus size={14} />
-                          <span>Anamnese em branco</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleStartNewAnamnese('Seções padrão')}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      backgroundColor: 'var(--primary)',
+                      color: '#ffffff',
+                      padding: '0.45rem 0.95rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      borderRadius: '0.375rem',
+                      border: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px var(--primary-border)',
+                      transition: 'background-color 0.15s ease',
+                    }}
+                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
+                  >
+                    <Plus size={15} />
+                    <span>Adicionar anamnese</span>
+                  </button>
                 </div>
               </div>
 

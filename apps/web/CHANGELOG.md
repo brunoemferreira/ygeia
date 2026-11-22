@@ -5,6 +5,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Botão Único "+ Adicionar anamnese" (`PatientProfileView.tsx`)**:
+  - Conversão do botão dividido com dropdown para um botão de ação única e direta, removendo o seletor com chevron e as opções internas conforme solicitado.
+  - Ao clicar, o sistema abre imediatamente o formulário de anamnese estruturado pronto para preenchimento.
+
 ### Corrigido
 - **Formatação de Telefones no Grid e na Exibição de Pacientes (`PatientDirectory.tsx`, `countryDialCodes.tsx`, `AdminDashboard.tsx`)**:
   - Implementação da função utilitária `formatPhoneDisplay` para garantir que telefones salvos no banco de dados (sejam eles gravados com código DDI internacional `+55`, com máscara ou em dígitos brutos como `19992922054`) sejam sempre exibidos formatados no grid de pacientes (`(19) 99292-2054` ou `+55 (19) 99292-2054`).

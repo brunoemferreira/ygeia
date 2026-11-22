@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🔘 Simplificação do Botão de Adicionar Anamnese
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - O botão **+ Adicionar anamnese** agora é um botão único e direto (removido o botão dividido, chevron e o menu suspenso de modelos que ficavam dentro dele).
+    - O clique agora abre imediatamente o editor de anamnese com o template clínico completo carregado.
+
 ### 📱 Formatação Automática de Telefones no Grid de Pacientes
 - **Frontend Web (`apps/web`)**:
   - `countryDialCodes.tsx`:
