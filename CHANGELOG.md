@@ -9,6 +9,32 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
+### 🎨 Padronização de Design System, White-Label Studio & Módulos Clínicos Evolva
+- **Frontend Web (`apps/web`)**:
+  - **Biblioteca Unificada de Componentes UI (`src/components/ui/`)**:
+    - `AppButton`: Padronização de botões do sistema com variantes (`primary`, `secondary`, `outline`, `danger`, `ghost`), tamanhos (`sm`, `md`, `lg`), estado de carregamento e suporte a ícones.
+    - `AppInput`: Input unificado com suporte a rótulo, ícone frontal, sufixo de unidade médica (`kg`, `ml`, `mg`, `UI`), anel de foco e mensagens de validação.
+    - `AppCard`: Contêiner com variantes padronizadas (`default`, `metric`, `highlight`, `flat`) com bordas suaves e elevação consistente.
+    - `AppBadge`: Pílulas de status semânticas (`success`, `warning`, `danger`, `info`, `neutral`).
+    - `AppModal`: Diálogo modal acessível com desfoque de fundo (backdrop blur), suporte a tecla Escape e rodapé padronizado.
+    - `AppTable`: Grid paginado genérico `<T>` com busca integrada, dropdown de filtros rápidos, cabeçalhos em caixa alta, hover interativo, clique para edição e barra completa de paginação.
+  - **White-Label & Color Studio Sênior (`WhiteLabelStudio.tsx`)**:
+    - Substituição completa de seletores nativos básicos por experiência de estúdio profissional:
+      - 6 paletas médicas curadas (Esmeralda, Azul Clínico, Ametista, Sálvia, Coral, Titanium).
+      - Motor de harmonização automática calculando cores secundárias e de destaque matematicamente a partir da cor primária.
+      - Validador em tempo real de contraste e conformidade WCAG 2.2 AA (relação mínima 4.5:1).
+      - Simulador multi-telas em tela dividida com visualização em tempo real do *Dashboard*, da *Tela de Login* e do *App Mobile do Paciente*.
+  - **Módulos Clínicos Portados do Projeto Evolva (`src/components/patient/`)**:
+    - `BodyMapSVG`: Silhueta anatômica vetorial interativa com os 6 sítios subcutâneos de aplicação GLP-1, rotação automática, pulso no sítio recomendado e destaque do último aplicado.
+    - `HydrationWidget`: Marcador radial circular SVG de hidratação, cálculo de $35\text{ ml/kg}$, contador de volume restante e botões rápidos (+250ml, +500ml, -250ml).
+    - `NutritionCard`: Proteção de massa magra a $1.4\text{ g/kg}$, balanço calórico diário e colunas detalhadas dos 4 macronutrientes (Proteínas em destaque coral, Carboidratos, Gorduras e Fibras).
+    - `WeightCard`: Evolução ponderal com peso inicial, atual e meta, contador de quilos eliminados e barra percentual de progresso.
+    - `ActiveMedicationCard`: Monitoramento de caneta/ampola ativa de incretina (Tirzepatida/Semaglutida), conversão de cliques, dosagem em seringa U-100 e contagem regressiva de 30 dias de estabilidade microbiológica.
+    - `DayStripSelector`: Carrossel horizontal de dias da semana com marcadores visuais de dose e hidratação diária.
+    - `PatientPortal`: Portal do paciente completo integrando todos os componentes clínicos em layout responsivo de 2 colunas.
+  - **Refatoração da Gestão de Pacientes (`PatientDirectory.tsx`)**:
+    - Adotou `AppTable`, `AppButton`, `AppBadge` e `AppCard` mantendo 100% de fidelidade ao layout do mockup aprovado.
+
 ### 📑 Tela de Seleção de Pacientes (100% Fiel à Referência) & Suporte a Edição
 - **Frontend Web (`apps/web`)**:
   - **Tela de Seleção de Pacientes (`PatientDirectory.tsx`)**:

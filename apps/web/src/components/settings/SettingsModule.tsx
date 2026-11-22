@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { getStoredBranding, saveStoredBranding } from '../../utils/branding';
+import { WhiteLabelStudio } from './WhiteLabelStudio';
 
 interface SettingsModuleProps {
   initialSubTab?: string;
@@ -53,10 +53,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
     fotoUrl: '/bruno-profile.jpg',
   });
 
-  // 2. White Label (Personalização) State sincronizado com o gerenciador de branding
-  const [branding, setBranding] = useState(() => getStoredBranding());
-
-  // 3. Team / Secretárias
+  // 2. Team / Secretárias
   const [teamMembers, setTeamMembers] = useState([
     { id: '1', name: 'Juliana Paes', email: 'secretaria@consultorio.com', role: 'Secretária', status: 'Ativo' },
   ]);
@@ -71,12 +68,6 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
     e.preventDefault();
     setIsEditingPersonal(false);
     triggerSuccess('Dados pessoais atualizados com sucesso!');
-  };
-
-  const handleSaveBranding = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveStoredBranding(branding);
-    triggerSuccess('Identidade visual e marca atualizadas com sucesso!');
   };
 
   // Submenu structure matching user image exactly
@@ -776,144 +767,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ initialSubTab = 
             </div>
           )}
 
-          {/* TAB: PERSONALIZAÇÃO / WHITE LABEL */}
+          {/* TAB: PERSONALIZAÇÃO / WHITE LABEL STUDIO (SÊNIOR) */}
           {activeTab === 'personalizacao' && (
-            <div>
-              <div style={{ marginBottom: '1.75rem' }}>
-                <h2 style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-                  🎨 Personalização & White Label
-                </h2>
-                <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
-                  Defina a identidade visual do seu consultório (cores, logotipo e timbrado).
-                </p>
-              </div>
-
-              <form onSubmit={handleSaveBranding} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    Nome do Consultório / Marca Profissional
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={branding.clinicName}
-                    onChange={(e) => setBranding({ ...branding, clinicName: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.75rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      Cor Primária
-                    </label>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <input
-                        type="color"
-                        value={branding.primaryColor}
-                        onChange={(e) => setBranding({ ...branding, primaryColor: e.target.value })}
-                        style={{ width: '38px', height: '38px', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: 'pointer', padding: 0 }}
-                      />
-                      <input
-                        type="text"
-                        value={branding.primaryColor}
-                        onChange={(e) => setBranding({ ...branding, primaryColor: e.target.value })}
-                        style={{ width: '100%', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.8125rem' }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      Cor Secundária
-                    </label>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <input
-                        type="color"
-                        value={branding.secondaryColor}
-                        onChange={(e) => setBranding({ ...branding, secondaryColor: e.target.value })}
-                        style={{ width: '38px', height: '38px', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: 'pointer', padding: 0 }}
-                      />
-                      <input
-                        type="text"
-                        value={branding.secondaryColor}
-                        onChange={(e) => setBranding({ ...branding, secondaryColor: e.target.value })}
-                        style={{ width: '100%', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.8125rem' }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                      Cor de Destaque
-                    </label>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <input
-                        type="color"
-                        value={branding.accentColor}
-                        onChange={(e) => setBranding({ ...branding, accentColor: e.target.value })}
-                        style={{ width: '38px', height: '38px', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: 'pointer', padding: 0 }}
-                      />
-                      <input
-                        type="text"
-                        value={branding.accentColor}
-                        onChange={(e) => setBranding({ ...branding, accentColor: e.target.value })}
-                        style={{ width: '100%', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.8125rem' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' }}>
-                    Tipografia da Marca
-                  </label>
-                  <select
-                    value={branding.fontFamily}
-                    onChange={(e) => setBranding({ ...branding, fontFamily: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.75rem',
-                      borderRadius: '0.5rem',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.875rem',
-                      background: 'white',
-                      boxSizing: 'border-box',
-                    }}
-                  >
-                    <option value="Plus Jakarta Sans">Plus Jakarta Sans (Recomendado)</option>
-                    <option value="Inter">Inter (Padrão Internacional)</option>
-                    <option value="Roboto">Roboto (Google Material)</option>
-                    <option value="Montserrat">Montserrat (Elegante)</option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  style={{
-                    background: branding.primaryColor || '#059669',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    padding: '0.75rem 1.5rem',
-                    fontWeight: 700,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    alignSelf: 'flex-start',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  Salvar Identidade White Label
-                </button>
-              </form>
-            </div>
+            <WhiteLabelStudio />
           )}
 
           {/* TAB: SECRETÁRIAS & EQUIPE */}

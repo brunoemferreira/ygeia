@@ -6,6 +6,33 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-21
 
 ### Adicionado
+- **Biblioteca Unificada de Componentes de Design System (`src/components/ui/`)**:
+  - `AppButton`: Suporte a variantes (`primary`, `secondary`, `outline`, `danger`, `ghost`), tamanhos (`sm`, `md`, `lg`), estado de carregamento e slot de ícone.
+  - `AppInput`: Componente de entrada padronizado com label, ícone frontal, sufixo de unidades clínicas (`kg`, `ml`, `mg`, `UI`), anel de foco e suporte a erro.
+  - `AppCard`: Contêiner com variantes semânticas (`default`, `metric`, `highlight`, `flat`) e elevações suaves.
+  - `AppBadge`: Pílulas de status (`success`, `warning`, `danger`, `info`, `neutral`).
+  - `AppModal`: Diálogo modal acessível com backdrop blur e tecla Escape.
+  - `AppTable`: Grid paginado genérico `<T>` com busca integrada, dropdown de filtro de categoria, hover em linhas, clique para edição e navegação por páginas.
+  - `index.ts`: Barrel export para consumo em todo o ecossistema.
+- **Estúdio Sênior de Personalização e White-Label (`WhiteLabelStudio.tsx`)**:
+  - 6 paletas médicas curadas prontas para uso em 1 clique.
+  - Motor de harmonização algorítmica de cores secundárias e de destaque.
+  - Auditor de contraste WCAG 2.2 AA em tempo real com indicador numérico de taxa.
+  - Simulador interativo split-screen com visualização simultânea do Dashboard, Login e App Mobile.
+- **Módulos Clínicos Portados do Projeto Evolva (`src/components/patient/`)**:
+  - `BodyMapSVG`: Silhueta anatômica SVG com rotação dos 6 sítios de injeção subcutânea e pulso visual.
+  - `HydrationWidget`: Medidor radial circular com cálculo da meta metabólica de $35\text{ ml/kg}$ e atalhos rápidos.
+  - `NutritionCard`: Card com proteção de massa magra a $1.4\text{ g/kg}$ e 4 macronutrientes.
+  - `WeightCard`: Evolução do peso, perda total em kg e percentual concluído.
+  - `ActiveMedicationCard`: Gestão de canetas/ampolas de GLP-1 com cliques, seringas U-100 e estabilidade de 30 dias.
+  - `DayStripSelector`: Carrossel semanal com indicadores de dose e água.
+  - `PatientPortal`: Portal do paciente completo com todos os módulos integrados.
+
+### Modificado
+- **Refatoração da Lista de Pacientes (`PatientDirectory.tsx`)**:
+  - Migrado para utilizar a biblioteca padronizada de UI (`AppTable`, `AppButton`, `AppBadge`, `AppCard`), mantendo rigorosa paridade visual com os mockups aprovados.
+
+### Adicionado
 - **Tela de Seleção de Pacientes Idêntica ao Mockup (`PatientDirectory.tsx`)**:
   - Implementação literal do design: fonte **Plus Jakarta Sans**, tag `ROTINA CLÍNICA`, título `Pacientes`, botão `+ Novo paciente` com ícone `UserPlus`.
   - 4 Cards de métricas KPI: *Total Pacientes* (verde), *App Conectado* (azul), *Com Convênio* (roxo) e *Particulares* (âmbar).
