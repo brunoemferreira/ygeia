@@ -75,6 +75,8 @@ O backend foi construído sobre o framework NestJS utilizando o motor de alta ve
 - **Injeção de Tenant via Contexto Seguro**:
   - Toda transação de banco de dados executa antes de qualquer query: `SET LOCAL app.current_tenant_id = 'tenant-uuid'`.
   - Se um invasor tentar injetar um `tenant_id` diferente via payload JSON, o PostgreSQL descarta a query silenciosamente ou bloqueia no nível do SGBD.
+- **Operações CRUD Completas com Isolamento Multi-Tenant**:
+  - Todas as operações em pacientes (criação, listagem, atualização e exclusão `DELETE /api/v1/patients/:id`) exigem autenticação válida e vinculação obrigatória de `tenant_id` tanto via cláusula de filtro quanto por RLS no banco, impossibilitando acessos, modificações ou exclusões indevidas de dados entre diferentes clínicas.
 
 ### 2.2. Autenticação Criptográfica com Argon2id
 - Em conformidade com o **RFC 9106** e as recomendações do OWASP Password Storage Cheat Sheet:

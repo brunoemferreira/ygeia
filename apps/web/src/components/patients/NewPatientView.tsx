@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   User,
   Stethoscope,
@@ -272,6 +272,53 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Sincroniza formulário caso initialPatient seja alterado dinamicamente
+  useEffect(() => {
+    if (initialPatient) {
+      setFullName(initialPatient.name || '');
+      setBirthDate(initialPatient.birthDate ? formatDate(initialPatient.birthDate) : '');
+      setGender(initialPatient.gender || initialPatient.sex || '');
+      setEmail(initialPatient.email || '');
+
+      let p = initialPatient.phone || '';
+      if (initialPatient.phone) {
+        const match = COUNTRY_DIAL_CODES.find((c) => initialPatient.phone?.startsWith(c.dialCode));
+        if (match) {
+          setSelectedCountry(match);
+          p = p.replace(match.dialCode, '').trim();
+        }
+      }
+      setSelectedCountry((prevCountry) => {
+        setPhone(formatPhoneNumber(p, prevCountry.code));
+        return prevCountry;
+      });
+
+      setCpf(initialPatient.cpf ? formatCpf(initialPatient.cpf) : '');
+      setGuardianName(initialPatient.guardianName || '');
+      setGuardianCpf(initialPatient.guardianCpf ? formatCpf(initialPatient.guardianCpf) : '');
+      setSendWelcomeEmail(initialPatient.sendWelcomeEmail !== undefined ? initialPatient.sendWelcomeEmail : true);
+      setSendWelcomeWhatsapp(initialPatient.sendWelcomeWhatsapp !== undefined ? initialPatient.sendWelcomeWhatsapp : true);
+      setObjective(initialPatient.objective || initialPatient.goal || 'Emagrecimento');
+      setSelectedProtocols(initialPatient.treatmentProtocols || ['Emagrecimento Saudável']);
+      setProtocolNotes(initialPatient.protocolNotes || '');
+      setTags(initialPatient.tags || ['Atleta', 'Low Carb']);
+      setPathologies(initialPatient.pathologies || []);
+      setInsuranceName(initialPatient.insurancePlan || 'Sem convênio');
+      setInsuranceCardNumber(initialPatient.insuranceCardNumber || '');
+      setInsuranceRepassAmount(initialPatient.insuranceRepassAmount || '');
+      setAttendanceLocation(initialPatient.attendanceLocation || 'Consultório Principal (Matriz)');
+      setPhotoUrl(initialPatient.photoUrl || '');
+      setCep(initialPatient.address?.cep ? formatCep(initialPatient.address.cep) : '');
+      setStreet(initialPatient.address?.street || '');
+      setNumber(initialPatient.address?.number || '');
+      setComplement(initialPatient.address?.complement || '');
+      setNeighborhood(initialPatient.address?.neighborhood || '');
+      setCity(initialPatient.address?.city || '');
+      setState(initialPatient.address?.state || '');
+      setNotes(initialPatient.notes || '');
+    }
+  }, [initialPatient]);
+
   // ViaCEP integration
   const handleCepBlur = async () => {
     const cleanCep = cep.replace(/\D/g, '');
@@ -343,8 +390,10 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
       const payload = {
         id: initialPatient?.id || String(Date.now()),
         fullName: fullName.trim(),
+        name: fullName.trim(),
         birthDate,
         gender: gender || 'Não informado',
+        sex: gender || 'Não informado',
         email: email.trim() || undefined,
         phone: formattedPhoneValue,
         cpf: cpf || undefined,
@@ -442,29 +491,56 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
             {isEditing ? 'Editar paciente' : 'Novo paciente'}
           </h1>
           <p style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#64748b' }}>
-            Preencha as etapas para cadastrar um novo paciente
+            {isEditing
+              ? 'Altere os dados desejados e clique em "Salvar alterações" a qualquer momento.'
+              : 'Preencha as etapas para cadastrar um novo paciente'}
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={onBackToGrid}
-          style={{
-            borderRadius: '0.5rem',
-            padding: '0.4rem 0.85rem',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            color: '#475569',
-            backgroundColor: '#f1f5f9',
-            border: '1px solid #e2e8f0',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-          }}
-          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#e2e8f0')}
-          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
-        >
-          Fechar
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button
+            type="button"
+            onClick={onBackToGrid}
+            style={{
+              borderRadius: '0.5rem',
+              padding: '0.45rem 0.85rem',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              color: '#475569',
+              backgroundColor: '#f1f5f9',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#e2e8f0')}
+            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f1f5f9')}
+          >
+            Fechar
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSubmit()}
+            disabled={isSubmitting}
+            style={{
+              borderRadius: '0.5rem',
+              padding: '0.45rem 1.15rem',
+              fontSize: '0.875rem',
+              fontWeight: 700,
+              color: '#ffffff',
+              backgroundColor: 'var(--primary)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              opacity: isSubmitting ? 0.6 : 1,
+            }}
+          >
+            <Check size={16} />
+            <span>{isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Cadastrar paciente'}</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Layout Responsivo Mobile First: Stepper + Form */}
@@ -1464,6 +1540,24 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                     </button>
                     <button
                       type="button"
+                      onClick={() => handleSubmit()}
+                      disabled={isSubmitting}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--primary-border)',
+                        backgroundColor: 'var(--primary-light)',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        opacity: isSubmitting ? 0.6 : 1,
+                      }}
+                    >
+                      {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar'}
+                    </button>
+                    <button
+                      type="button"
                       onClick={handleNextStep}
                       style={{
                         borderRadius: '0.5rem',
@@ -1596,6 +1690,24 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                     </button>
                     <button
                       type="button"
+                      onClick={() => handleSubmit()}
+                      disabled={isSubmitting}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--primary-border)',
+                        backgroundColor: 'var(--primary-light)',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        opacity: isSubmitting ? 0.6 : 1,
+                      }}
+                    >
+                      {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar'}
+                    </button>
+                    <button
+                      type="button"
                       onClick={handleNextStep}
                       style={{
                         borderRadius: '0.5rem',
@@ -1695,6 +1807,24 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       }}
                     >
                       Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit()}
+                      disabled={isSubmitting}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--primary-border)',
+                        backgroundColor: 'var(--primary-light)',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        opacity: isSubmitting ? 0.6 : 1,
+                      }}
+                    >
+                      {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar'}
                     </button>
                     <button
                       type="button"
@@ -1845,6 +1975,24 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       }}
                     >
                       Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit()}
+                      disabled={isSubmitting}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--primary-border)',
+                        backgroundColor: 'var(--primary-light)',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        opacity: isSubmitting ? 0.6 : 1,
+                      }}
+                    >
+                      {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar'}
                     </button>
                     <button
                       type="button"
@@ -2089,6 +2237,24 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                     </button>
                     <button
                       type="button"
+                      onClick={() => handleSubmit()}
+                      disabled={isSubmitting}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--primary-border)',
+                        backgroundColor: 'var(--primary-light)',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        opacity: isSubmitting ? 0.6 : 1,
+                      }}
+                    >
+                      {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar'}
+                    </button>
+                    <button
+                      type="button"
                       onClick={handleNextStep}
                       style={{
                         borderRadius: '0.5rem',
@@ -2190,6 +2356,24 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       }}
                     >
                       Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit()}
+                      disabled={isSubmitting}
+                      style={{
+                        borderRadius: '0.5rem',
+                        border: '1px solid var(--primary-border)',
+                        backgroundColor: 'var(--primary-light)',
+                        padding: '0.625rem 1.25rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        opacity: isSubmitting ? 0.6 : 1,
+                      }}
+                    >
+                      {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar'}
                     </button>
                     <button
                       type="button"

@@ -6,6 +6,8 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Endpoint e Serviço de Exclusão de Pacientes com Isolamento Multi-Tenant (`patients.controller.ts`, `patients.service.ts`)**:
+  - Implementado o método `deletePatient(tenantId, patientId)` e rota `@Delete(':id')` no `PatientsController` com verificação rigorosa de isolamento por `tenant_id` e políticas RLS.
 - **Controles Anti-Invasão e Fortalecimento de Cabeçalhos HTTP (`main.ts`, `SECURITY.md`)**:
   - Configuração de `bodyLimit: 1MB` no Fastify para prevenção de exaustão de memória e DoS por injeção de payloads maciços.
   - Ativação de cabeçalhos de segurança estritos via Fastify Helmet (`frameguard: { action: 'deny' }` contra Clickjacking, `noSniff: true` contra MIME-sniffing e ocultação do cabeçalho `X-Powered-By`).

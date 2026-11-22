@@ -5,6 +5,17 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Persistência e Correção no Salvamento de Edições de Paciente (`AdminDashboard.tsx`, `NewPatientView.tsx`, `PatientDirectory.tsx`)**:
+  - Resolução do problema em que salvar alterações no cadastro de paciente não gravava os campos editados.
+  - Correção no mapeamento de propriedades em `onPatientUpdated`: o campo `goal` estava incorretamente vinculado a `updatedP.protocolNotes`, sendo ajustado para `updatedP.goal || updatedP.objective || p.goal`.
+  - Normalização e sincronização bidirecional de `name`/`fullName`, `gender`/`sex`, além de preservação do objeto aninhado `address`.
+  - Criação de armazenamento persistente com `localStorage.getItem('ygeia_patients_list')` e função utilitária `savePatients()`, garantindo que inserções, alterações e exclusões de pacientes persistam após recarregamento de página (F5) ou troca de rotas.
+  - Sincronização em tempo real de `selectedPatientForView` para atualizar o prontuário (`PatientProfileView`) imediatamente quando a edição for iniciada a partir do perfil do paciente.
+  - Adição de `key` dinâmica no `<NewPatientView>` e hook reativo `useEffect` para forçar remontagem e reinicialização completa dos campos do formulário ao alternar entre pacientes.
+  - Inclusão de botão primário de *"Salvar alterações"* / *"Cadastrar paciente"* no cabeçalho superior do wizard, permitindo salvar os dados a qualquer momento de qualquer etapa, bem como botões de salvamento em todas as etapas intermediárias (Etapas 2 a 7).
+  - Sincronização em segundo plano com a API (`POST /api/v1/patients`, `PUT /api/v1/patients/:id` e `DELETE /api/v1/patients/:id`) com suporte a token JWT.
+
 ### Adicionado
 - **Matriz de Segurança Web e Mitigações Anti-Invasão (`SECURITY.md`, `README.md`)**:
   - Formalização dos requisitos de Content-Security-Policy (CSP), `frame-ancestors: 'none'`, sanitização de HTML clínico no editor contra Stored XSS e isolamento de credenciais com HttpOnly Cookies no `SECURITY.md`.

@@ -243,4 +243,12 @@ export class PatientsService {
       initials: this.extractInitials(updated.fullName),
     };
   }
+
+  async deletePatient(tenantId: string, patientId: string): Promise<boolean> {
+    const res = await this.db.query(
+      'DELETE FROM patients WHERE id = $1 AND tenant_id = $2 RETURNING id',
+      [patientId, tenantId],
+    );
+    return (res.rowCount ?? 0) > 0;
+  }
 }

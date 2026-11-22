@@ -77,8 +77,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Workout Split State
   const [activeWorkoutSplit, setActiveWorkoutSplit] = useState('A');
 
-  // Lista de pacientes da clínica com suporte a paginação e busca
-  const [patients, setPatients] = useState<PatientRecord[]>([
+  // Lista padrão de pacientes
+  const defaultPatientsList: PatientRecord[] = [
     {
       id: '1',
       name: user?.fullName || 'Bruno Eduardo de Moura Ferreira',
@@ -222,9 +222,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       lastConsult: '10/10/2026',
       insurancePlan: 'Bradesco Saúde',
     },
-  ]);
+  ];
 
-  // Carrega pacientes reais cadastrados na API
+  const PATIENTS_STORAGE_KEY = 'ygeia_patients_list';
+
+  // Lista de pacientes da clínica com suporte a persistência no localStorage e busca
+  const [patients, setPatients] = useState<PatientRecord[]>(() => {
+    try {
+      const stored = localStorage.getItem(PATIENTS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar pacientes do localStorage:', e);
+    }
+    return defaultPatientsList;
+  });
+
+  // Salva no estado e persiste no localStorage
+  const savePatients = (updatedList: PatientRecord[]) => {
+    setPatients(updatedList);
+    try {
+      localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(updatedList));
+    } catch (e) {
+      console.warn('Erro ao salvar pacientes no localStorage:', e);
+    }
+  };
+
+  // Carrega pacientes reais cadastrados na API e une preservando alterações locais
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -250,14 +278,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               insurancePlan: p.insurancePlan || 'Particular',
             }));
 
-            // Une pacientes da API preservando únicos por id
+            // Une pacientes preservando modificações locais existentes
             setPatients((prev) => {
               const map = new Map<string, PatientRecord>();
-              apiPatients.forEach((ap) => map.set(ap.id, ap));
-              prev.forEach((pr) => {
-                if (!map.has(pr.id)) map.set(pr.id, pr);
+              prev.forEach((pr) => map.set(String(pr.id), pr));
+              apiPatients.forEach((ap) => {
+                if (!map.has(String(ap.id))) {
+                  map.set(String(ap.id), ap);
+                }
               });
-              return Array.from(map.values());
+              const combined = Array.from(map.values());
+              try {
+                localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(combined));
+              } catch {}
+              return combined;
             });
           }
         }
@@ -773,20 +807,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <>
           {patientViewMode === 'create' ? (
             <NewPatientView
+              key="create-new-patient"
               mode="create"
               onBackToGrid={() => setPatientViewMode('grid')}
               onPatientCreated={(newP) => {
+                const cleanName = newP.fullName || newP.name || 'Paciente';
                 const newRecord: PatientRecord = {
                   id: newP.id || String(Date.now()),
-                  name: newP.fullName,
-                  initials: newP.initials || newP.fullName?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'PA',
+                  name: cleanName,
+                  initials: (cleanName || 'PA')
+                    .split(' ')
+                    .filter(Boolean)
+                    .map((n: string) => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase() || 'PA',
                   email: newP.email || '',
                   phone: newP.phone || '',
                   cpf: newP.cpf || '',
                   birthDate: newP.birthDate || '',
-                  sex: newP.gender || 'Não informado',
-                  gender: newP.gender,
-                  goal: newP.protocolNotes || 'Emagrecimento Saudável',
+                  sex: newP.gender || newP.sex || 'Não informado',
+                  gender: newP.gender || newP.sex || 'Não informado',
+                  goal: newP.goal || newP.objective || 'Emagrecimento',
                   status: 'Ativo',
                   lastConsult: 'Hoje',
                   insurancePlan: newP.insurancePlan || 'Sem convênio',
@@ -806,12 +848,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   sendWelcomeEmail: newP.sendWelcomeEmail,
                   sendWelcomeWhatsapp: newP.sendWelcomeWhatsapp,
                 };
-                setPatients((prev) => [newRecord, ...prev]);
+                const updatedList = [newRecord, ...patients];
+                savePatients(updatedList);
                 setPatientViewMode('grid');
+
+                // Sincronização em background com a API caso haja token
+                if (token) {
+                  const apiBase = ((import.meta as any).env?.VITE_API_URL || 'http://localhost:4333') + '/api/v1';
+                  fetch(`${apiBase}/patients`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      fullName: newRecord.name,
+                      birthDate: newRecord.birthDate,
+                      biologicalSex: newRecord.sex === 'Feminino' ? 'FEMALE' : 'MALE',
+                      email: newRecord.email,
+                      phone: newRecord.phone,
+                      cpf: newRecord.cpf,
+                      treatmentGoals: newRecord.goal,
+                      insurancePlan: newRecord.insurancePlan,
+                      locationName: newRecord.attendanceLocation,
+                      notes: newRecord.notes,
+                    }),
+                  }).catch(() => {});
+                }
               }}
             />
           ) : patientViewMode === 'edit' ? (
             <NewPatientView
+              key={selectedPatientForEdit ? `edit-${selectedPatientForEdit.id}` : 'edit-patient'}
               mode="edit"
               initialPatient={selectedPatientForEdit}
               onBackToGrid={() => {
@@ -819,45 +887,82 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 setPatientViewMode('grid');
               }}
               onPatientUpdated={(updatedP) => {
-                setPatients((prev) =>
-                  prev.map((p) => {
-                    if (p.id === updatedP.id || (selectedPatientForEdit && p.id === selectedPatientForEdit.id)) {
-                      return {
-                        ...p,
-                        name: updatedP.fullName || p.name,
-                        initials: updatedP.fullName
-                          ? updatedP.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
-                          : p.initials,
-                        email: updatedP.email ?? p.email,
-                        phone: updatedP.phone ?? p.phone,
-                        cpf: updatedP.cpf ?? p.cpf,
-                        birthDate: updatedP.birthDate ?? p.birthDate,
-                        sex: updatedP.gender ?? p.sex,
-                        gender: updatedP.gender ?? p.gender,
-                        goal: updatedP.protocolNotes ?? p.goal,
-                        insurancePlan: updatedP.insurancePlan ?? p.insurancePlan,
-                        attendanceLocation: updatedP.attendanceLocation ?? p.attendanceLocation,
-                        photoUrl: updatedP.photoUrl ?? p.photoUrl,
-                        guardianName: updatedP.guardianName ?? p.guardianName,
-                        guardianCpf: updatedP.guardianCpf ?? p.guardianCpf,
-                        objective: updatedP.objective ?? p.objective,
-                        tags: updatedP.tags ?? p.tags,
-                        pathologies: updatedP.pathologies ?? p.pathologies,
-                        treatmentProtocols: updatedP.treatmentProtocols ?? p.treatmentProtocols,
-                        protocolNotes: updatedP.protocolNotes ?? p.protocolNotes,
-                        insuranceCardNumber: updatedP.insuranceCardNumber ?? p.insuranceCardNumber,
-                        insuranceRepassAmount: updatedP.insuranceRepassAmount ?? p.insuranceRepassAmount,
-                        address: updatedP.address ?? p.address,
-                        notes: updatedP.notes ?? p.notes,
-                        sendWelcomeEmail: updatedP.sendWelcomeEmail ?? p.sendWelcomeEmail,
-                        sendWelcomeWhatsapp: updatedP.sendWelcomeWhatsapp ?? p.sendWelcomeWhatsapp,
-                      };
-                    }
-                    return p;
-                  })
-                );
+                const targetId = String(updatedP.id || selectedPatientForEdit?.id);
+                let updatedRecord: PatientRecord | null = null;
+
+                const updatedList = patients.map((p) => {
+                  if (String(p.id) === targetId || (selectedPatientForEdit && String(p.id) === String(selectedPatientForEdit.id))) {
+                    const cleanName = updatedP.fullName || updatedP.name || p.name;
+                    updatedRecord = {
+                      ...p,
+                      name: cleanName,
+                      initials: cleanName
+                        .split(' ')
+                        .filter(Boolean)
+                        .map((n: string) => n[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase() || 'PA',
+                      email: updatedP.email !== undefined ? updatedP.email : p.email,
+                      phone: updatedP.phone !== undefined ? updatedP.phone : p.phone,
+                      cpf: updatedP.cpf !== undefined ? updatedP.cpf : p.cpf,
+                      birthDate: updatedP.birthDate !== undefined ? updatedP.birthDate : p.birthDate,
+                      sex: updatedP.gender || updatedP.sex || p.sex,
+                      gender: updatedP.gender || updatedP.sex || p.gender,
+                      goal: updatedP.goal || updatedP.objective || p.goal,
+                      objective: updatedP.objective ?? p.objective,
+                      insurancePlan: updatedP.insurancePlan ?? p.insurancePlan,
+                      attendanceLocation: updatedP.attendanceLocation ?? p.attendanceLocation,
+                      photoUrl: updatedP.photoUrl ?? p.photoUrl,
+                      guardianName: updatedP.guardianName ?? p.guardianName,
+                      guardianCpf: updatedP.guardianCpf ?? p.guardianCpf,
+                      tags: updatedP.tags ?? p.tags,
+                      pathologies: updatedP.pathologies ?? p.pathologies,
+                      treatmentProtocols: updatedP.treatmentProtocols ?? p.treatmentProtocols,
+                      protocolNotes: updatedP.protocolNotes ?? p.protocolNotes,
+                      insuranceCardNumber: updatedP.insuranceCardNumber ?? p.insuranceCardNumber,
+                      insuranceRepassAmount: updatedP.insuranceRepassAmount ?? p.insuranceRepassAmount,
+                      address: updatedP.address ? { ...p.address, ...updatedP.address } : p.address,
+                      notes: updatedP.notes ?? p.notes,
+                      sendWelcomeEmail: updatedP.sendWelcomeEmail !== undefined ? updatedP.sendWelcomeEmail : p.sendWelcomeEmail,
+                      sendWelcomeWhatsapp: updatedP.sendWelcomeWhatsapp !== undefined ? updatedP.sendWelcomeWhatsapp : p.sendWelcomeWhatsapp,
+                    };
+                    return updatedRecord;
+                  }
+                  return p;
+                });
+
+                savePatients(updatedList);
+
+                // Se estava visualizando o prontuário deste paciente, sincroniza o perfil
+                if (selectedPatientForView && updatedRecord && String(selectedPatientForView.id) === targetId) {
+                  setSelectedPatientForView(updatedRecord);
+                }
+
                 setSelectedPatientForEdit(null);
                 setPatientViewMode('grid');
+
+                // Sincronização em background com a API caso haja token
+                if (token && targetId) {
+                  const apiBase = ((import.meta as any).env?.VITE_API_URL || 'http://localhost:4333') + '/api/v1';
+                  fetch(`${apiBase}/patients/${targetId}`, {
+                    method: 'PUT',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      fullName: updatedRecord ? (updatedRecord as PatientRecord).name : updatedP.fullName,
+                      birthDate: updatedRecord ? (updatedRecord as PatientRecord).birthDate : updatedP.birthDate,
+                      biologicalSex: (updatedRecord ? (updatedRecord as PatientRecord).sex : updatedP.gender) === 'Feminino' ? 'FEMALE' : 'MALE',
+                      email: updatedRecord ? (updatedRecord as PatientRecord).email : updatedP.email,
+                      phone: updatedRecord ? (updatedRecord as PatientRecord).phone : updatedP.phone,
+                      cpf: updatedRecord ? (updatedRecord as PatientRecord).cpf : updatedP.cpf,
+                      treatmentGoals: updatedRecord ? (updatedRecord as PatientRecord).goal : updatedP.goal,
+                      insurancePlan: updatedRecord ? (updatedRecord as PatientRecord).insurancePlan : updatedP.insurancePlan,
+                    }),
+                  }).catch(() => {});
+                }
               }}
             />
           ) : patientViewMode === 'view' && selectedPatientForView ? (
@@ -873,9 +978,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 setPatientViewMode('edit');
               }}
               onDelete={(id) => {
-                setPatients((prev) => prev.filter((p) => p.id !== id));
+                const updatedList = patients.filter((p) => String(p.id) !== String(id));
+                savePatients(updatedList);
                 setSelectedPatientForView(null);
                 setPatientViewMode('grid');
+
+                if (token) {
+                  const apiBase = ((import.meta as any).env?.VITE_API_URL || 'http://localhost:4333') + '/api/v1';
+                  fetch(`${apiBase}/patients/${id}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` },
+                  }).catch(() => {});
+                }
               }}
             />
           ) : (
@@ -895,7 +1009,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 setPatientViewMode('view');
               }}
               onDeletePatient={(patientId) => {
-                setPatients((prev) => prev.filter((p) => p.id !== patientId));
+                const updatedList = patients.filter((p) => String(p.id) !== String(patientId));
+                savePatients(updatedList);
+
+                if (token) {
+                  const apiBase = ((import.meta as any).env?.VITE_API_URL || 'http://localhost:4333') + '/api/v1';
+                  fetch(`${apiBase}/patients/${patientId}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` },
+                  }).catch(() => {});
+                }
               }}
               onSelectPatient={(p) => {
                 setSelectedPatientForView(p);

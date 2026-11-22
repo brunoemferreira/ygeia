@@ -9,6 +9,27 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 👤 Revisão Completa dos Cadastros: Inserir, Editar e Excluir Pacientes com Persistência
+- **Frontend Web (`apps/web`)**:
+  - `AdminDashboard.tsx`:
+    - **Persistência em LocalStorage (`ygeia_patients_list`)**: Pacientes criados, editados ou excluídos agora são gravados no `localStorage` através da função unificada `savePatients()`, garantindo que nenhuma alteração se perca após recarregar a página (F5) ou navegar entre abas do menu.
+    - **Correção no Salvamento de Edições de Paciente**:
+      - Corrigido o bug crítico onde `goal` recebia indevidamente `updatedP.protocolNotes ?? p.goal`, substituindo pelo mapeamento correto `updatedP.goal || updatedP.objective || p.goal`.
+      - Mapeamento consistente de `name` e `fullName`, `gender` e `sex`, além de merge seguro do objeto `address`.
+      - Sincronização imediata de `selectedPatientForView`: quando a edição é disparada a partir do prontuário (`PatientProfileView`), os dados do paciente aberto são atualizados em tempo real sem reter valores desatualizados.
+    - **Sincronização em Background com a API**:
+      - Criação (`POST /api/v1/patients`), atualização (`PUT /api/v1/patients/:id`) e exclusão (`DELETE /api/v1/patients/:id`) integradas automaticamente em segundo plano quando há sessão ativa com token.
+    - **Chaves de Ciclo de Vida (`key`)**: Inclusão de `key` dinâmica no `<NewPatientView>` para forçar remontagem limpa dos estados de edição ao alternar entre diferentes pacientes.
+  - `NewPatientView.tsx`:
+    - Adicionado hook `useEffect` reativo para sincronizar todos os campos de formulário caso `initialPatient` se altere.
+    - Adicionado botão primário de *"Salvar alterações"* diretamente no topo superior do formulário (ao lado de *"Fechar"*), permitindo salvar modificações a qualquer momento a partir de qualquer uma das etapas.
+    - Disponibilizado botão de *"Salvar alterações"* na barra de ações inferior de todas as etapas intermediárias (Etapas 2 a 7) ao lado de *"Continuar"*.
+  - `PatientDirectory.tsx`:
+    - Confirmação de exclusão integrada com remoção reativa no estado e persistência garantida no `localStorage`.
+- **Backend API (`apps/api`)**:
+  - `patients.controller.ts` & `patients.service.ts`:
+    - Implementado endpoint `@Delete(':id')` e método `deletePatient(tenantId, patientId)` assegurando isolamento multi-tenant estrito via `tenant_id` e políticas PostgreSQL RLS.
+
 ### 🛡️ Política e Arquitetura de Segurança Anti-Invasão (Defense-in-Depth)
 - **Governança & Ecossistema Geral**:
   - Criação do documento institucional [`SECURITY.md`](./SECURITY.md) cobrindo a matriz anti-invasão Zero Trust nos 3 projetos (`apps/api`, `apps/web` e `apps/mobile`), política de divulgação responsável de vulnerabilidades e checklist de conformidade.

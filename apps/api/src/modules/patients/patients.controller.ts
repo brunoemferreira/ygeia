@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Param,
   Body,
   Query,
@@ -79,5 +80,15 @@ export class PatientsController {
   ): Promise<PatientResponse> {
     const tenantId = this.resolveTenantId(req);
     return await this.patientsService.updatePatient(tenantId, id, body);
+  }
+
+  @Delete(':id')
+  async deletePatient(
+    @Param('id') id: string,
+    @Req() req?: any,
+  ): Promise<{ success: boolean }> {
+    const tenantId = this.resolveTenantId(req);
+    const deleted = await this.patientsService.deletePatient(tenantId, id);
+    return { success: deleted };
   }
 }
