@@ -21,6 +21,7 @@ import {
   COUNTRY_DIAL_CODES,
   CountryDialCode,
   CountryFlag,
+  formatPhoneNumber,
 } from './countryDialCodes';
 
 export interface NewPatientModalProps {
@@ -105,13 +106,6 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
     if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
     if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
-  };
-
-  const formatPhone = (val: string) => {
-    const digits = val.replace(/\D/g, '').slice(0, 11);
-    if (digits.length <= 2) return digits ? `(${digits}` : '';
-    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -613,9 +607,10 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                           </button>
                           <input
                             type="text"
-                            placeholder="(00) 00000-0000"
+                            placeholder={selectedCountry.placeholder}
+                            maxLength={selectedCountry.maxLength}
                             value={phone}
-                            onChange={(e) => setPhone(selectedCountry.code === 'BR' ? formatPhone(e.target.value) : e.target.value)}
+                            onChange={(e) => setPhone(formatPhoneNumber(e.target.value, selectedCountry.code))}
                             style={{
                               flex: 1,
                               height: '100%',
@@ -680,6 +675,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                                       setSelectedCountry(c);
                                       setIsCountryPickerOpen(false);
                                       setCountrySearch('');
+                                      setPhone((prev) => formatPhoneNumber(prev, c.code));
                                     }}
                                     style={{
                                       width: '100%',

@@ -76,7 +76,7 @@ export type InviteTeamMemberInput = z.infer<typeof inviteTeamMemberSchema>;
 export const createPatientSchema = z.object({
   fullName: z.string().min(3, 'Nome deve conter no mínimo 3 caracteres'),
   email: z.string().email('E-mail inválido'),
-  phone: z.string().min(10, 'Telefone inválido'),
+  phone: z.string().min(8, 'Telefone inválido').max(64, 'Telefone deve conter no máximo 64 caracteres'),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data de nascimento deve seguir AAAA-MM-DD'),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
 });

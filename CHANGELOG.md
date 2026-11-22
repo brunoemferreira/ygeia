@@ -9,6 +9,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📞 Formatação Dinâmica por Prefixo Internacional & Expansão de Banco de Dados
+- **Frontend Web (`apps/web`)**:
+  - `countryDialCodes.tsx`:
+    - Adicionado suporte a máscaras e formatos nacionais para todos os 37 prefixos/países suportados (ex: EUA `(000) 000-0000`, Portugal `000 000 000`, Espanha `000 00 00 00`, Reino Unido `00000 000000`, França `00 00 00 00 00`, Alemanha `0000 0000000`, etc.).
+    - Implementada a função `formatPhoneNumber(value, countryCode)` que formata dinamicamente conforme o usuário digita e reformata automaticamente o número existente ao alternar de país.
+    - Placeholder e limites de caracteres (`maxLength`) dinâmicos sincronizados com o país selecionado.
+  - `NewPatientView.tsx` e `NewPatientModal.tsx`:
+    - Integração de `formatPhoneNumber`, placeholders dinâmicos e revalidação de formato em tempo real.
+- **Backend & Banco de Dados (`apps/api` e `@ygeia/validation-schemas`)**:
+  - `0004_expand_phone_fields.sql`: Nova migration garantindo que colunas de telefone (`phone`, `whatsapp`) tenham tamanho de `VARCHAR(64)`, suportando telefones internacionais completos com DDI, DDD e máscara.
+  - `@ygeia/validation-schemas`: Ajustada a validação do schema `createPatientSchema` para aceitar telefones de 8 a 64 caracteres.
+
 ### 🌍 Bandeiras Gráficas em Alta Resolução para Todos os Prefixos Telefônicos Internacionais
 - **Frontend Web (`apps/web`)**:
   - `countryDialCodes.tsx`: Criação de componente dedicado `CountryFlag` que renderiza bandeiras oficiais e nítidas para **todos os 37 países e prefixos** suportados (Brasil, EUA, Portugal, Espanha, Argentina, Alemanha, França, Itália, Japão, etc.), eliminando problemas de fontes de emojis no Windows.

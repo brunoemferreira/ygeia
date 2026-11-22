@@ -5,6 +5,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado
+- **Formatação Dinâmica de Telefone por País / DDI (`countryDialCodes.tsx`, `NewPatientView.tsx`, `NewPatientModal.tsx`)**:
+  - Regras de formatação, placeholders e limites de dígitos específicos para cada um dos 37 países suportados (ex: EUA, Portugal, Espanha, Reino Unido, França, etc.).
+  - Ao selecionar ou trocar de país, o placeholder e a máscara se adaptam imediatamente, reformatando qualquer número já digitado.
+
 ### Adicionado / Corrigido
 - **Bandeiras Gráficas para Todos os Prefixos Internacionais (`countryDialCodes.tsx`, `NewPatientView.tsx`, `NewPatientModal.tsx`)**:
   - Implementação de renderização gráfica nítida de bandeiras para **todos os prefixos/países** cadastrados (não apenas Brasil), funcionando perfeitamente em Windows e navegadores modernos.

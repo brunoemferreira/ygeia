@@ -25,6 +25,7 @@ import {
   COUNTRY_DIAL_CODES,
   CountryDialCode,
   CountryFlag,
+  formatPhoneNumber,
 } from './countryDialCodes';
 
 export const OBJECTIVE_OPTIONS = [
@@ -111,13 +112,6 @@ function formatCpf(value: string) {
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
 }
 
-function formatPhone(value: string) {
-  const digits = value.replace(/\D/g, '').slice(0, 11);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
-}
-
 function formatDate(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 8);
   if (digits.length <= 2) return digits;
@@ -167,7 +161,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
     if (p.startsWith(initialCountry.dialCode)) {
       p = p.replace(initialCountry.dialCode, '').trim();
     }
-    return initialCountry.code === 'BR' ? formatPhone(p) : p;
+    return formatPhoneNumber(p, initialCountry.code);
   });
 
   const [cpf, setCpf] = useState(initialPatient?.cpf ? formatCpf(initialPatient.cpf) : '');
@@ -716,9 +710,9 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                         <input
                           type="text"
                           value={phone}
-                          onChange={(e) => setPhone(selectedCountry.code === 'BR' ? formatPhone(e.target.value) : e.target.value)}
-                          placeholder="(00) 00000-0000"
-                          maxLength={selectedCountry.code === 'BR' ? 15 : 20}
+                          onChange={(e) => setPhone(formatPhoneNumber(e.target.value, selectedCountry.code))}
+                          placeholder={selectedCountry.placeholder}
+                          maxLength={selectedCountry.maxLength}
                           style={{
                             flex: 1,
                             height: '100%',
@@ -783,6 +777,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                                     setSelectedCountry(c);
                                     setIsCountryPickerOpen(false);
                                     setCountrySearch('');
+                                    setPhone((prev) => formatPhoneNumber(prev, c.code));
                                   }}
                                   style={{
                                     width: '100%',
