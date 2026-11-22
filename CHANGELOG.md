@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🧹 Limpeza de Seções na Visualização do Paciente
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - Removidos os itens de menu e páginas *"Perfil nutricional integrado"* e *"Teia de interconexões"* da sidebar de navegação clínica, simplificando a jornada de avaliação nutricional focando em anamnese, recordatório, prontuário, restrições e medicamentos.
+
 ### 🎨 Padronização e Conformidade 100% com o Tema Dinâmico White Label
 - **Frontend Web (`apps/web`)**:
   - `PatientProfileView.tsx`:

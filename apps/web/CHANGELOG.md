@@ -5,6 +5,10 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Removido
+- **Itens de Menu na Ficha do Paciente (`PatientProfileView.tsx`)**:
+  - Remoção dos menus e páginas *"Perfil nutricional integrado"* e *"Teia de interconexões"*, tornando o menu de avaliação nutricional mais conciso e focado nas rotinas práticas de consulta.
+
 ### Modificado
 - **Aplicação Completa do Tema Dinâmico em Telas Novas e Existentes (`PatientProfileView.tsx`, `NewPatientModal.tsx`, `NewPatientView.tsx`, `SettingsModule.tsx`)**:
   - Auditoria e remoção de todas as cores de marca estáticas (`#10b981`, `#059669`, `#ecfdf5`, etc.), substituindo por tokens do tema dinâmico (`var(--primary)`, `var(--primary-hover)`, `var(--primary-light)`, `var(--primary-border)`, `var(--primary-glow)`).

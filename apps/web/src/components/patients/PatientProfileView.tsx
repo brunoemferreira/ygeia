@@ -21,7 +21,6 @@ import {
   Trash2,
   Edit2,
   MessageCircle,
-  Sparkles,
   ClipboardList,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
@@ -147,19 +146,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   // Definição das seções do menu lateral
   const menuGroups = [
     {
-      type: 'single',
-      id: 'perfil_integrado',
-      label: 'Perfil nutricional integrado',
-      icon: Sparkles,
-    },
-    {
       type: 'group',
       id: 'avaliacao_nutricional',
       label: 'Avaliação nutricional',
       icon: ClipboardList,
       children: [
         { id: 'anamnese_transcricao', label: 'Anamnese e transcrição', hasPlus: true },
-        { id: 'teia_interconexoes', label: 'Teia de interconexões', hasPlus: true },
         { id: 'recordatorio_alimentar', label: 'Recordatório alimentar', hasPlus: true },
         { id: 'prontuario', label: 'Prontuário', hasPlus: true },
         { id: 'restricoes_alimentares', label: 'Restrições alimentares', hasPlus: false },
