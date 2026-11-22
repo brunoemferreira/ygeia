@@ -698,51 +698,42 @@ p {
   }
 }
 
-/* Mobile-First Settings Layout */
-.ygeia-settings-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  background: #ffffff;
-  border-radius: 1rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+/* Settings 2-Column Layout (Matching Better Health) */
+.ygeia-settings-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: flex-start;
+  width: 100%;
 }
 
 @media (min-width: 1024px) {
-  .ygeia-settings-container {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    min-height: 680px;
+  .ygeia-settings-layout {
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
   }
 }
 
-.ygeia-settings-nav {
+.ygeia-settings-sidebar {
   display: flex;
-  flex-direction: row;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0.75rem 1rem;
-  gap: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
-  scrollbar-width: none;
-  background: #fafbfc;
+  flex-direction: column;
+  width: 100%;
 }
 
-.ygeia-settings-nav::-webkit-scrollbar {
-  display: none;
+.ygeia-settings-content {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 2rem;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-@media (min-width: 1024px) {
-  .ygeia-settings-nav {
-    flex-direction: column;
-    overflow-x: visible;
-    padding: 1.25rem 1rem;
-    gap: 1.5rem;
-    border-bottom: none;
-    border-right: 1px solid #f1f5f9;
-    background: #ffffff;
+@media (max-width: 640px) {
+  .ygeia-settings-content {
+    padding: 1.25rem;
   }
 }
 

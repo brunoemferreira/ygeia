@@ -9,6 +9,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🎨 Restauração Fiel e Alinhamento da Tela de Configurações (Padrão Better Health)
+- **Frontend Web (`apps/web`)**:
+  - `SettingsModule.tsx`:
+    - Reestruturação completa do layout para corresponder 1:1 ao design do Better Health:
+      - **Cabeçalho**: Adicionada tag superior `CONFIGURAÇÃO` em caixa alta com fundo sutil, título `Configurações` em destaque (1.75rem, bold 800) e subtítulo institucional.
+      - **Layout em 2 Colunas (`.ygeia-settings-layout`)**:
+        - **Sidebar Esquerda Aberta (`.ygeia-settings-sidebar`)**: Caixa de busca `Procurar` no topo com ícone e borda limpa, seguida pelos quatro grupos estruturados com títulos em cinza (`CONTA`, `ATENDIMENTO`, `DOCUMENTOS E ASSINATURA`, `APARÊNCIA`) e botões com ícones dedicados e pílula ativa em cinza claro (`#f1f5f9`).
+        - **Card Principal Branco (`.ygeia-settings-content`)**: Cartão limpo com bordas e sombra suave contendo o conteúdo da sub-aba ativa.
+      - **Aba Dados Pessoais Fiel à Referência**:
+        - Modo de visualização limpo com botão `Editar` no canto superior direito.
+        - Seção **Foto**: Caixa tracejada com avatar do profissional (`/bruno-profile.jpg`), textos informativos e botões `Alterar` e `Remover`.
+        - Seções **IDENTIFICAÇÃO** e **ENDEREÇO**: Listagem em linhas horizontais divididas por divisores suaves (`Nome completo`, `Email`, `Telefone`, `CRN`, `CPF / CNPJ`, `Especialidades`, `CEP`, `Logradouro`, `Cidade / UF`).
+        - Modo de edição acessível via botão `Editar` permitindo atualizar os dados e persistir em tempo real.
+  - `styles.css`: Substituição do encapsulamento anterior por regras limpas de grid responsivo `.ygeia-settings-layout`, `.ygeia-settings-sidebar` e `.ygeia-settings-content`.
+
 ### ✨ Melhorias Avançadas no Cadastro de Pacientes & Componentes de Formulário
 - **Frontend Web (`apps/web`)**:
   - `NewPatientView.tsx`:

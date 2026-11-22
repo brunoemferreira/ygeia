@@ -5,6 +5,14 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Restauração Fiel do Layout da Tela de Configurações (`SettingsModule.tsx`, `styles.css`)**:
+  - Correção da estrutura visual e de layout que havia encapsulado indevidamente a navegação dentro de um único container branco.
+  - Implementação do layout idêntico à imagem de referência do Better Health:
+    - Sidebar de navegação aberta com grupos `CONTA`, `ATENDIMENTO`, `DOCUMENTOS E ASSINATURA` e `APARÊNCIA`, além da busca de ajustes.
+    - Card principal de conteúdo com design de dados pessoais estruturado: bloco de foto em container tracejado, seções em linhas `IDENTIFICAÇÃO` e `ENDEREÇO`.
+    - Alternância suave entre modo leitura e edição via botão `Editar`.
+
 ### Adicionado
 - **Melhorias Visuais e Funcionais no Cadastro de Pacientes (`NewPatientView.tsx`, `styles.css`)**:
   - **Telefone com Seletor de DDI e Bandeirinhas**: Seletor modal/popover com 37 países, bandeiras emoji, busca instantânea e fechamento ao clicar fora.
