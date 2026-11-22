@@ -9,6 +9,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### ⚙️ Resiliência da API Backend em Desenvolvimento Local
+- **Backend API (`apps/api`)**:
+  - `DatabaseService`: Tratamento gracioso de indisponibilidade temporária de conexão com o PostgreSQL em modo de desenvolvimento local, mantendo a API em execução contínua para rotas e serviços auxiliares enquanto o contêiner ou serviço de banco de dados é iniciado.
+
 ### 📱 Mobile First Integral, Padronização de Configurações & Menus Principais (Cadastros, Nutrição e Treinamento)
 - **Frontend Web (`apps/web`)**:
   - **Arquitetura Mobile First em Todos os Componentes e Telas**:

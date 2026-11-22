@@ -33,8 +33,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
       await this.runMigrations();
     } catch (error) {
-      this.logger.error('Falha ao conectar ao PostgreSQL:', error);
-      throw error;
+      this.logger.warn('PostgreSQL ainda não está acessível na porta 5440. A API continuará em execução no modo de desenvolvimento.');
+      if (process.env.NODE_ENV === 'production') {
+        this.logger.error('Falha ao conectar ao PostgreSQL:', error);
+        throw error;
+      }
     }
   }
 

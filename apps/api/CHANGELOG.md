@@ -3,6 +3,12 @@
 Todas as alterações notáveis da API serão registradas aqui.
 Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [SemVer](https://semver.org/).
 
+## [Unreleased] - 2026-11-22
+
+### Modificado
+- **Resiliência do DatabaseService em Ambiente de Desenvolvimento**:
+  - `DatabaseService`: Tratamento de indisponibilidade temporária do PostgreSQL em ambiente de desenvolvimento local, evitando encerramento forçado da API quando o container ou serviço do banco ainda estiver iniciando.
+
 ## [Unreleased] - 2026-11-21
 
 ### Adicionado
