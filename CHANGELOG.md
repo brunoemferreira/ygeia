@@ -9,6 +9,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🩹 Correção no Carregamento, Persistência e Sincronização de Anamneses
+- **Frontend Web (`apps/web`)**:
+  - `AnamneseEditor.tsx`:
+    - Adição de sincronização reativa com `useEffect` para carregar imediatamente os dados da anamnese (`sections`, `selectedTemplate`, `transcriptionText`) sempre que um item for selecionado no grid ou um novo for criado.
+    - Suporte a templates clínicos adicionais no seletor: *Anamnese Infantil*, *Saúde Gastrointestinal*, *Anamnese Esportiva*, *Seções padrão* e *Anamnese em Branco*.
+    - Garantia de null-safety para iniciais, idade e identificadores do paciente.
+  - `PatientProfileView.tsx`:
+    - Implementação de persistência no `localStorage` indexada por paciente (`ygeia_anamneses_${patientId}`), evitando perdas de anamneses cadastradas ou editadas ao recarregar ou navegar entre pacientes.
+    - Adição de menu dropdown com templates clínicos no botão *+ Adicionar anamnese ⌄*.
+    - Proteção contra valores nulos/indefinidos em cálculos de idade, chaves numéricas do paciente e links de WhatsApp.
+  - `AdminDashboard.tsx`:
+    - Inclusão da propriedade `key={selectedPatientForView.id}` para remontagem e isolamento estrito de estado ao alternar entre pacientes.
+    - Adição do botão de visualização rápida com olho (`Eye`) na lista de pacientes do painel inicial (`dashboard_pacientes`), permitindo acesso direto à ficha e anamneses sem etapas intermediárias.
+
 ### 📋 Grid de Múltiplas Anamneses (Layout 1:1 DietSystem)
 - **Frontend Web (`apps/web`)**:
   - `PatientProfileView.tsx`:

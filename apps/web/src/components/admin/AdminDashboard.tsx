@@ -5,6 +5,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
+  Eye,
+  Edit2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -373,16 +375,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.875rem',
-                      padding: '0.75rem',
+                      padding: '0.65rem 0.75rem',
                       borderRadius: '0.5rem',
                       cursor: 'pointer',
                       transition: 'background-color 0.15s ease',
+                      border: '1px solid transparent',
                     }}
-                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                    onMouseOver={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                      (e.currentTarget as HTMLElement).style.borderColor = '#f1f5f9';
+                    }}
+                    onMouseOut={(e) => {
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                      (e.currentTarget as HTMLElement).style.borderColor = 'transparent';
+                    }}
                     onClick={() => {
-                      setSelectedPatientForEdit(patient);
-                      setPatientViewMode('edit');
+                      setSelectedPatientForView(patient);
+                      setPatientViewMode('view');
                       if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
                     }}
                   >
@@ -419,6 +428,77 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       >
                         {patient.name}
                       </div>
+                    </div>
+
+                    {/* Ações Rápidas: Olhinho de Visualização e Lápis de Edição */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPatientForView(patient);
+                          setPatientViewMode('view');
+                          if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                        }}
+                        title="Visualizar anamnese e prontuário"
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          padding: '0.35rem',
+                          color: '#64748b',
+                          borderRadius: '0.375rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease',
+                        }}
+                        onMouseOver={(e) => {
+                          (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-light)';
+                          (e.currentTarget as HTMLElement).style.color = 'var(--primary)';
+                          (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary-border)';
+                        }}
+                        onMouseOut={(e) => {
+                          (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                          (e.currentTarget as HTMLElement).style.color = '#64748b';
+                          (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
+                        }}
+                      >
+                        <Eye size={14} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPatientForEdit(patient);
+                          setPatientViewMode('edit');
+                          if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                        }}
+                        title="Editar cadastro do paciente"
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          padding: '0.35rem',
+                          color: '#64748b',
+                          borderRadius: '0.375rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease',
+                        }}
+                        onMouseOver={(e) => {
+                          (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                          (e.currentTarget as HTMLElement).style.color = '#0f172a';
+                        }}
+                        onMouseOut={(e) => {
+                          (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                          (e.currentTarget as HTMLElement).style.color = '#64748b';
+                        }}
+                      >
+                        <Edit2 size={14} />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -782,6 +862,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             />
           ) : patientViewMode === 'view' && selectedPatientForView ? (
             <PatientProfileView
+              key={selectedPatientForView.id}
               patient={selectedPatientForView}
               onBack={() => {
                 setSelectedPatientForView(null);

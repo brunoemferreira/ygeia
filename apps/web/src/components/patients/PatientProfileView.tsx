@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   ArrowLeft,
   Search,
@@ -24,6 +24,7 @@ import {
   ClipboardList,
   Wand2,
   Split,
+  FileText,
 } from 'lucide-react';
 import { PatientRecord } from './PatientDirectory';
 import { AnamneseEditor, AnamneseData } from './AnamneseEditor';
@@ -43,6 +44,22 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   onDelete,
 }) => {
   const { toast } = useToast();
+
+  const patientId = String(patient?.id || '1');
+  const patientName = patient?.name || (patient as any)?.fullName || 'Paciente';
+  const patientInitials =
+    patient?.initials ||
+    patientName
+      .trim()
+      .split(/\s+/)
+      .map((n: string) => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() ||
+    'PA';
+
+  // Chave de armazenamento no localStorage por paciente
+  const storageKey = `ygeia_anamneses_${patientId}`;
 
   // Seção ativa
   const [activeSection, setActiveSection] = useState<string>('anamnese_transcricao');
@@ -64,13 +81,18 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  // Dropdown do botão "+ Adicionar anamnese"
+  const [showAddAnamneseDropdown, setShowAddAnamneseDropdown] = useState(false);
+
   // Múltiplas anamneses por paciente & tela de edição
   const [isEditingAnamnese, setIsEditingAnamnese] = useState(false);
   const [editingAnamneseData, setEditingAnamneseData] = useState<AnamneseData | null>(null);
-  const [anamnesesList, setAnamnesesList] = useState<AnamneseData[]>([
+
+  // Anamneses padrão caso não existam no localStorage
+  const getDefaultAnamneses = (): AnamneseData[] => [
     {
       id: 'anamnese_1',
-      patientId: patient.id,
+      patientId: patientId,
       title: 'Anamnese criada em 22 de novembro de 2026',
       date: '2026-11-22T08:00:00Z',
       templateType: 'Seções padrão',
@@ -85,7 +107,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     },
     {
       id: 'anamnese_2',
-      patientId: patient.id,
+      patientId: patientId,
       title: 'Anamnese criada em 22 de novembro de 2026',
       date: '2026-11-22T09:30:00Z',
       templateType: 'Seções padrão',
@@ -98,11 +120,52 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         sonoAtividadeFisica: 'Treino e descanso adequados.',
       },
     },
-  ]);
+  ];
+
+  const [anamnesesList, setAnamnesesList] = useState<AnamneseData[]>(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar anamneses do localStorage:', e);
+    }
+    return getDefaultAnamneses();
+  });
+
+  // Atualiza a lista quando o paciente mudar
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAnamnesesList(parsed);
+          return;
+        }
+      }
+      setAnamnesesList(getDefaultAnamneses());
+    } catch (e) {
+      console.warn('Erro ao atualizar anamneses:', e);
+      setAnamnesesList(getDefaultAnamneses());
+    }
+  }, [patientId, storageKey]);
+
+  // Persiste no localStorage quando a lista for alterada
+  const saveAnamnesesToStorage = (updatedList: AnamneseData[]) => {
+    setAnamnesesList(updatedList);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(updatedList));
+    } catch (e) {
+      console.warn('Erro ao salvar no localStorage:', e);
+    }
+  };
 
   // Cálculo de idade amigável a partir da data de nascimento
   const patientAgeString = useMemo(() => {
-    if (!patient.birthDate) return '45 anos e 7 meses';
+    if (!patient?.birthDate) return '45 anos e 7 meses';
     try {
       let bDate: Date;
       if (patient.birthDate.includes('/')) {
@@ -124,19 +187,20 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
     } catch {
       return '45 anos e 7 meses';
     }
-  }, [patient.birthDate]);
+  }, [patient?.birthDate]);
 
   // Chave identificadora do paciente (chave numérica idêntica ao DietSystem)
   const patientKey = useMemo(() => {
-    const numeric = (patient.id || '').replace(/\D/g, '');
+    const rawId = String(patient?.id || patientName || '1000001851');
+    const numeric = rawId.replace(/\D/g, '');
     if (numeric.length >= 6) return numeric.slice(-8);
     let hash = 0;
-    for (let i = 0; i < (patient.id || patient.name).length; i++) {
-      hash = ((hash << 5) - hash) + (patient.id || patient.name).charCodeAt(i);
+    for (let i = 0; i < rawId.length; i++) {
+      hash = ((hash << 5) - hash) + rawId.charCodeAt(i);
       hash |= 0;
     }
     return String(Math.abs(hash)).padStart(8, '7').slice(-8);
-  }, [patient.id, patient.name]);
+  }, [patient?.id, patientName]);
 
   const handleCopyKey = () => {
     navigator.clipboard.writeText(patientKey);
@@ -151,12 +215,66 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   };
 
   // Extrair telefone para WhatsApp
-  const phoneClean = (patient.phone || '').replace(/\D/g, '');
+  const phoneClean = (patient?.phone || '').replace(/\D/g, '');
   const whatsappUrl = phoneClean
     ? `https://wa.me/${phoneClean.startsWith('55') ? phoneClean : '55' + phoneClean}?text=${encodeURIComponent(
-        `Olá, ${patient.name}! Aqui é do seu consultório de nutrição.`
+        `Olá, ${patientName}! Aqui é do seu consultório de nutrição.`
       )}`
     : null;
+
+  // Iniciar nova anamnese com template opcional
+  const handleStartNewAnamnese = (templateType: string = 'Seções padrão') => {
+    setShowAddAnamneseDropdown(false);
+    let customSections = {
+      queixaPrincipal: '',
+      historiaClinica: '',
+      habitoIntestinal: '',
+      hidratacao: '',
+      rotinaAlimentar: '',
+      sonoAtividadeFisica: '',
+    };
+
+    if (templateType === 'Anamnese Esportiva') {
+      customSections = {
+        queixaPrincipal: 'Objetivo atlético: aumento de VO2 máx, hipertrofia e rendimento competitivo.',
+        historiaClinica: 'Sem lesões osteoarticulares recentes. Uso prévio de pré-treino e creatina.',
+        habitoIntestinal: 'Hábito regular, Bristol tipo 4, sem desconforto durante provas ou treinos intensos.',
+        hidratacao: 'Consumo habitual de 3.5L de água/dia + repositor hidroeletrolítico intra-treino.',
+        rotinaAlimentar: 'Carboidratos complexos no pré-treino imediato; aporte proteico de 2.0g/kg distribuído em 5 refeições.',
+        sonoAtividadeFisica: 'Treino de corrida 4x/semana + musculação 3x/semana. Sono de 8 horas reparador.',
+      };
+    } else if (templateType === 'Anamnese Infantil') {
+      customSections = {
+        queixaPrincipal: 'Acompanhamento do desenvolvimento pondero-estatural e seletividade alimentar infantil.',
+        historiaClinica: 'Histórico de aleitamento materno até os 6 meses. Sem alergias alimentares conhecidas.',
+        habitoIntestinal: 'Evacuação diária sem dor ou esforço; consistência pastosa / Bristol 4.',
+        hidratacao: 'Consumo de água em copo de transição (~1.2L ao dia) e sucos naturais ocasionais.',
+        rotinaAlimentar: 'Café da manhã, lanche escolar, almoço, lanche da tarde e jantar em família.',
+        sonoAtividadeFisica: 'Sono de 9 a 10 horas contínuas. Brincadeiras ativas e natação 2x/semana.',
+      };
+    } else if (templateType === 'Saúde Gastrointestinal') {
+      customSections = {
+        queixaPrincipal: 'Sintomas gastrointestinais recorrentes: distensão abdominal pós-prandial e flatulência.',
+        historiaClinica: 'Histórico de gastrite leve; sem diagnóstico prévio de SII ou doença celíaca.',
+        habitoIntestinal: 'Alternância entre fezes Bristol 3 e 5; desconforto associado a laticínios.',
+        hidratacao: 'Ingestão de água fracionada de 2L/dia, redução voluntária de refrigerantes.',
+        rotinaAlimentar: 'Investigação inicial pelo protocolo Low-FODMAP; redução de alimentos fermentáveis.',
+        sonoAtividadeFisica: 'Sono fragmentado em noites com desconforto gástrico. Caminhadas leves.',
+      };
+    }
+
+    const newDraft: AnamneseData = {
+      id: String(Date.now()),
+      patientId: patientId,
+      title: `Anamnese criada em ${new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+      date: new Date().toISOString(),
+      templateType,
+      sections: customSections,
+    };
+
+    setEditingAnamneseData(newDraft);
+    setIsEditingAnamnese(true);
+  };
 
   // Se o usuário estiver preenchendo/editando uma anamnese, exibe a tela do editor completa (imagem de referência)
   if (isEditingAnamnese) {
@@ -170,15 +288,15 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           setEditingAnamneseData(null);
         }}
         onSave={(saved) => {
-          setAnamnesesList((prev) => {
-            const index = prev.findIndex((a) => a.id === saved.id);
-            if (index >= 0) {
-              const updated = [...prev];
-              updated[index] = saved;
-              return updated;
-            }
-            return [saved, ...prev];
-          });
+          const index = anamnesesList.findIndex((a) => a.id === saved.id);
+          let updated: AnamneseData[];
+          if (index >= 0) {
+            updated = [...anamnesesList];
+            updated[index] = saved;
+          } else {
+            updated = [saved, ...anamnesesList];
+          }
+          saveAnamnesesToStorage(updated);
           setIsEditingAnamnese(false);
           setEditingAnamneseData(null);
         }}
@@ -385,13 +503,13 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
               flexShrink: 0,
             }}
           >
-            {patient.initials || 'JS'}
+            {patientInitials}
           </div>
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#0f172a' }}>
-                {patient.name}
+                {patientName}
               </span>
               <span
                 style={{
@@ -935,34 +1053,189 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     <span>PDF unificado</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingAnamneseData(null);
-                      setIsEditingAnamnese(true);
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      borderRadius: '0.375rem',
-                      backgroundColor: 'var(--primary)',
-                      color: '#ffffff',
-                      padding: '0.45rem 0.95rem',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      border: 'none',
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 2px var(--primary-border)',
-                      transition: 'background-color 0.15s ease',
-                    }}
-                    onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
-                    onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
-                  >
-                    <Plus size={15} />
-                    <span>Adicionar anamnese</span>
-                    <ChevronDown size={14} />
-                  </button>
+                  <div style={{ position: 'relative' }}>
+                    <div style={{ display: 'inline-flex', borderRadius: '0.375rem', overflow: 'hidden', boxShadow: '0 1px 2px var(--primary-border)' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleStartNewAnamnese('Seções padrão')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.45rem',
+                          backgroundColor: 'var(--primary)',
+                          color: '#ffffff',
+                          padding: '0.45rem 0.85rem',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.15s ease',
+                        }}
+                        onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                        onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
+                      >
+                        <Plus size={15} />
+                        <span>Adicionar anamnese</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowAddAnamneseDropdown(!showAddAnamneseDropdown)}
+                        title="Escolher modelo de anamnese"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: 'var(--primary)',
+                          color: '#ffffff',
+                          padding: '0.45rem 0.5rem',
+                          border: 'none',
+                          borderLeft: '1px solid rgba(255, 255, 255, 0.25)',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.15s ease',
+                        }}
+                        onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-hover)')}
+                        onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
+                      >
+                        <ChevronDown size={14} />
+                      </button>
+                    </div>
+
+                    {/* Dropdown de Modelos de Anamnese */}
+                    {showAddAnamneseDropdown && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          right: 0,
+                          top: '110%',
+                          backgroundColor: '#ffffff',
+                          borderRadius: '0.5rem',
+                          border: '1px solid #e2e8f0',
+                          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                          minWidth: '220px',
+                          zIndex: 60,
+                          padding: '0.35rem 0',
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleStartNewAnamnese('Seções padrão')}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            width: '100%',
+                            padding: '0.5rem 1rem',
+                            fontSize: '0.8125rem',
+                            color: '#334155',
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                        >
+                          <FileText size={14} color="var(--primary)" />
+                          <span>Seções padrão</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleStartNewAnamnese('Anamnese Esportiva')}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            width: '100%',
+                            padding: '0.5rem 1rem',
+                            fontSize: '0.8125rem',
+                            color: '#334155',
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                        >
+                          <Activity size={14} color="#8b5cf6" />
+                          <span>Anamnese esportiva</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleStartNewAnamnese('Saúde Gastrointestinal')}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            width: '100%',
+                            padding: '0.5rem 1rem',
+                            fontSize: '0.8125rem',
+                            color: '#334155',
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                        >
+                          <Utensils size={14} color="#0284c7" />
+                          <span>Saúde gastrointestinal</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleStartNewAnamnese('Anamnese Infantil')}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            width: '100%',
+                            padding: '0.5rem 1rem',
+                            fontSize: '0.8125rem',
+                            color: '#334155',
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                        >
+                          <User size={14} color="#eab308" />
+                          <span>Anamnese infantil</span>
+                        </button>
+
+                        <div style={{ height: '1px', backgroundColor: '#f1f5f9', margin: '0.25rem 0' }} />
+
+                        <button
+                          type="button"
+                          onClick={() => handleStartNewAnamnese('Anamnese em Branco')}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            width: '100%',
+                            padding: '0.5rem 1rem',
+                            fontSize: '0.8125rem',
+                            color: '#64748b',
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
+                        >
+                          <Plus size={14} />
+                          <span>Anamnese em branco</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1182,7 +1455,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                         <button
                           type="button"
                           onClick={() => {
-                            setAnamnesesList((prev) => prev.filter((a) => a.id !== item.id));
+                            const updated = anamnesesList.filter((a) => a.id !== item.id);
+                            saveAnamnesesToStorage(updated);
                             toast.success('Anamnese excluída com sucesso.');
                           }}
                           title="Excluir anamnese"

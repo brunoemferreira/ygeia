@@ -5,6 +5,16 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Carregamento, Sincronização e Persistência de Anamneses (`AnamneseEditor.tsx`, `PatientProfileView.tsx`, `AdminDashboard.tsx`)**:
+  - Correção no carregamento dos dados da anamnese no editor: agora o `AnamneseEditor` sincroniza reativamente via `useEffect` sempre que uma anamnese for aberta para edição ou quando uma nova for iniciada.
+  - Implementação de persistência local por paciente no `localStorage` (`ygeia_anamneses_${patientId}`), assegurando que anamneses criadas, modificadas ou removidas não se percam ao navegar ou recarregar a tela.
+  - Suporte a templates clínicos adicionais no seletor de modelos (*Anamnese Infantil*, *Saúde Gastrointestinal*, *Anamnese Esportiva*, *Seções padrão* e *Anamnese em Branco*).
+  - Tratamento completo de null-safety para nomes, iniciais, telefones e cálculo da chave de identificação do paciente (`patientKey`).
+  - Adição de dropdown de modelos ao botão `+ Adicionar anamnese ⌄` no cabeçalho do módulo.
+  - Adição de `key={selectedPatientForView.id}` na renderização de `PatientProfileView` no `AdminDashboard` para prevenir retenção de estado entre pacientes distintos.
+  - Adição do botão de visualização com olho (`Eye`) nas linhas de pacientes no card da tela inicial `dashboard_pacientes`.
+
 ### Adicionado
 - **Grid de Anamneses Múltiplas com 6 Ações por Linha (`PatientProfileView.tsx`)**:
   - Implementação das linhas de anamneses preenchidas idênticas à imagem de referência:

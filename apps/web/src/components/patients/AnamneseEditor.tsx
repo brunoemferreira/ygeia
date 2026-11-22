@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   PlayCircle,
@@ -56,6 +56,18 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
 }) => {
   const { toast } = useToast();
 
+  const patientName = patient?.name || (patient as any)?.fullName || 'Paciente';
+  const patientInitials =
+    patient?.initials ||
+    patientName
+      .trim()
+      .split(/\s+/)
+      .map((n: string) => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() ||
+    'PA';
+
   // Abas superiores: 'anamnese' ou 'transcricao'
   const [activeTab, setActiveTab] = useState<'anamnese' | 'transcricao'>('anamnese');
 
@@ -63,7 +75,7 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
   const [suggestionsActive, setSuggestionsActive] = useState(true);
 
   // Template selecionado
-  const [selectedTemplate, setSelectedTemplate] = useState('Seções padrão');
+  const [selectedTemplate, setSelectedTemplate] = useState(initialData?.templateType || 'Seções padrão');
 
   // Seções da Anamnese
   const [sections, setSections] = useState({
@@ -74,6 +86,33 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
     rotinaAlimentar: initialData?.sections?.rotinaAlimentar || '',
     sonoAtividadeFisica: initialData?.sections?.sonoAtividadeFisica || '',
   });
+
+  // Sincroniza dados sempre que initialData mudar (garante carregamento correto ao abrir anamnese)
+  useEffect(() => {
+    if (initialData) {
+      setSections({
+        queixaPrincipal: initialData.sections?.queixaPrincipal || '',
+        historiaClinica: initialData.sections?.historiaClinica || '',
+        habitoIntestinal: initialData.sections?.habitoIntestinal || '',
+        hidratacao: initialData.sections?.hidratacao || '',
+        rotinaAlimentar: initialData.sections?.rotinaAlimentar || '',
+        sonoAtividadeFisica: initialData.sections?.sonoAtividadeFisica || '',
+      });
+      setSelectedTemplate(initialData.templateType || 'Seções padrão');
+      setTranscriptionText(initialData.transcriptionText || '');
+    } else {
+      setSections({
+        queixaPrincipal: '',
+        historiaClinica: '',
+        habitoIntestinal: '',
+        hidratacao: '',
+        rotinaAlimentar: '',
+        sonoAtividadeFisica: '',
+      });
+      setSelectedTemplate('Seções padrão');
+      setTranscriptionText('');
+    }
+  }, [initialData]);
 
   // Gravação de áudio / transcrição
   const [isRecording, setIsRecording] = useState(false);
@@ -97,14 +136,44 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
         sonoAtividadeFisica: 'Treino de corrida 4x/semana + musculação 3x/semana. Sono de 8 horas reparador.',
       });
       toast.info('Template de Anamnese Esportiva aplicado!');
+    } else if (tmpl === 'Anamnese Infantil') {
+      setSections({
+        queixaPrincipal: 'Acompanhamento do desenvolvimento pondero-estatural e seletividade alimentar infantil.',
+        historiaClinica: 'Histórico de aleitamento materno até os 6 meses. Sem alergias alimentares conhecidas.',
+        habitoIntestinal: 'Evacuação diária sem dor ou esforço; consistência pastosa / Bristol 4.',
+        hidratacao: 'Consumo de água em copo de transição (~1.2L ao dia) e sucos naturais ocasionais.',
+        rotinaAlimentar: 'Café da manhã, lanche escolar, almoço, lanche da tarde e jantar em família.',
+        sonoAtividadeFisica: 'Sono de 9 a 10 horas contínuas. Brincadeiras ativas e natação 2x/semana.',
+      });
+      toast.info('Template de Anamnese Infantil aplicado!');
+    } else if (tmpl === 'Saúde Gastrointestinal') {
+      setSections({
+        queixaPrincipal: 'Sintomas gastrointestinais recorrentes: distensão abdominal pós-prandial e flatulência.',
+        historiaClinica: 'Histórico de gastrite leve; sem diagnóstico prévio de SII ou doença celíaca.',
+        habitoIntestinal: 'Alternância entre fezes Bristol 3 e 5; desconforto associado a laticínios.',
+        hidratacao: 'Ingestão de água fracionada de 2L/dia, redução voluntária de refrigerantes.',
+        rotinaAlimentar: 'Investigação inicial pelo protocolo Low-FODMAP; redução de alimentos fermentáveis.',
+        sonoAtividadeFisica: 'Sono fragmentado em noites com desconforto gástrico. Caminhadas leves.',
+      });
+      toast.info('Template de Saúde Gastrointestinal aplicado!');
+    } else if (tmpl === 'Anamnese em Branco') {
+      setSections({
+        queixaPrincipal: '',
+        historiaClinica: '',
+        habitoIntestinal: '',
+        hidratacao: '',
+        rotinaAlimentar: '',
+        sonoAtividadeFisica: '',
+      });
+      toast.info('Template em branco carregado.');
     } else if (tmpl === 'Seções padrão') {
       setSections({
-        queixaPrincipal: initialData?.sections?.queixaPrincipal || '',
-        historiaClinica: initialData?.sections?.historiaClinica || '',
-        habitoIntestinal: initialData?.sections?.habitoIntestinal || '',
-        hidratacao: initialData?.sections?.hidratacao || '',
-        rotinaAlimentar: initialData?.sections?.rotinaAlimentar || '',
-        sonoAtividadeFisica: initialData?.sections?.sonoAtividadeFisica || '',
+        queixaPrincipal: initialData?.sections?.queixaPrincipal || 'Acompanhamento nutricional periódico e modulação da composição corporal.',
+        historiaClinica: initialData?.sections?.historiaClinica || 'Sem comorbidades relatadas.',
+        habitoIntestinal: initialData?.sections?.habitoIntestinal || 'Hábito regular, fezes tipo 4 de Bristol.',
+        hidratacao: initialData?.sections?.hidratacao || 'Consumo habitual de 2.5L de água/dia.',
+        rotinaAlimentar: initialData?.sections?.rotinaAlimentar || 'Café da manhã, almoço e jantar estruturados.',
+        sonoAtividadeFisica: initialData?.sections?.sonoAtividadeFisica || '7 a 8 horas de sono reparador. Musculação 4x/semana.',
       });
       toast.info('Template de Seções Padrão restaurado!');
     }
@@ -129,7 +198,7 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
 
     const anamneseRecord: AnamneseData = {
       id: initialData?.id || String(Date.now()),
-      patientId: patient.id,
+      patientId: patient?.id || 'default',
       title: initialData?.title || defaultTitle,
       date: now.toISOString(),
       templateType: selectedTemplate,
@@ -236,15 +305,15 @@ export const AnamneseEditor: React.FC<AnamneseEditorProps> = ({
               flexShrink: 0,
             }}
           >
-            {patient.initials || 'JS'}
+            {patientInitials}
           </div>
 
           <div>
             <div style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#0f172a' }}>
-              {patient.name}
+              {patientName}
             </div>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-              {patientAgeString}
+              {patientAgeString || '45 anos e 7 meses'}
             </div>
           </div>
         </div>
