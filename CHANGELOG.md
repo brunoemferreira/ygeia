@@ -9,6 +9,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📐 Otimização Visual do Menu do Perfil do Paciente (Prontuário)
+- **Frontend Web (`apps/web`)**:
+  - `PatientProfileView.tsx`:
+    - **Redução de Espaçamento e Altura entre Itens**: Compactação do padding vertical e das margens entre categorias (`gap: 0.15rem`, padding `0.32rem`) e subitens (`gap: 0.05rem`, padding `0.24rem`), permitindo visualização de mais opções na tela sem necessidade de rolagem excessiva.
+    - **Ajuste Tipográfico**: Redução refinada do tamanho das fontes dos títulos de categorias para `0.75rem` (12px) e dos subitens para `0.71875rem` (11.5px), conferindo uma experiência mais limpa, profissional e densa.
+
 ### 🥗 Expansão da Avaliação Nutricional: Anamnese, Recordatório, Prontuário e Restrições Alimentares
 - **Frontend Web (`apps/web`)**:
   - `PatientProfileView.tsx`:

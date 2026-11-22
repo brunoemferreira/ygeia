@@ -1333,10 +1333,10 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             minWidth: '260px',
             backgroundColor: '#ffffff',
             borderRight: '1px solid #f1f5f9',
-            padding: '1rem 0.65rem',
+            padding: '0.75rem 0.5rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.35rem',
+            gap: '0.15rem',
             overflowY: 'auto',
             height: 'calc(100vh - 65px)',
             position: 'sticky',
@@ -1348,15 +1348,15 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.45rem',
+              gap: '0.4rem',
               borderRadius: '0.375rem',
               border: '1px solid #e2e8f0',
-              padding: '0.45rem 0.65rem',
-              marginBottom: '0.65rem',
+              padding: '0.35rem 0.55rem',
+              marginBottom: '0.35rem',
               backgroundColor: '#ffffff',
             }}
           >
-            <Search size={14} color="#94a3b8" />
+            <Search size={13} color="#94a3b8" />
             <input
               type="text"
               placeholder="Buscar seção..."
@@ -1365,7 +1365,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
               style={{
                 border: 'none',
                 outline: 'none',
-                fontSize: '0.78125rem',
+                fontSize: '0.75rem',
                 color: '#0f172a',
                 width: '100%',
                 backgroundColor: 'transparent',
@@ -1386,15 +1386,15 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.6rem',
+                    gap: '0.5rem',
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.32rem 0.55rem',
                     borderRadius: '0.375rem',
                     border: 'none',
                     background: isActive ? 'var(--primary-light)' : 'transparent',
                     color: isActive ? 'var(--primary)' : '#334155',
                     fontWeight: isActive ? 600 : 500,
-                    fontSize: '0.8125rem',
+                    fontSize: '0.75rem',
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'all 0.1s ease',
@@ -1406,7 +1406,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
                   }}
                 >
-                  <Icon size={15} color={isActive ? 'var(--primary)' : '#64748b'} />
+                  <Icon size={14} color={isActive ? 'var(--primary)' : '#64748b'} />
                   <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {item.label}
                   </span>
@@ -1429,13 +1429,13 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.32rem 0.55rem',
                     borderRadius: '0.375rem',
                     border: 'none',
                     background: 'transparent',
                     color: hasActiveChild ? 'var(--primary)' : '#334155',
-                    fontWeight: hasActiveChild ? 700 : 500,
-                    fontSize: '0.8125rem',
+                    fontWeight: hasActiveChild ? 700 : 600,
+                    fontSize: '0.75rem',
                     cursor: 'pointer',
                     textAlign: 'left',
                     position: 'relative',
@@ -1449,8 +1449,8 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                       style={{
                         position: 'absolute',
                         left: 0,
-                        top: '4px',
-                        bottom: '4px',
+                        top: '3px',
+                        bottom: '3px',
                         width: '3px',
                         borderRadius: '0 2px 2px 0',
                         backgroundColor: 'var(--primary)',
@@ -1458,15 +1458,15 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     />
                   )}
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <GroupIcon size={15} color={hasActiveChild ? 'var(--primary)' : '#64748b'} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <GroupIcon size={14} color={hasActiveChild ? 'var(--primary)' : '#64748b'} />
                     <span>{item.label}</span>
                   </div>
 
                   {isExpanded ? (
-                    <ChevronDown size={14} color="#94a3b8" />
+                    <ChevronDown size={13} color="#94a3b8" />
                   ) : (
-                    <ChevronRight size={14} color="#94a3b8" />
+                    <ChevronRight size={13} color="#94a3b8" />
                   )}
                 </button>
 
@@ -1476,9 +1476,9 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      paddingLeft: '1.25rem',
-                      gap: '0.15rem',
-                      marginTop: '0.1rem',
+                      paddingLeft: '1.1rem',
+                      gap: '0.05rem',
+                      marginTop: '0.05rem',
                     }}
                   >
                     {item.children?.map((sub) => {
@@ -1491,12 +1491,12 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            padding: '0.4rem 0.65rem',
+                            padding: '0.24rem 0.5rem',
                             borderRadius: '0.375rem',
                             backgroundColor: isSubActive ? 'var(--primary-light)' : 'transparent',
                             color: isSubActive ? 'var(--primary)' : '#475569',
                             fontWeight: isSubActive ? 600 : 400,
-                            fontSize: '0.78125rem',
+                            fontSize: '0.71875rem',
                             cursor: 'pointer',
                             transition: 'all 0.1s ease',
                           }}
@@ -1507,21 +1507,21 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                             if (!isSubActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
                           }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <span>•</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span style={{ fontSize: '0.65rem', color: isSubActive ? 'var(--primary)' : '#94a3b8' }}>•</span>
                             <span>{sub.label}</span>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                             {sub.badge && (
                               <span
                                 style={{
-                                  fontSize: '0.625rem',
+                                  fontSize: '0.5625rem',
                                   fontWeight: 700,
                                   color: 'var(--primary)',
                                   backgroundColor: 'var(--primary-light)',
-                                  borderRadius: '0.25rem',
-                                  padding: '0.1rem 0.35rem',
+                                  borderRadius: '0.2rem',
+                                  padding: '0.05rem 0.3rem',
                                 }}
                               >
                                 {sub.badge}
@@ -1556,7 +1556,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                                   alignItems: 'center',
                                 }}
                               >
-                                <Plus size={13} />
+                                <Plus size={12} />
                               </button>
                             )}
                           </div>

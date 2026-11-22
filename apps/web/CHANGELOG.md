@@ -5,6 +5,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Modificado
+- **Otimização de Espaçamento e Tipografia no Menu Lateral do Paciente (`PatientProfileView.tsx`)**:
+  - Redução da altura/padding entre categorias e subitens no menu lateral clínico do prontuário.
+  - Diminuição proporcional do tamanho da fonte dos itens para `0.75rem` e `0.71875rem`, proporcionando visualização mais compacta e eficiente.
+
 ### Adicionado
 - **Módulos de Avaliação Nutricional: Anamnese, Recordatório, Prontuário e Restrições Alimentares (`PatientProfileView.tsx`)**:
   - Ajuste no menu lateral renomeando *"Anamnese e transcrição"* para exclusivamente *"Anamnese"*.
