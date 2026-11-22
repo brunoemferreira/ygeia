@@ -6,6 +6,21 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Ícone de Visualização no Grid de Pacientes (`PatientDirectory.tsx`)**:
+  - Inclusão do botão de ação com ícone de olho (`Eye` do Lucide), posicionado imediatamente antes do botão de editar (lápis) na coluna de ações da tabela.
+  - Estilização em cartão suave (`#ffffff`, borda `#e2e8f0`, raio de curvatura `0.375rem`), com feedback de foco e hover.
+- **Tela Completa de Visualização do Paciente — Padrão DietSystem (`PatientProfileView.tsx`, `AdminDashboard.tsx`)**:
+  - Implementação da tela completa de visualização e gestão clínica de paciente construída conforme a arquitetura da plataforma DietSystem (`https://my.dietsystem.com.br/patients/1000001851`):
+    - **Hero Card**: Foto/iniciais, nome, status, idade, sexo biológico, convênio, objetivo nutricional em destaque, tags e patologias.
+    - **Atalhos Diretos**: Abertura direta do WhatsApp do paciente (`wa.me`), botão "Iniciar Consulta", "Editar Cadastro" e exclusão com modal de confirmação.
+    - **Cards de Métricas Clínicas**: Peso atual, evolução, IMC, % de gordura corporal e meta calórica diária.
+    - **Abas de Conteúdo**:
+      - `Prontuário & Linha do Tempo`: Histórico cronológico e adição rápida de evolução clínica com persistência no prontuário.
+      - `Dados Cadastrais & Contato`: Identificação, contato com bandeiras e máscaras internacionais, responsável legal (se menor de idade), endereço e convênio.
+      - `Plano Alimentar & Prescrição`: Macronutrientes diários (gramas e porcentagens), detalhamento de refeições com horários e itens, e compartilhamento via WhatsApp e PDF.
+      - `Avaliação Antropométrica`: Medidas, índices calculados e dobras cutâneas (Pollock 7 dobras).
+      - `Anamnese & Hábitos`: Queixa principal, histórico patológico familiar, rotina e hábitos de vida.
+      - `Exames & Documentos`: Tabela com biomarcadores de exames de sangue e faixas de referência ideais.
 - **Formatação Dinâmica de Telefone por País / DDI (`countryDialCodes.tsx`, `NewPatientView.tsx`, `NewPatientModal.tsx`)**:
   - Regras de formatação, placeholders e limites de dígitos específicos para cada um dos 37 países suportados (ex: EUA, Portugal, Espanha, Reino Unido, França, etc.).
   - Ao selecionar ou trocar de país, o placeholder e a máscara se adaptam imediatamente, reformatando qualquer número já digitado.

@@ -5,6 +5,7 @@ import {
   Search,
   ShieldCheck,
   Smartphone,
+  Eye,
   Edit2,
   Trash2,
   CheckCircle2,
@@ -64,6 +65,7 @@ export interface PatientDirectoryProps {
   patients: PatientRecord[];
   onNewPatient: () => void;
   onEditPatient?: (patient: PatientRecord) => void;
+  onViewPatient?: (patient: PatientRecord) => void;
   onDeletePatient?: (patientId: string) => void;
   onSelectPatient?: (patient: PatientRecord) => void;
 }
@@ -72,6 +74,7 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
   patients,
   onNewPatient,
   onEditPatient,
+  onViewPatient,
   onDeletePatient,
   onSelectPatient,
 }) => {
@@ -128,7 +131,9 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
   const privateCount = totalPatients - insuranceCount;
 
   const handlePatientRowClick = (patient: PatientRecord) => {
-    if (onEditPatient) {
+    if (onViewPatient) {
+      onViewPatient(patient);
+    } else if (onEditPatient) {
       onEditPatient(patient);
     } else if (onSelectPatient) {
       onSelectPatient(patient);
@@ -753,11 +758,54 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                             gap: '0.35rem',
                           }}
                         >
+                          {/* Visualizar Prontuário / Informações do Paciente (Olho na frente do lápis) */}
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handlePatientRowClick(patient);
+                              if (onViewPatient) {
+                                onViewPatient(patient);
+                              } else {
+                                handlePatientRowClick(patient);
+                              }
+                            }}
+                            title="Visualizar informações e prontuário do paciente"
+                            style={{
+                              background: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              padding: '0.35rem',
+                              color: '#64748b',
+                              borderRadius: '0.375rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+                              transition: 'all 0.15s ease',
+                            }}
+                            onMouseOver={(e) => {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary-light)';
+                              (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary-border)';
+                              (e.currentTarget as HTMLElement).style.color = 'var(--primary)';
+                            }}
+                            onMouseOut={(e) => {
+                              (e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff';
+                              (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
+                              (e.currentTarget as HTMLElement).style.color = '#64748b';
+                            }}
+                          >
+                            <Eye size={14} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onEditPatient) {
+                                onEditPatient(patient);
+                              } else {
+                                handlePatientRowClick(patient);
+                              }
                             }}
                             title="Editar paciente"
                             style={{

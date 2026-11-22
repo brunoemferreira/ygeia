@@ -11,6 +11,7 @@ import { useToast } from '../../context/ToastContext';
 import { SettingsModule } from '../settings/SettingsModule';
 import { NewPatientView } from '../patients/NewPatientView';
 import { PatientDirectory, PatientRecord } from '../patients/PatientDirectory';
+import { PatientProfileView } from '../patients/PatientProfileView';
 import { getStoredBranding } from '../../utils/branding';
 import { AppCard, AppButton, AppInput, AppBadge } from '../ui';
 import { MifflinStJeorStrategy, HarrisBenedictStrategy } from '@ygeia/domain-core';
@@ -31,9 +32,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const branding = getStoredBranding();
   const primaryColor = branding.primaryColor || '#059669';
 
-  // Modo de visualização na tela de Pacientes: 'grid' (Tabela Paginada), 'create' (Novo) ou 'edit' (Edição)
-  const [patientViewMode, setPatientViewMode] = useState<'grid' | 'create' | 'edit'>('grid');
+  // Modo de visualização na tela de Pacientes: 'grid' (Tabela Paginada), 'create' (Novo), 'edit' (Edição) ou 'view' (Prontuário/Perfil)
+  const [patientViewMode, setPatientViewMode] = useState<'grid' | 'create' | 'edit' | 'view'>('grid');
   const [selectedPatientForEdit, setSelectedPatientForEdit] = useState<PatientRecord | null>(null);
+  const [selectedPatientForView, setSelectedPatientForView] = useState<PatientRecord | null>(null);
 
   // State de busca de paciente no card 1
   const [patientSearch, setPatientSearch] = useState('');
@@ -778,23 +780,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 setPatientViewMode('grid');
               }}
             />
+          ) : patientViewMode === 'view' && selectedPatientForView ? (
+            <PatientProfileView
+              patient={selectedPatientForView}
+              onBack={() => {
+                setSelectedPatientForView(null);
+                setPatientViewMode('grid');
+              }}
+              onEdit={(p) => {
+                setSelectedPatientForEdit(p);
+                setPatientViewMode('edit');
+              }}
+              onDelete={(id) => {
+                setPatients((prev) => prev.filter((p) => p.id !== id));
+                setSelectedPatientForView(null);
+                setPatientViewMode('grid');
+              }}
+            />
           ) : (
             <PatientDirectory
               patients={patients}
               onNewPatient={() => {
                 setSelectedPatientForEdit(null);
+                setSelectedPatientForView(null);
                 setPatientViewMode('create');
               }}
               onEditPatient={(patient) => {
                 setSelectedPatientForEdit(patient);
                 setPatientViewMode('edit');
               }}
+              onViewPatient={(patient) => {
+                setSelectedPatientForView(patient);
+                setPatientViewMode('view');
+              }}
               onDeletePatient={(patientId) => {
                 setPatients((prev) => prev.filter((p) => p.id !== patientId));
               }}
               onSelectPatient={(p) => {
-                setSelectedPatientForEdit(p);
-                setPatientViewMode('edit');
+                setSelectedPatientForView(p);
+                setPatientViewMode('view');
               }}
             />
           )}

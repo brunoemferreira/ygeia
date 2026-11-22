@@ -9,6 +9,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 👁️ Ação de Visualização de Pacientes no Grid & Tela de Prontuário Completa (Modelo DietSystem)
+- **Frontend Web (`apps/web`)**:
+  - `PatientDirectory.tsx`:
+    - Adicionado botão de ação com ícone de olho (`Eye` do Lucide), estilizado com borda suave, cantos arredondados e sombra sutil, posicionado **na frente do lápis de editar** na coluna de ações do grid de pacientes.
+    - O clique no olho aciona a visualização imediata do prontuário e ficha clínica do paciente (`onViewPatient`).
+  - `PatientProfileView.tsx`:
+    - Nova tela de visualização e gestão clínica de paciente inspirada diretamente na arquitetura e estrutura do DietSystem (`https://my.dietsystem.com.br/patients/1000001851`).
+    - **Header & Hero Card**: Avatar com iniciais/foto, nome completo, badges de status, idade/nascimento, sexo de referência para cálculos, convênio, local de atendimento, objetivo clínico em destaque e badges de tags e patologias cadastradas.
+    - **Ações Rápidas**: Disparo direto para WhatsApp do paciente (`wa.me` com mensagem personalizada), botão "Iniciar Consulta", "Editar Cadastro" e modal de exclusão segura.
+    - **Régua de Métricas Rápidas**: Visualização instantânea de peso atual, variação de peso, IMC com classificação OMS, percentual de gordura corporal e meta calórica diária.
+    - **Abas Clínicas Padronizadas**:
+      1. *Prontuário & Linha do Tempo*: Histórico cronológico de consultas e atendimentos, box de inserção rápida de evolução clínica/alertas com salvamento instantâneo, e alertas clínicos em destaque.
+      2. *Dados Cadastrais & Contato*: Dados pessoais, CPF, telefone formatado com bandeira do país, responsável legal para menores de idade, endereço completo e dados de convênio.
+      3. *Plano Alimentar & Prescrição*: Resumo do VET (kcal/dia), divisão de macronutrientes (Carboidratos, Proteínas e Lipídios em gramas e %), lista cronológica de refeições estruturadas e botões de download de PDF e envio via WhatsApp.
+      4. *Avaliação Antropométrica*: Medidas corporais, IMC, RCQ, massa magra/muscular e dobras cutâneas com protocolo Pollock 7 dobras.
+      5. *Anamnese & Hábitos*: Queixa principal, histórico familiar, medicamentos, rotina de treino, qualidade do sono e avaliação digestiva (Escala de Bristol).
+      6. *Exames & Documentos*: Tabela de exames laboratoriais recentes com faixas de referência e status.
+  - `AdminDashboard.tsx`:
+    - Integrado o modo `'view'` em `patientViewMode` e `selectedPatientForView`, permitindo navegação fluida entre grid, visualização detalhada, edição e criação.
+
 ### 📞 Formatação Dinâmica por Prefixo Internacional & Expansão de Banco de Dados
 - **Frontend Web (`apps/web`)**:
   - `countryDialCodes.tsx`:
