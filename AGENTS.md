@@ -40,3 +40,20 @@ Este documento estabelece as regras e padrões de engenharia para qualquer agent
   - **Auditoria Obrigatória Pré-Entrega**:
     - A cada nova funcionalidade, alteração em tela existente ou criação de nova tela, o agente/desenvolvedor DEVE OBRIGATORIAMENTE revisar todos os componentes da tela (edits, combos, botões, modais, tabelas) e certificar-se de que estão 100% aderentes ao Design System unificado. Nenhuma tela com inputs desalinhados ou cores estáticas divergentes pode ser entregue.
 
+## 6. Regra Estrita de Banco de Dados & DBA Sênior PostgreSQL Obrigatório
+- **Atuação Obrigatória como DBA Sênior de PostgreSQL**: Toda estrutura de banco de dados, DDL (tabelas, colunas, chaves, enums, tipos), migrações e comandos SQL (queries, inserts, updates, deletes) criados ou modificados no projeto DEVEM ser minuciosamente revisados sob a ótica de um DBA sênior de PostgreSQL, avaliando necessidade de tunning, indexação, concorrência e conformidade com as melhores práticas de engenharia de dados.
+  - **Indexação Obrigatória de Foreign Keys**: Nenhuma chave estrangeira (`REFERENCES`) pode existir sem um índice correspondente na tabela filha. Índices de FK são essenciais no PostgreSQL para evitar locks de tabela (`ShareRowExclusiveLock`) em operações de exclusão ou atualização na tabela pai e evitar sequential scans em joins frequentes.
+  - **Composição de Índices com Isolamento Multi-Tenant (RLS)**: Em tabelas com Row-Level Security, o `tenant_id` DEVE ser obrigatoriamente a primeira coluna (coluna líder) de qualquer índice composto (ex: `(tenant_id, email)`, `(tenant_id, created_at DESC)`, `(tenant_id, status)`), permitindo que o planejador utilize Index Scans restritos ao tenant.
+  - **Aceleração de Buscas Textuais com Trigramas (`pg_trgm`)**: Consultas com `ILIKE '%termo%'` ou `LOWER(coluna) LIKE '%termo%'` não utilizam índices B-tree convencionais. Devem ser empregados índices `GIN` com a classe de operadores `gin_trgm_ops` da extensão `pg_trgm` para buscas parciais eficientes em prontuários, nomes de pacientes e catálogos.
+  - **Proibição de `SELECT *` em Produção**: Consultas na camada de repositório e serviços devem explicitar nominalmente cada coluna necessária, otimizando I/O de rede, cache de buffers (`shared_buffers`) e permitindo consultas do tipo *Index-Only Scan*.
+  - **Tipagem e Modelagem Robusta**:
+    - Utilizar sempre `TIMESTAMPTZ` (com fuso horário) para qualquer data/hora.
+    - Utilizar tipos numéricos com escala e precisão explícitas (`NUMERIC(p, s)`) para medidas antropométricas, calorias e dosagens nutricionais (evitar `FLOAT` ou `DOUBLE PRECISION` sujeitos a imprecisões binárias).
+    - Defaults sensatos com `NOT NULL` defensivo e constraints `CHECK` e `UNIQUE` para garantir integridade a nível de banco de dados.
+  - **Rastreabilidade e Idempotência de Migrations**:
+    - Toda migração deve ser estritamente versionada e registrada em tabela de governança (`schema_migrations`).
+    - Nenhuma migração pode falhar em re-execução ou deixar a base em estado inconsistente.
+  - **Auditoria Obrigatória DBA Pré-Entrega**:
+    - A cada nova migration, alteração de schema ou adição de query SQL, o agente/desenvolvedor DEVE verificar se os índices foram criados, se há risco de Seq Scan desnecessário e se as políticas de RLS e integridade referencial estão ativas e otimizadas.
+
+

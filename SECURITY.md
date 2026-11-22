@@ -77,6 +77,12 @@ O backend foi construído sobre o framework NestJS utilizando o motor de alta ve
   - Se um invasor tentar injetar um `tenant_id` diferente via payload JSON, o PostgreSQL descarta a query silenciosamente ou bloqueia no nível do SGBD.
 - **Operações CRUD Completas com Isolamento Multi-Tenant**:
   - Todas as operações em pacientes (criação, listagem, atualização e exclusão `DELETE /api/v1/patients/:id`) exigem autenticação válida e vinculação obrigatória de `tenant_id` tanto via cláusula de filtro quanto por RLS no banco, impossibilitando acessos, modificações ou exclusões indevidas de dados entre diferentes clínicas.
+- **Tunning e Otimização DBA de RLS & Prevenção de DoS (Migração 0005)**:
+  - **Indexação de Foreign Keys**: Todas as foreign keys do banco agora possuem índices dedicados (`idx_tenant_domains_tenant_id`, `idx_refresh_tokens_tenant_user`, `idx_team_invitations_invited_by`, etc.), eliminando table locks em cascata (`ShareRowExclusiveLock`) e prevenindo degradação sob carga concorrente.
+  - **Leading Column RLS**: Em todas as tabelas com RLS, o `tenant_id` é rigorosamente a primeira coluna nos índices compostos (`(tenant_id, created_at DESC)`, `(tenant_id, status)`), garantindo *Index Scans* estritos.
+  - **Busca Textual Segura com Trigramas (`pg_trgm`)**: Criação de índices `GIN` (`idx_patients_trgm_name`, `idx_patients_trgm_email`) para busca rápida sem causar *Sequential Scans* abusivos em pesquisas parciais.
+  - **Statement Timeout**: Pool de conexões do PostgreSQL configurado com `statement_timeout: 10000` (10 segundos) como mitigação ativa contra exaustão de conexões e ataques de Slowloris/Slow-Query DoS.
+  - **Governança de Migrations**: Rastreabilidade formal via tabela `schema_migrations`, garantindo execução estritamente transacional e idempotente.
 
 ### 2.2. Autenticação Criptográfica com Argon2id
 - Em conformidade com o **RFC 9106** e as recomendações do OWASP Password Storage Cheat Sheet:

@@ -6,6 +6,20 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Governança DBA Sênior, Migrações Idempotentes e Tunning de Performance PostgreSQL (`0005_dba_performance_tuning_and_indexes.sql`, `database.service.ts`)**:
+  - Migração `0005`:
+    - Criação da tabela `schema_migrations` com registro de versões e timestamps de aplicação.
+    - Ativação das extensões `pg_trgm` e `btree_gist`.
+    - Criação de índices em foreign keys para eliminação de table locks e sequential scans em cascata: `idx_tenant_domains_tenant_id`, `idx_refresh_tokens_tenant_user`, `idx_refresh_tokens_user_id`, `idx_refresh_tokens_tenant_id`, `idx_team_invitations_invited_by`, `idx_nutritionist_profiles_user_id`.
+    - Criação de índices compostos para isolamento multi-tenant (RLS) otimizado: `idx_patients_tenant_created` (`tenant_id, created_at DESC`) e `idx_patients_tenant_status` (`tenant_id, status`).
+    - Criação de índices GIN com `gin_trgm_ops` para aceleração de buscas textuais de pacientes (`idx_patients_trgm_name`, `idx_patients_trgm_email`).
+    - Adição de constraint `CHECK` para integridade de status de pacientes.
+  - `DatabaseService`:
+    - Suporte a migrações transacionais e rastreamento formal em `schema_migrations`.
+    - Configuração de `statement_timeout: 10000` no pool de conexões.
+
+
+### Adicionado
 - **Endpoint e Serviço de Exclusão de Pacientes com Isolamento Multi-Tenant (`patients.controller.ts`, `patients.service.ts`)**:
   - Implementado o método `deletePatient(tenantId, patientId)` e rota `@Delete(':id')` no `PatientsController` com verificação rigorosa de isolamento por `tenant_id` e políticas RLS.
 - **Controles Anti-Invasão e Fortalecimento de Cabeçalhos HTTP (`main.ts`, `SECURITY.md`)**:

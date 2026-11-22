@@ -9,6 +9,25 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🗄️ Regra Obrigatória de Engenharia de Banco de Dados & DBA Sênior PostgreSQL (AGENTS.md)
+- **Regras Globais de Engenharia (`AGENTS.md`)**:
+  - **Inclusão da Seção 6**: Estabelecida regra obrigatória e permanente de auditoria DBA sênior de PostgreSQL para todo DDL, migração e SQL gerado ou alterado no repositório.
+  - Exigências estritas: indexação obrigatória de todas as foreign keys (prevenção de locks de tabela e joins lentos), `tenant_id` como primeira coluna nos índices de tabelas com RLS, aceleração de buscas parciais com trigramas `pg_trgm` (GIN), proibição de `SELECT *` em produção, uso de `TIMESTAMPTZ` e precisão numérica decimal explícita (`NUMERIC`), e controle idempotente de migrations.
+- **Backend API (`apps/api`)**:
+  - `0005_dba_performance_tuning_and_indexes.sql`:
+    - Ativação das extensões `pg_trgm` e `btree_gist`.
+    - Criação da tabela de rastreabilidade e governança `schema_migrations`.
+    - Criação de índices em todas as foreign keys que careciam de cobertura (`tenant_domains.tenant_id`, `refresh_tokens.user_id`, `refresh_tokens.tenant_id`, `team_invitations.invited_by`, `nutritionist_profiles.user_id`).
+    - Otimização de paginação e filtragem multi-tenant em `patients` (`idx_patients_tenant_created`, `idx_patients_tenant_status`).
+    - Índices GIN trigram para aceleração de buscas textuais de pacientes por nome e e-mail (`idx_patients_trgm_name`, `idx_patients_trgm_email`).
+    - Constraint defensiva `CHECK` para status de pacientes (`ACTIVE`, `INACTIVE`, `ARCHIVED`).
+  - `database.service.ts`:
+    - Implementação de rastreamento transacional de migrações na tabela `schema_migrations`, garantindo idempotência e prevenindo re-execuções desnecessárias.
+    - Configuração de `statement_timeout: 10000` (10s) no pool para prevenção ativa contra exaustão de recursos e queries travadas.
+  - `SECURITY.md`:
+    - Atualização do inventário de segurança com proteções DBA, isolamento indexado de RLS e statement timeouts.
+
+
 ### 🎨 Padronização Visual Estrita de UI, Design System Unificado e Regra AGENTS.md
 - **Regras Globais de Engenharia (`AGENTS.md`)**:
   - **Inclusão da Seção 5**: Estabelecida regra obrigatória e permanente de padronização visual para qualquer agente ou desenvolvedor.

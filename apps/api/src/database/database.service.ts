@@ -24,6 +24,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
+      statement_timeout: 10000, // 10s statement timeout para prevenção de queries travadas
     });
 
     try {
@@ -69,11 +70,42 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     try {
       await client.query("SET app.bypass_rls = 'true'");
+
+      // Governança de Migrações: Garante a existência da tabela schema_migrations
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+          version VARCHAR(64) PRIMARY KEY,
+          applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
+
+      const appliedRes = await client.query<{ version: string }>(
+        'SELECT version FROM schema_migrations'
+      );
+      const appliedSet = new Set(appliedRes.rows.map((r) => r.version));
+
       for (const file of migrationFiles) {
+        if (appliedSet.has(file)) {
+          continue; // Já executada anteriormente
+        }
+
         const fullPath = path.join(migrationsDir, file);
         const sql = fs.readFileSync(fullPath, 'utf8');
-        await client.query(sql);
-        this.logger.log(`Migration executada com sucesso: ${file}`);
+
+        await client.query('BEGIN');
+        try {
+          await client.query(sql);
+          await client.query(
+            'INSERT INTO schema_migrations (version, applied_at) VALUES ($1, NOW())',
+            [file]
+          );
+          await client.query('COMMIT');
+          this.logger.log(`Migration executada com sucesso: ${file}`);
+        } catch (mErr) {
+          await client.query('ROLLBACK');
+          this.logger.error(`Erro ao executar migration ${file}:`, mErr);
+          throw mErr;
+        }
       }
     } catch (err) {
       this.logger.error('Erro ao executar migrations:', err);
