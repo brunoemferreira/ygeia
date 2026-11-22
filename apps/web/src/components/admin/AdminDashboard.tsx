@@ -29,8 +29,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const branding = getStoredBranding();
   const primaryColor = branding.primaryColor || '#059669';
 
-  // Modo de visualização na tela de Pacientes: 'grid' (Tabela Paginada) ou 'create' (Tela Novo Paciente)
-  const [patientViewMode, setPatientViewMode] = useState<'grid' | 'create'>('grid');
+  // Modo de visualização na tela de Pacientes: 'grid' (Tabela Paginada), 'create' (Novo) ou 'edit' (Edição)
+  const [patientViewMode, setPatientViewMode] = useState<'grid' | 'create' | 'edit'>('grid');
+  const [selectedPatientForEdit, setSelectedPatientForEdit] = useState<PatientRecord | null>(null);
 
   // State de busca de paciente no card 1
   const [patientSearch, setPatientSearch] = useState('');
@@ -41,9 +42,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     {
       id: '1',
       name: user?.fullName || 'Bruno Eduardo de Moura Ferreira',
-      initials: 'BF',
+      initials: 'BE',
       email: user?.email || 'brunoemf@gmail.com',
-      phone: '(19) 99292-2000',
+      phone: '19992922054',
       cpf: '218.980.718-29',
       birthDate: '15/04/1988',
       sex: 'Masculino',
@@ -51,6 +52,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       status: 'Ativo',
       lastConsult: '21/11/2026',
       insurancePlan: 'Particular',
+      locationName: 'Meu consultório',
+      welcomeEmail: true,
+      welcomeWhatsapp: true,
     },
     {
       id: '2',
@@ -336,7 +340,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     }}
                     onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
                     onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'transparent')}
-                    onClick={() => toast.info(`Prontuário de ${patient.name} selecionado.`)}
+                    onClick={() => {
+                      setSelectedPatientForEdit(patient);
+                      setPatientViewMode('edit');
+                      if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                    }}
                   >
                     {/* Avatar em Círculo com Iniciais */}
                     <div
@@ -642,31 +650,89 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <>
           {patientViewMode === 'create' ? (
             <NewPatientView
+              mode="create"
               onBackToGrid={() => setPatientViewMode('grid')}
               onPatientCreated={(newP) => {
                 const newRecord: PatientRecord = {
-                  id: newP.id,
+                  id: newP.id || String(Date.now()),
                   name: newP.fullName,
-                  initials: newP.initials || 'PA',
+                  initials: newP.initials || newP.fullName?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'PA',
                   email: newP.email || '',
                   phone: newP.phone || '',
                   cpf: newP.cpf || '',
                   birthDate: newP.birthDate || '',
                   sex: newP.biologicalSex === 'FEMALE' ? 'Feminino' : 'Masculino',
+                  assignedSexAtBirth: newP.assignedSexAtBirth,
+                  genderIdentity: newP.genderIdentity,
                   goal: newP.treatmentGoals || 'Performance & Modulação Metabólica',
                   status: 'Ativo',
                   lastConsult: 'Hoje',
                   insurancePlan: newP.insurancePlan || 'Particular',
+                  locationName: newP.locationName || 'Meu consultório',
+                  welcomeEmail: newP.welcomeEmail,
+                  welcomeWhatsapp: newP.welcomeWhatsapp,
                 };
                 setPatients((prev) => [newRecord, ...prev]);
+                setPatientViewMode('grid');
+              }}
+            />
+          ) : patientViewMode === 'edit' ? (
+            <NewPatientView
+              mode="edit"
+              initialPatient={selectedPatientForEdit}
+              onBackToGrid={() => {
+                setSelectedPatientForEdit(null);
+                setPatientViewMode('grid');
+              }}
+              onPatientUpdated={(updatedP) => {
+                setPatients((prev) =>
+                  prev.map((p) => {
+                    if (p.id === updatedP.id || (selectedPatientForEdit && p.id === selectedPatientForEdit.id)) {
+                      return {
+                        ...p,
+                        name: updatedP.fullName || p.name,
+                        initials: updatedP.fullName
+                          ? updatedP.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                          : p.initials,
+                        email: updatedP.email ?? p.email,
+                        phone: updatedP.phone ?? p.phone,
+                        cpf: updatedP.cpf ?? p.cpf,
+                        birthDate: updatedP.birthDate ?? p.birthDate,
+                        sex: updatedP.biologicalSex === 'FEMALE' ? 'Feminino' : 'Masculino',
+                        assignedSexAtBirth: updatedP.assignedSexAtBirth,
+                        genderIdentity: updatedP.genderIdentity,
+                        goal: updatedP.treatmentGoals ?? p.goal,
+                        insurancePlan: updatedP.insurancePlan ?? p.insurancePlan,
+                        locationName: updatedP.locationName ?? p.locationName,
+                        welcomeEmail: updatedP.welcomeEmail ?? p.welcomeEmail,
+                        welcomeWhatsapp: updatedP.welcomeWhatsapp ?? p.welcomeWhatsapp,
+                      };
+                    }
+                    return p;
+                  })
+                );
+                setSelectedPatientForEdit(null);
                 setPatientViewMode('grid');
               }}
             />
           ) : (
             <PatientDirectory
               patients={patients}
-              onNewPatient={() => setPatientViewMode('create')}
-              onSelectPatient={(p) => toast.info(`Paciente selecionado: ${p.name}`)}
+              onNewPatient={() => {
+                setSelectedPatientForEdit(null);
+                setPatientViewMode('create');
+              }}
+              onEditPatient={(patient) => {
+                setSelectedPatientForEdit(patient);
+                setPatientViewMode('edit');
+              }}
+              onDeletePatient={(patientId) => {
+                setPatients((prev) => prev.filter((p) => p.id !== patientId));
+              }}
+              onSelectPatient={(p) => {
+                setSelectedPatientForEdit(p);
+                setPatientViewMode('edit');
+              }}
             />
           )}
         </>

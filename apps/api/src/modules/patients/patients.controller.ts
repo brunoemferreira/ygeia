@@ -2,10 +2,11 @@ import {
   Controller,
   Get,
   Post,
+  Put,
+  Param,
   Body,
   Query,
   Req,
-  UseGuards,
   UnauthorizedException,
   Inject,
 } from '@nestjs/common';
@@ -59,5 +60,24 @@ export class PatientsController {
   ): Promise<PatientResponse> {
     const tenantId = this.resolveTenantId(req);
     return await this.patientsService.createPatient(tenantId, body);
+  }
+
+  @Get(':id')
+  async getPatient(
+    @Param('id') id: string,
+    @Req() req?: any,
+  ): Promise<PatientResponse> {
+    const tenantId = this.resolveTenantId(req);
+    return await this.patientsService.getPatient(tenantId, id);
+  }
+
+  @Put(':id')
+  async updatePatient(
+    @Param('id') id: string,
+    @Body() body: Partial<CreatePatientInput>,
+    @Req() req?: any,
+  ): Promise<PatientResponse> {
+    const tenantId = this.resolveTenantId(req);
+    return await this.patientsService.updatePatient(tenantId, id, body);
   }
 }

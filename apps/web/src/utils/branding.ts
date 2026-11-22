@@ -32,10 +32,10 @@ export function getStoredBranding(): ClinicBranding {
     if (raw) {
       const parsed = JSON.parse(raw);
       // Sanitização: migra 'Better Health' ou paleta azul legada para a identidade oficial Ygeía
-      if (parsed.clinicName === 'Better Health') {
+      if (!parsed.clinicName || parsed.clinicName.includes('Better Health')) {
         parsed.clinicName = 'Ygeía';
       }
-      if (parsed.slogan === 'Precision Nutrition & Clinical Care') {
+      if (!parsed.slogan || parsed.slogan.includes('Precision Nutrition')) {
         parsed.slogan = 'Nutrição Clínica & Governança Metabólica';
       }
       if (

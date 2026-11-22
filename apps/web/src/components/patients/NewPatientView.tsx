@@ -16,10 +16,14 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { getStoredBranding } from '../../utils/branding';
+import { PatientRecord } from './PatientDirectory';
 
 export interface NewPatientViewProps {
+  initialPatient?: PatientRecord | null;
+  mode?: 'create' | 'edit';
   onBackToGrid: () => void;
   onPatientCreated?: (patient: any) => void;
+  onPatientUpdated?: (patient: any) => void;
 }
 
 type StepKey =
@@ -33,33 +37,46 @@ type StepKey =
   | 'atestado';
 
 export const NewPatientView: React.FC<NewPatientViewProps> = ({
+  initialPatient,
+  mode = 'create',
   onBackToGrid,
   onPatientCreated,
+  onPatientUpdated,
 }) => {
   const { token } = useAuth();
   const { toast } = useToast();
   const branding = getStoredBranding();
   const primaryColor = branding.primaryColor || '#059669';
 
+  const isEdit = mode === 'edit' || !!initialPatient;
+
   // Active step
   const [activeStep, setActiveStep] = useState<StepKey>('dados_pessoais');
 
-  // Form State - Dados Pessoais (Exatamente como no mockup)
-  const [fullName, setFullName] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [sex, setSex] = useState<'Feminino' | 'Masculino' | ''>('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [cpf, setCpf] = useState('');
-  const [guardianName, setGuardianName] = useState('');
-  const [guardianCpf, setGuardianCpf] = useState('');
-  const [welcomeEmail, setWelcomeEmail] = useState(true);
-  const [welcomeWhatsapp, setWelcomeWhatsapp] = useState(false);
+  // Form State - Dados Pessoais (Preenchidos se for edição)
+  const [fullName, setFullName] = useState(initialPatient?.name || '');
+  const [birthDate, setBirthDate] = useState(initialPatient?.birthDate || '');
+  const [sex, setSex] = useState<'Feminino' | 'Masculino' | ''>(
+    initialPatient?.sex === 'Masculino' ? 'Masculino' : initialPatient?.sex === 'Feminino' ? 'Feminino' : 'Feminino'
+  );
+  const [assignedSexAtBirth, setAssignedSexAtBirth] = useState<string>(
+    initialPatient?.assignedSexAtBirth || (initialPatient?.sex === 'Masculino' ? 'Masculino' : 'Feminino')
+  );
+  const [genderIdentity, setGenderIdentity] = useState<string>(
+    initialPatient?.genderIdentity || ''
+  );
+  const [email, setEmail] = useState(initialPatient?.email || '');
+  const [phone, setPhone] = useState(initialPatient?.phone || '');
+  const [cpf, setCpf] = useState(initialPatient?.cpf || '');
+  const [guardianName, setGuardianName] = useState(initialPatient?.guardianName || '');
+  const [guardianCpf, setGuardianCpf] = useState(initialPatient?.guardianCpf || '');
+  const [welcomeEmail, setWelcomeEmail] = useState(initialPatient?.welcomeEmail ?? true);
+  const [welcomeWhatsapp, setWelcomeWhatsapp] = useState(initialPatient?.welcomeWhatsapp ?? false);
 
   // Form State - Etapas Adicionais
-  const [treatmentGoals, setTreatmentGoals] = useState('');
-  const [insurancePlan, setInsurancePlan] = useState('');
-  const [locationName, setLocationName] = useState('Consultório Principal');
+  const [treatmentGoals, setTreatmentGoals] = useState(initialPatient?.goal || '');
+  const [insurancePlan, setInsurancePlan] = useState(initialPatient?.insurancePlan || 'Particular');
+  const [locationName, setLocationName] = useState(initialPatient?.locationName || 'Meu consultório');
   const [photoUrl, setPhotoUrl] = useState('');
   const [fullAddress, setFullAddress] = useState('');
   const [notes, setNotes] = useState('');
@@ -101,15 +118,6 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
     { key: 'atestado', label: 'Atestado e recibo', icon: Receipt },
   ];
 
-  const handleNextStep = () => {
-    const currentIndex = steps.findIndex((s) => s.key === activeStep);
-    if (currentIndex < steps.length - 1) {
-      setActiveStep(steps[currentIndex + 1].key);
-    } else {
-      toast.info('Você já está na última etapa. Clique em Cadastrar para concluir.');
-    }
-  };
-
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
@@ -135,43 +143,59 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
 
     try {
       const apiBase = ((import.meta as any).env?.VITE_API_URL || 'http://localhost:4333') + '/api/v1';
-      const res = await fetch(`${apiBase}/patients`, {
-        method: 'POST',
+      const endpoint = isEdit && initialPatient?.id
+        ? `${apiBase}/patients/${initialPatient.id}`
+        : `${apiBase}/patients`;
+      const method = isEdit && initialPatient?.id ? 'PUT' : 'POST';
+
+      const payload = {
+        fullName: fullName.trim(),
+        birthDate: birthDate.includes('/')
+          ? birthDate.split('/').reverse().join('-')
+          : birthDate,
+        biologicalSex: sex === 'Feminino' ? 'FEMALE' : 'MALE',
+        assignedSexAtBirth: assignedSexAtBirth || (sex === 'Feminino' ? 'FEMALE' : 'MALE'),
+        genderIdentity: genderIdentity || undefined,
+        email: email.trim() || undefined,
+        phone: phone.trim() || undefined,
+        cpf: cpf.trim() || undefined,
+        guardianName: guardianName.trim() || undefined,
+        guardianCpf: guardianCpf.trim() || undefined,
+        welcomeEmail,
+        welcomeWhatsapp,
+        treatmentGoals: treatmentGoals.trim() || undefined,
+        insurancePlan: insurancePlan.trim() || undefined,
+        locationName: locationName.trim() || undefined,
+        fullAddress: fullAddress.trim() || undefined,
+        notes: notes.trim() || undefined,
+        photoUrl: photoUrl.trim() || undefined,
+      };
+
+      const res = await fetch(endpoint, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          birthDate: birthDate.includes('/')
-            ? birthDate.split('/').reverse().join('-')
-            : birthDate,
-          biologicalSex: sex === 'Feminino' ? 'FEMALE' : 'MALE',
-          email: email.trim() || undefined,
-          phone: phone.trim() || undefined,
-          cpf: cpf.trim() || undefined,
-          guardianName: guardianName.trim() || undefined,
-          guardianCpf: guardianCpf.trim() || undefined,
-          welcomeEmail,
-          welcomeWhatsapp,
-          treatmentGoals: treatmentGoals.trim() || undefined,
-          insurancePlan: insurancePlan.trim() || undefined,
-          locationName: locationName.trim() || undefined,
-          fullAddress: fullAddress.trim() || undefined,
-          notes: notes.trim() || undefined,
-          photoUrl: photoUrl.trim() || undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Erro ao cadastrar paciente.');
+        throw new Error(errorData.message || (isEdit ? 'Erro ao atualizar paciente.' : 'Erro ao cadastrar paciente.'));
       }
 
-      const newPatient = await res.json();
-      toast.success(`Paciente ${fullName} cadastrado com sucesso!`);
-      if (onPatientCreated) {
-        onPatientCreated(newPatient);
+      const result = await res.json();
+      if (isEdit) {
+        toast.success(`Paciente ${fullName} atualizado com sucesso!`);
+        if (onPatientUpdated) {
+          onPatientUpdated(result);
+        }
+      } else {
+        toast.success(`Paciente ${fullName} cadastrado com sucesso!`);
+        if (onPatientCreated) {
+          onPatientCreated(result);
+        }
       }
       onBackToGrid();
     } catch (err: any) {
@@ -187,7 +211,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
         display: 'flex',
         flexDirection: 'column',
         gap: '1.25rem',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
       {/* Top Header da Tela (Conforme Mockup media_1795311187219_22060d3a.jpg) */}
@@ -208,7 +232,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
               textTransform: 'uppercase',
             }}
           >
-            Pacientes
+            PACIENTES
           </div>
 
           <h2
@@ -220,10 +244,12 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
               margin: '0 0 0.25rem 0',
             }}
           >
-            Novo paciente
+            {isEdit ? 'Editar paciente' : 'Novo paciente'}
           </h2>
-          <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
-            Preencha as etapas para cadastrar um novo paciente
+          <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0, fontWeight: 400 }}>
+            {isEdit
+              ? `Atualize as etapas e dados cadastrais de ${fullName || initialPatient?.name || 'paciente'}`
+              : 'Preencha as etapas para cadastrar um novo paciente'}
           </p>
         </div>
 
@@ -235,7 +261,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
             background: 'none',
             border: 'none',
             color: '#64748b',
-            fontSize: '0.875rem',
+            fontSize: '0.8125rem',
             fontWeight: 600,
             cursor: 'pointer',
             padding: '0.35rem 0.65rem',
@@ -279,7 +305,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
               marginBottom: '0.5rem',
             }}
           >
-            Novo paciente
+            {isEdit ? 'Editar paciente' : 'Novo paciente'}
           </div>
 
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -379,7 +405,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   />
                 </div>
 
-                {/* Data de nascimento * & Sexo * */}
+                {/* Data de nascimento * & Sexo de referência para cálculos * */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
@@ -408,7 +434,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                      Sexo <span style={{ color: '#ef4444' }}>*</span>
+                      Sexo de referência para cálculos <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <select
                       required
@@ -431,6 +457,72 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       <option value="">Selecione</option>
                       <option value="Feminino">Feminino</option>
                       <option value="Masculino">Masculino</option>
+                    </select>
+                    <div style={{ fontSize: '0.6875rem', color: '#64748b', marginTop: '0.3rem' }}>
+                      Usado nos cálculos e nas faixas de referência. Revise conforme a avaliação clínica.
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sexo atribuído ao nascimento & Identidade de gênero (opcional) */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                      Sexo atribuído ao nascimento
+                    </label>
+                    <select
+                      value={assignedSexAtBirth}
+                      onChange={(e) => setAssignedSexAtBirth(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.65rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        color: assignedSexAtBirth ? '#0f172a' : '#64748b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Feminino">Feminino</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Não informado">Não informado</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                      Identidade de gênero (opcional)
+                    </label>
+                    <select
+                      value={genderIdentity}
+                      onChange={(e) => setGenderIdentity(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.65rem 0.875rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.875rem',
+                        color: genderIdentity ? '#0f172a' : '#64748b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+                      onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Mulher cisgênero">Mulher cisgênero</option>
+                      <option value="Homem cisgênero">Homem cisgênero</option>
+                      <option value="Mulher transgênero">Mulher transgênero</option>
+                      <option value="Homem transgênero">Homem transgênero</option>
+                      <option value="Não-binário">Não-binário</option>
+                      <option value="Outro">Outro</option>
+                      <option value="Prefiro não informar">Prefiro não informar</option>
                     </select>
                   </div>
                 </div>
@@ -727,6 +819,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
+                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
@@ -739,19 +832,19 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
             {activeStep === 'convenio' && (
               <div>
                 <div style={{ fontSize: '1.1875rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                  Convênio / Plano de Saúde
+                  Convênio e Faturamento
                 </div>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Informe se o paciente possui plano de saúde para geração de recibos de reembolso.
+                  Informe se o atendimento é particular ou vinculado a uma operadora credenciada.
                 </p>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Operadora do Convênio
+                    Plano de Saúde / Convênio
                   </label>
                   <input
                     type="text"
-                    placeholder="Ex: Particular, Bradesco Saúde, Unimed, SulAmérica"
+                    placeholder="Ex: Particular, Unimed, Bradesco Saúde, Amil"
                     value={insurancePlan}
                     onChange={(e) => setInsurancePlan(e.target.value)}
                     style={{
@@ -760,6 +853,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
+                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
@@ -775,14 +869,16 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   Local de atendimento
                 </div>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Selecione a unidade clínica ou modalidade de consulta deste paciente.
+                  Selecione a unidade clínica, consultório parceiro ou modalidade teleconsulta.
                 </p>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Unidade ou Modalidade
+                    Unidade de atendimento
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    placeholder="Ex: Consultório Principal, Teleatendimento Ygeía"
                     value={locationName}
                     onChange={(e) => setLocationName(e.target.value)}
                     style={{
@@ -791,15 +887,11 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
+                      color: '#0f172a',
                       outline: 'none',
-                      backgroundColor: '#ffffff',
                       boxSizing: 'border-box',
                     }}
-                  >
-                    <option value="Consultório Principal">Consultório Principal (Presencial)</option>
-                    <option value="Teleconsulta Online">Teleconsulta Online (Ygeía Telemedicina)</option>
-                    <option value="Atendimento Domiciliar">Atendimento Domiciliar / Home Care</option>
-                  </select>
+                  />
                 </div>
               </div>
             )}
@@ -811,37 +903,45 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   Foto do paciente
                 </div>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Adicione uma foto do paciente para facilitar o reconhecimento visual no prontuário.
+                  Faça upload da imagem do paciente para exibição no prontuário e no aplicativo.
                 </p>
 
                 <div
                   style={{
                     border: '2px dashed #cbd5e1',
                     borderRadius: '0.75rem',
-                    padding: '2rem',
+                    padding: '2.5rem',
                     textAlign: 'center',
+                    cursor: 'pointer',
                     backgroundColor: '#f8fafc',
                   }}
+                  onClick={() => toast.info('Selecione uma imagem JPG ou PNG de até 5MB.')}
                 >
                   <Upload size={32} color="#94a3b8" style={{ margin: '0 auto 0.75rem auto' }} />
-                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#334155', marginBottom: '0.25rem' }}>
-                    Arraste ou selecione uma imagem
+                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                    Arraste ou clique para anexar uma foto
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '1rem' }}>
-                    PNG, JPG ou WEBP de até 5MB
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    PNG, JPG ou WEBP até 5MB
                   </div>
+                </div>
+
+                <div style={{ marginTop: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    Ou insira a URL da foto
+                  </label>
                   <input
                     type="url"
-                    placeholder="Ou informe a URL da foto do paciente"
+                    placeholder="https://exemplo.com/foto.jpg"
                     value={photoUrl}
                     onChange={(e) => setPhotoUrl(e.target.value)}
                     style={{
                       width: '100%',
-                      maxWidth: '400px',
-                      padding: '0.55rem 0.75rem',
+                      padding: '0.65rem 0.875rem',
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
-                      fontSize: '0.8125rem',
+                      fontSize: '0.875rem',
+                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
@@ -857,16 +957,16 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   Endereço completo
                 </div>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Endereço residencial do paciente para faturamento e prontuário legal.
+                  Cadastre o endereço residencial ou profissional para fins fiscais e de faturamento.
                 </p>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    Logradouro, número e bairro
+                    Logradouro, número, bairro e cidade
                   </label>
                   <input
                     type="text"
-                    placeholder="Ex: Av. Paulista, 1000, Apto 42, Bela Vista"
+                    placeholder="Ex: Av. Paulista, 1000, Apto 52, Bela Vista, São Paulo - SP"
                     value={fullAddress}
                     onChange={(e) => setFullAddress(e.target.value)}
                     style={{
@@ -875,6 +975,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
+                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
@@ -890,25 +991,32 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   Observação importante
                 </div>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Alergias graves, restrições alimentares severas ou notas de atenção prioritária.
+                  Alergias graves, restrições alimentares severas ou notas confidenciais que devem ficar em destaque.
                 </p>
 
-                <textarea
-                  rows={4}
-                  placeholder="Ex: Alergia severa a amendoim e crustáceos. Paciente bariátrico em acompanhamento."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.875rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit',
-                  }}
-                />
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    Notas clínicas prioritárias
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Ex: Paciente com diagnóstico de doença celíaca severa e intolerância à lactose."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 0.875rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.875rem',
+                      color: '#0f172a',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      fontFamily: 'inherit',
+                      resize: 'vertical',
+                    }}
+                  />
+                </div>
               </div>
             )}
 
@@ -919,24 +1027,25 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   Atestado e recibo
                 </div>
                 <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1.25rem' }}>
-                  Configurações fiscais para emissão automática de recibo e atestado de comparecimento.
+                  Configurações de emissão de recibo para declaração do imposto de renda ou reembolso.
                 </p>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                    CPF ou CNPJ para emissão do recibo
+                    CPF/CNPJ para emissão de comprovante fiscal
                   </label>
                   <input
                     type="text"
-                    placeholder="Deixe em branco para usar o CPF do paciente ou do responsável"
+                    placeholder="000.000.000-00"
                     value={receiptCpfCnpj}
-                    onChange={(e) => setReceiptCpfCnpj(e.target.value)}
+                    onChange={(e) => setReceiptCpfCnpj(formatCpf(e.target.value))}
                     style={{
                       width: '100%',
                       padding: '0.65rem 0.875rem',
                       borderRadius: '0.5rem',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.875rem',
+                      color: '#0f172a',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
@@ -945,15 +1054,18 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
               </div>
             )}
 
-            {/* BARRAS DE AÇÃO NO RODAPÉ: CANCELAR, CONTINUAR E CADASTRAR (MOCKUP) */}
+            {/* ====================================================
+                AÇÕES DO FORMULÁRIO (CANCELAR + SALVAR / CADASTRAR)
+                (Conforme Mockup media_1795311187219_22060d3a.jpg)
+               ==================================================== */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
                 gap: '0.75rem',
-                marginTop: '1.75rem',
-                paddingTop: '1.25rem',
+                marginTop: '1.5rem',
+                paddingTop: '1.5rem',
                 borderTop: '1px solid #f1f5f9',
               }}
             >
@@ -978,33 +1090,12 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                 Cancelar
               </button>
 
-              {/* Botão Continuar */}
-              <button
-                type="button"
-                onClick={handleNextStep}
-                style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  color: '#334155',
-                  borderRadius: '0.5rem',
-                  padding: '0.6rem 1.5rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-                onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
-              >
-                Continuar
-              </button>
-
-              {/* Botão Cadastrar (Verde Esmeralda Sólido) */}
+              {/* Botão Cadastrar / Salvar alterações */}
               <button
                 type="submit"
                 disabled={loading}
                 style={{
-                  backgroundColor: '#10b981',
+                  backgroundColor: '#059669',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '0.5rem',
@@ -1015,16 +1106,23 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.35)',
                   opacity: loading ? 0.75 : 1,
+                  transition: 'background-color 0.15s ease',
+                }}
+                onMouseOver={(e) => {
+                  if (!loading) (e.currentTarget as HTMLElement).style.backgroundColor = '#047857';
+                }}
+                onMouseOut={(e) => {
+                  if (!loading) (e.currentTarget as HTMLElement).style.backgroundColor = '#059669';
                 }}
               >
                 {loading ? (
-                  <span>Cadastrando...</span>
+                  <span>Salvando...</span>
                 ) : (
                   <>
                     <Check size={16} />
-                    <span>Cadastrar</span>
+                    <span>{isEdit ? 'Salvar alterações' : 'Cadastrar'}</span>
                   </>
                 )}
               </button>

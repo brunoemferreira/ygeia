@@ -169,7 +169,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   lineHeight: 1.2,
                 }}
               >
-                {clinicBranding.clinicName || 'Ygeía'}
+                {(!clinicBranding.clinicName || clinicBranding.clinicName.includes('Better Health'))
+                  ? 'Ygeía'
+                  : clinicBranding.clinicName}
               </div>
               <div
                 style={{

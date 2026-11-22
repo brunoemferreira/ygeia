@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 
 export interface CreatePatientInput {
@@ -139,6 +139,108 @@ export class PatientsService {
     return {
       ...created,
       initials: this.extractInitials(created.fullName),
+    };
+  }
+
+  async getPatient(tenantId: string, patientId: string): Promise<PatientResponse> {
+    const res = await this.db.query(
+      `SELECT id, tenant_id as "tenantId", full_name as "fullName",
+              birth_date as "birthDate", biological_sex as "biologicalSex",
+              assigned_sex_at_birth as "assignedSexAtBirth", gender_identity as "genderIdentity",
+              email, phone, cpf, guardian_name as "guardianName", guardian_cpf as "guardianCpf",
+              welcome_email as "welcomeEmail", welcome_whatsapp as "welcomeWhatsapp",
+              status, photo_url as "photoUrl", treatment_goals as "treatmentGoals",
+              insurance_plan as "insurancePlan", location_name as "locationName",
+              full_address as "fullAddress", notes, created_at as "createdAt"
+       FROM patients
+       WHERE id = $1 AND tenant_id = $2
+       LIMIT 1`,
+      [patientId, tenantId],
+    );
+
+    if (res.rows.length === 0) {
+      throw new NotFoundException('Paciente não encontrado.');
+    }
+
+    const row = res.rows[0];
+    return {
+      ...row,
+      initials: this.extractInitials(row.fullName),
+    };
+  }
+
+  async updatePatient(
+    tenantId: string,
+    patientId: string,
+    input: Partial<CreatePatientInput>,
+  ): Promise<PatientResponse> {
+    const existing = await this.db.query(
+      'SELECT id FROM patients WHERE id = $1 AND tenant_id = $2 LIMIT 1',
+      [patientId, tenantId],
+    );
+
+    if (existing.rows.length === 0) {
+      throw new NotFoundException('Paciente não encontrado.');
+    }
+
+    const res = await this.db.query(
+      `UPDATE patients
+       SET full_name = COALESCE($1, full_name),
+           birth_date = COALESCE($2, birth_date),
+           biological_sex = COALESCE($3, biological_sex),
+           assigned_sex_at_birth = COALESCE($4, assigned_sex_at_birth),
+           gender_identity = COALESCE($5, gender_identity),
+           email = COALESCE($6, email),
+           phone = COALESCE($7, phone),
+           cpf = COALESCE($8, cpf),
+           guardian_name = COALESCE($9, guardian_name),
+           guardian_cpf = COALESCE($10, guardian_cpf),
+           welcome_email = COALESCE($11, welcome_email),
+           welcome_whatsapp = COALESCE($12, welcome_whatsapp),
+           treatment_goals = COALESCE($13, treatment_goals),
+           insurance_plan = COALESCE($14, insurance_plan),
+           location_name = COALESCE($15, location_name),
+           full_address = COALESCE($16, full_address),
+           notes = COALESCE($17, notes),
+           photo_url = COALESCE($18, photo_url),
+           updated_at = NOW()
+       WHERE id = $19 AND tenant_id = $20
+       RETURNING id, tenant_id as "tenantId", full_name as "fullName",
+                 birth_date as "birthDate", biological_sex as "biologicalSex",
+                 assigned_sex_at_birth as "assignedSexAtBirth", gender_identity as "genderIdentity",
+                 email, phone, cpf, guardian_name as "guardianName", guardian_cpf as "guardianCpf",
+                 welcome_email as "welcomeEmail", welcome_whatsapp as "welcomeWhatsapp",
+                 status, photo_url as "photoUrl", treatment_goals as "treatmentGoals",
+                 insurance_plan as "insurancePlan", location_name as "locationName",
+                 full_address as "fullAddress", notes, created_at as "createdAt"`,
+      [
+        input.fullName?.trim() || null,
+        input.birthDate || null,
+        input.biologicalSex || null,
+        input.assignedSexAtBirth || null,
+        input.genderIdentity || null,
+        input.email?.trim() || null,
+        input.phone?.trim() || null,
+        input.cpf?.trim() || null,
+        input.guardianName?.trim() || null,
+        input.guardianCpf?.trim() || null,
+        input.welcomeEmail !== undefined ? input.welcomeEmail : null,
+        input.welcomeWhatsapp !== undefined ? input.welcomeWhatsapp : null,
+        input.treatmentGoals || null,
+        input.insurancePlan || null,
+        input.locationName || null,
+        input.fullAddress || null,
+        input.notes || null,
+        input.photoUrl || null,
+        patientId,
+        tenantId,
+      ],
+    );
+
+    const updated = res.rows[0];
+    return {
+      ...updated,
+      initials: this.extractInitials(updated.fullName),
     };
   }
 }

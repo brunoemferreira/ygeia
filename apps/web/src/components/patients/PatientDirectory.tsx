@@ -1,12 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import {
   Search,
-  Plus,
+  UserPlus,
+  Users,
+  Smartphone,
+  Shield,
+  CreditCard,
+  Pencil,
+  Trash2,
+  Mail,
+  Phone,
   ChevronLeft,
   ChevronRight,
-  User,
-  Phone,
-  Download,
+  ChevronsLeft,
+  ChevronsRight,
+  CheckCircle2,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { getStoredBranding } from '../../utils/branding';
@@ -20,21 +28,32 @@ export interface PatientRecord {
   cpf?: string;
   birthDate?: string;
   sex?: string;
+  assignedSexAtBirth?: string;
+  genderIdentity?: string;
   goal: string;
   status: 'Ativo' | 'Inativo';
   lastConsult: string;
   insurancePlan?: string;
+  locationName?: string;
+  guardianName?: string;
+  guardianCpf?: string;
+  welcomeEmail?: boolean;
+  welcomeWhatsapp?: boolean;
 }
 
 export interface PatientDirectoryProps {
   patients: PatientRecord[];
   onNewPatient: () => void;
+  onEditPatient?: (patient: PatientRecord) => void;
+  onDeletePatient?: (patientId: string) => void;
   onSelectPatient?: (patient: PatientRecord) => void;
 }
 
 export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
   patients,
   onNewPatient,
+  onEditPatient,
+  onDeletePatient,
   onSelectPatient,
 }) => {
   const { toast } = useToast();
@@ -43,41 +62,74 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'Ativo' | 'Inativo'>('ALL');
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<string>('ALL');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(8);
+  const [pageSize, setPageSize] = useState(10);
 
-  // Filtered list
+  // KPI Calculations
+  const totalCount = patients.length;
+  const connectedAppCount = patients.filter((p) => p.welcomeEmail || p.welcomeWhatsapp || p.status === 'Ativo').length;
+  const withInsuranceCount = patients.filter(
+    (p) => p.insurancePlan && p.insurancePlan !== 'Particular' && p.insurancePlan !== '',
+  ).length;
+  const privateCount = patients.filter(
+    (p) => !p.insurancePlan || p.insurancePlan === 'Particular',
+  ).length;
+
+  // Filtered patients
   const filteredPatients = useMemo(() => {
     return patients.filter((p) => {
+      const s = searchTerm.toLowerCase();
       const matchSearch =
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.cpf && p.cpf.includes(searchTerm)) ||
-        p.phone.includes(searchTerm);
+        !s ||
+        p.name.toLowerCase().includes(s) ||
+        p.email.toLowerCase().includes(s) ||
+        (p.cpf && p.cpf.toLowerCase().includes(s)) ||
+        p.phone.toLowerCase().includes(s);
 
-      const matchStatus = statusFilter === 'ALL' || p.status === statusFilter;
+      let matchFilter = true;
+      if (filterType === 'ATIVO') {
+        matchFilter = p.status === 'Ativo';
+      } else if (filterType === 'CONVENIO') {
+        matchFilter = !!p.insurancePlan && p.insurancePlan !== 'Particular';
+      } else if (filterType === 'PARTICULAR') {
+        matchFilter = !p.insurancePlan || p.insurancePlan === 'Particular';
+      } else if (filterType === 'APP_ATIVO') {
+        matchFilter = p.welcomeEmail || p.welcomeWhatsapp || p.status === 'Ativo';
+      }
 
-      return matchSearch && matchStatus;
+      return matchSearch && matchFilter;
     });
-  }, [patients, searchTerm, statusFilter]);
+  }, [patients, searchTerm, filterType]);
 
-  // Paginated slice
+  // Paginated patients
   const totalPages = Math.ceil(filteredPatients.length / pageSize) || 1;
   const paginatedPatients = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return filteredPatients.slice(start, start + pageSize);
   }, [filteredPatients, currentPage, pageSize]);
 
-  const handleRowClick = (patient: PatientRecord) => {
-    setSelectedPatientId(patient.id === selectedPatientId ? null : patient.id);
-    if (onSelectPatient) {
+  const handlePatientClick = (patient: PatientRecord) => {
+    if (onEditPatient) {
+      onEditPatient(patient);
+    } else if (onSelectPatient) {
       onSelectPatient(patient);
     }
   };
+
+  const handleDelete = (e: React.MouseEvent, patient: PatientRecord) => {
+    e.stopPropagation();
+    if (window.confirm(`Tem certeza que deseja remover o paciente ${patient.name}?`)) {
+      if (onDeletePatient) {
+        onDeletePatient(patient.id);
+      }
+      toast.success(`Paciente ${patient.name} removido.`);
+    }
+  };
+
+  const clinicLabel = branding.clinicName || 'Ygeía';
 
   return (
     <div
@@ -85,12 +137,275 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
         display: 'flex',
         flexDirection: 'column',
         gap: '1.25rem',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      {/* Top Header & Barra de Ações Rápidas */}
+      {/* ========================================================
+          1. TOPO: BADGE + TÍTULO + BOTÃO NOVO PACIENTE
+         ======================================================== */}
       <div
         style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem',
+        }}
+      >
+        <div>
+          {/* Badge ROTINA CLÍNICA */}
+          <div
+            style={{
+              display: 'inline-block',
+              fontSize: '0.6875rem',
+              fontWeight: 800,
+              letterSpacing: '0.05em',
+              color: '#059669',
+              backgroundColor: '#ecfdf5',
+              padding: '0.2rem 0.65rem',
+              borderRadius: '9999px',
+              marginBottom: '0.35rem',
+              textTransform: 'uppercase',
+            }}
+          >
+            ROTINA CLÍNICA
+          </div>
+
+          {/* Título Principal */}
+          <h1
+            style={{
+              fontSize: '1.875rem',
+              fontWeight: 800,
+              color: '#0f172a',
+              margin: '0 0 0.2rem 0',
+              letterSpacing: '-0.025em',
+              lineHeight: 1.2,
+            }}
+          >
+            Pacientes
+          </h1>
+
+          {/* Subtítulo orientativo */}
+          <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0, fontWeight: 400 }}>
+            Gestão completa de pacientes, convênios e credenciais do aplicativo {clinicLabel}.
+          </p>
+        </div>
+
+        {/* Botão + Novo paciente */}
+        <button
+          type="button"
+          onClick={onNewPatient}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            backgroundColor: '#059669',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '0.5rem',
+            padding: '0.625rem 1.15rem',
+            fontSize: '0.8125rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(5, 150, 105, 0.28)',
+            transition: 'background-color 0.15s ease, transform 0.1s ease',
+          }}
+          onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#047857')}
+          onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#059669')}
+        >
+          <UserPlus size={16} />
+          <span>Novo paciente</span>
+        </button>
+      </div>
+
+      {/* ========================================================
+          2. CARDS DE RESUMO KPI (4 COLUNAS IDÊNTICAS AO MOCKUP)
+         ======================================================== */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '1rem',
+        }}
+      >
+        {/* Card 1: Total Pacientes */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '0.75rem',
+            border: '1px solid #e2e8f0',
+            padding: '1.1rem 1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '105px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+              Total Pacientes
+            </span>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '0.5rem',
+                backgroundColor: '#ecfdf5',
+                color: '#10b981',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Users size={16} />
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '1.625rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.15 }}>
+              {totalCount}
+            </div>
+            <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.2rem', fontWeight: 500 }}>
+              Cadastros ativos
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: App Conectado */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '0.75rem',
+            border: '1px solid #e2e8f0',
+            padding: '1.1rem 1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '105px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+              App Conectado
+            </span>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '0.5rem',
+                backgroundColor: '#eff6ff',
+                color: '#3b82f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Smartphone size={16} />
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '1.625rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.15 }}>
+              {connectedAppCount}
+            </div>
+            <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.2rem', fontWeight: 500 }}>
+              Usuários criados
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Com Convênio */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '0.75rem',
+            border: '1px solid #e2e8f0',
+            padding: '1.1rem 1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '105px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+              Com Convênio
+            </span>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '0.5rem',
+                backgroundColor: '#faf5ff',
+                color: '#a855f7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Shield size={16} />
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '1.625rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.15 }}>
+              {withInsuranceCount}
+            </div>
+            <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.2rem', fontWeight: 500 }}>
+              Repasses vinculados
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Particulares */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '0.75rem',
+            border: '1px solid #e2e8f0',
+            padding: '1.1rem 1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '105px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+              Particulares
+            </span>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '0.5rem',
+                backgroundColor: '#fffbeb',
+                color: '#f59e0b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CreditCard size={16} />
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '1.625rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.15 }}>
+              {privateCount}
+            </div>
+            <div style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '0.2rem', fontWeight: 500 }}>
+              Atendimento direto
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================
+          3. BARRA DE BUSCA & FILTRO (CARD BRANCO INDEPENDENTE)
+         ======================================================== */}
+      <div
+        style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '0.75rem',
+          border: '1px solid #e2e8f0',
+          padding: '0.75rem 1.25rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -98,336 +413,351 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
           gap: '1rem',
         }}
       >
-        <div>
-          <div
-            style={{
-              display: 'inline-block',
-              fontSize: '0.6875rem',
-              fontWeight: 800,
-              letterSpacing: '0.06em',
-              color: '#475569',
-              backgroundColor: '#e2e8f0',
-              padding: '0.2rem 0.6rem',
-              borderRadius: '9999px',
-              marginBottom: '0.35rem',
-              textTransform: 'uppercase',
+        {/* Campo de Busca Livre */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.625rem',
+            flex: 1,
+            minWidth: '280px',
+          }}
+        >
+          <Search size={16} color="#94a3b8" />
+          <input
+            type="text"
+            placeholder="Buscar paciente por nome, CPF, e-mail ou telefone..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
             }}
-          >
-            Pacientes
-          </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.2rem 0', letterSpacing: '-0.02em' }}>
-            Carteira de Pacientes
-          </h2>
-          <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
-            Gerenciamento completo da base de prontuários, planos nutricionais e histórico clínico
-          </p>
+            style={{
+              border: 'none',
+              outline: 'none',
+              width: '100%',
+              fontSize: '0.8125rem',
+              color: '#0f172a',
+              fontFamily: 'inherit',
+              backgroundColor: 'transparent',
+            }}
+          />
         </div>
 
-        {/* Botão Novo Paciente */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button
-            type="button"
-            onClick={() => toast.info('Exportando planilha de pacientes em formato XLSX...')}
-            title="Exportar base de pacientes"
+        {/* Dropdown de Filtro */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <label style={{ fontSize: '0.75rem', fontWeight: 500, color: '#64748b' }}>
+            Filtrar:
+          </label>
+          <select
+            value={filterType}
+            onChange={(e) => {
+              setFilterType(e.target.value);
+              setCurrentPage(1);
+            }}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
+              padding: '0.4rem 0.85rem',
+              borderRadius: '0.5rem',
+              border: '1px solid #e2e8f0',
               backgroundColor: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              padding: '0.6rem 1rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.8125rem',
+              fontSize: '0.75rem',
               fontWeight: 600,
+              color: '#334155',
+              outline: 'none',
               cursor: 'pointer',
-              transition: 'background-color 0.15s ease',
+              fontFamily: 'inherit',
             }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
           >
-            <Download size={15} />
-            <span>Exportar</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onNewPatient}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              backgroundColor: '#10b981',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '0.5rem',
-              padding: '0.65rem 1.35rem',
-              fontSize: '0.875rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
-              transition: 'transform 0.1s ease, opacity 0.15s ease',
-            }}
-            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.92')}
-            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
-          >
-            <Plus size={16} />
-            <span>Novo paciente</span>
-          </button>
+            <option value="ALL">Todos os Pacientes</option>
+            <option value="ATIVO">Cadastros Ativos</option>
+            <option value="CONVENIO">Com Convênio</option>
+            <option value="PARTICULAR">Particulares</option>
+            <option value="APP_ATIVO">App Ativo</option>
+          </select>
         </div>
       </div>
 
-      {/* Card Principal: Filtros + Grid de Dados Paginado */}
+      {/* ========================================================
+          4. TABELA DE PACIENTES (GRID COM SCROLL E DESIGN EXATO)
+         ======================================================== */}
       <div
         style={{
           backgroundColor: '#ffffff',
-          borderRadius: '1rem',
+          borderRadius: '0.75rem',
           border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
           overflow: 'hidden',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
         }}
       >
-        {/* Barra de Filtros e Busca */}
-        <div
-          style={{
-            padding: '1.25rem 1.5rem',
-            borderBottom: '1px solid #f1f5f9',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem',
-          }}
-        >
-          {/* Campo de Busca */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.65rem',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: '0.5rem',
-              padding: '0.5rem 0.85rem',
-              width: '100%',
-              maxWidth: '380px',
-            }}
-          >
-            <Search size={16} color="#94a3b8" />
-            <input
-              type="text"
-              placeholder="Buscar por nome, CPF ou e-mail..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                outline: 'none',
-                fontSize: '0.8125rem',
-                color: '#0f172a',
-                width: '100%',
-              }}
-            />
-          </div>
-
-          {/* Filtros de Status (Tabs) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginRight: '0.25rem' }}>
-              Status:
-            </span>
-            {(['ALL', 'Ativo', 'Inativo'] as const).map((st) => {
-              const isSelected = statusFilter === st;
-              const label = st === 'ALL' ? 'Todos' : st;
-              return (
-                <button
-                  key={st}
-                  type="button"
-                  onClick={() => {
-                    setStatusFilter(st);
-                    setCurrentPage(1);
-                  }}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr
+                style={{
+                  borderBottom: '1px solid #f1f5f9',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                <th
                   style={{
-                    backgroundColor: isSelected ? '#ecfdf5' : '#f8fafc',
-                    color: isSelected ? '#059669' : '#64748b',
-                    border: isSelected ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
-                    borderRadius: '0.375rem',
-                    padding: '0.35rem 0.75rem',
-                    fontSize: '0.75rem',
-                    fontWeight: isSelected ? 700 : 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
+                    padding: '0.875rem 1.25rem',
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
                   }}
                 >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tabela de Dados (Grid) */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8125rem' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
-                <th style={{ padding: '0.875rem 1.5rem', fontWeight: 700, width: '40px' }}>#</th>
-                <th style={{ padding: '0.875rem 1rem', fontWeight: 700 }}>Paciente</th>
-                <th style={{ padding: '0.875rem 1rem', fontWeight: 700 }}>CPF</th>
-                <th style={{ padding: '0.875rem 1rem', fontWeight: 700 }}>Telefone / Contato</th>
-                <th style={{ padding: '0.875rem 1rem', fontWeight: 700 }}>Objetivo Clínico</th>
-                <th style={{ padding: '0.875rem 1rem', fontWeight: 700 }}>Status</th>
-                <th style={{ padding: '0.875rem 1.5rem', fontWeight: 700, textAlign: 'right' }}>Ações</th>
+                  PACIENTE
+                </th>
+                <th
+                  style={{
+                    padding: '0.875rem 1rem',
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  CONTATO
+                </th>
+                <th
+                  style={{
+                    padding: '0.875rem 1rem',
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  CPF
+                </th>
+                <th
+                  style={{
+                    padding: '0.875rem 1rem',
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  CONVÊNIO
+                </th>
+                <th
+                  style={{
+                    padding: '0.875rem 1rem',
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  ACESSO APP
+                </th>
+                <th
+                  style={{
+                    padding: '0.875rem 1.25rem',
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    textAlign: 'right',
+                  }}
+                >
+                  AÇÕES
+                </th>
               </tr>
             </thead>
             <tbody>
               {paginatedPatients.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
-                    <User size={32} color="#cbd5e1" style={{ margin: '0 auto 0.75rem auto' }} />
-                    <div style={{ fontWeight: 700, color: '#334155', marginBottom: '0.25rem' }}>
-                      Nenhum paciente encontrado
+                  <td colSpan={6} style={{ padding: '3.5rem 1rem', textAlign: 'center', color: '#64748b' }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.25rem' }}>
+                      Nenhum paciente localizado
                     </div>
-                    <div style={{ fontSize: '0.75rem' }}>
-                      Tente ajustar os filtros de busca ou cadastre um novo paciente.
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      Ajuste os filtros de pesquisa ou cadastre um novo paciente.
                     </div>
                   </td>
                 </tr>
               ) : (
-                paginatedPatients.map((p, index) => {
-                  const isSelected = selectedPatientId === p.id;
-                  const itemIndex = (currentPage - 1) * pageSize + index + 1;
+                paginatedPatients.map((patient) => {
                   return (
                     <tr
-                      key={p.id}
-                      onClick={() => handleRowClick(p)}
+                      key={patient.id}
+                      onClick={() => handlePatientClick(patient)}
+                      title="Clique para editar este paciente"
                       style={{
                         borderBottom: '1px solid #f1f5f9',
-                        backgroundColor: isSelected ? '#ecfdf5' : 'transparent',
                         cursor: 'pointer',
-                        transition: 'background-color 0.15s ease',
+                        transition: 'background-color 0.12s ease',
                       }}
-                      onMouseOver={(e) => {
-                        if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
-                      }}
-                      onMouseOut={(e) => {
-                        if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-                      }}
+                      onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc')}
+                      onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = '#ffffff')}
                     >
-                      {/* Checkbox / Índice */}
-                      <td style={{ padding: '1rem 1.5rem', color: '#94a3b8', fontWeight: 600 }}>
-                        {itemIndex}
-                      </td>
-
-                      {/* Paciente (Avatar + Nome + E-mail) */}
-                      <td style={{ padding: '1rem' }}>
+                      {/* Coluna 1: PACIENTE (Avatar + Nome + Consultório) */}
+                      <td style={{ padding: '0.875rem 1.25rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <div
                             style={{
-                              width: '38px',
-                              height: '38px',
+                              width: '36px',
+                              height: '36px',
                               borderRadius: '50%',
-                              backgroundColor: isSelected ? '#10b981' : '#e2e8f0',
-                              color: isSelected ? '#ffffff' : '#334155',
+                              backgroundColor: '#d1fae5',
+                              color: '#065f46',
+                              fontWeight: 700,
+                              fontSize: '0.75rem',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontWeight: 700,
-                              fontSize: '0.8125rem',
                               flexShrink: 0,
                             }}
                           >
-                            {p.initials}
+                            {patient.initials || 'PA'}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.875rem' }}>
-                              {p.name}
+                            <div
+                              style={{
+                                fontSize: '0.84375rem',
+                                fontWeight: 700,
+                                color: '#0f172a',
+                                lineHeight: 1.2,
+                              }}
+                            >
+                              {patient.name}
                             </div>
-                            <div style={{ color: '#64748b', fontSize: '0.75rem' }}>
-                              {p.email || 'E-mail não cadastrado'}
+                            <div
+                              style={{
+                                fontSize: '0.6875rem',
+                                color: '#94a3b8',
+                                marginTop: '0.15rem',
+                                fontWeight: 400,
+                              }}
+                            >
+                              {patient.locationName || 'Meu consultório'}
                             </div>
                           </div>
                         </div>
                       </td>
 
-                      {/* CPF */}
-                      <td style={{ padding: '1rem', color: '#475569', fontFamily: 'monospace' }}>
-                        {p.cpf || 'Não informado'}
-                      </td>
-
-                      {/* Telefone */}
-                      <td style={{ padding: '1rem', color: '#475569' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          <Phone size={13} color="#059669" />
-                          <span>{p.phone || 'Sem telefone'}</span>
+                      {/* Coluna 2: CONTATO (E-mail + Telefone) */}
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: '#475569' }}>
+                            <Mail size={12} color="#94a3b8" />
+                            <span>{patient.email || 'Não informado'}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: '#475569' }}>
+                            <Phone size={12} color="#94a3b8" />
+                            <span>{patient.phone || 'Não informado'}</span>
+                          </div>
                         </div>
                       </td>
 
-                      {/* Objetivo Clínico */}
-                      <td style={{ padding: '1rem', color: '#334155', maxWidth: '240px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {p.goal}
+                      {/* Coluna 3: CPF */}
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <span style={{ fontSize: '0.78125rem', color: '#334155', fontWeight: 500 }}>
+                          {patient.cpf || '—'}
+                        </span>
                       </td>
 
-                      {/* Status */}
-                      <td style={{ padding: '1rem' }}>
+                      {/* Coluna 4: CONVÊNIO */}
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            backgroundColor: '#f1f5f9',
+                            border: '1px solid #e2e8f0',
+                            color: '#475569',
+                            fontSize: '0.6875rem',
+                            fontWeight: 600,
+                            borderRadius: '9999px',
+                            padding: '0.2rem 0.65rem',
+                          }}
+                        >
+                          {patient.insurancePlan || 'Particular'}
+                        </span>
+                      </td>
+
+                      {/* Coluna 5: ACESSO APP */}
+                      <td style={{ padding: '0.875rem 1rem' }}>
                         <span
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '0.3rem',
-                            backgroundColor: p.status === 'Ativo' ? '#ecfdf5' : '#f1f5f9',
-                            color: p.status === 'Ativo' ? '#065f46' : '#64748b',
-                            border: p.status === 'Ativo' ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
-                            borderRadius: '9999px',
-                            padding: '0.2rem 0.55rem',
+                            backgroundColor: '#ecfdf5',
+                            border: '1px solid #a7f3d0',
+                            color: '#059669',
                             fontSize: '0.6875rem',
-                            fontWeight: 700,
+                            fontWeight: 600,
+                            borderRadius: '9999px',
+                            padding: '0.2rem 0.65rem',
                           }}
                         >
-                          <span
-                            style={{
-                              width: '6px',
-                              height: '6px',
-                              borderRadius: '50%',
-                              backgroundColor: p.status === 'Ativo' ? '#10b981' : '#94a3b8',
-                            }}
-                          />
-                          <span>{p.status}</span>
+                          <CheckCircle2 size={12} color="#059669" />
+                          <span>App Ativo</span>
                         </span>
                       </td>
 
-                      {/* Ações */}
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {/* Coluna 6: AÇÕES (Lápis de edição + Lixeira) */}
+                      <td style={{ padding: '0.875rem 1.25rem', textAlign: 'right' }}>
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            gap: '0.65rem',
+                          }}
+                        >
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              toast.info(`Abrindo prontuário de ${p.name}...`);
+                              handlePatientClick(patient);
                             }}
+                            title="Editar paciente"
                             style={{
-                              backgroundColor: '#ecfdf5',
-                              border: '1px solid #a7f3d0',
-                              color: '#059669',
-                              borderRadius: '0.375rem',
-                              padding: '0.35rem 0.75rem',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
+                              background: 'none',
+                              border: 'none',
+                              color: '#94a3b8',
                               cursor: 'pointer',
-                              transition: 'all 0.15s ease',
+                              padding: '0.25rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'color 0.15s ease',
                             }}
-                            onMouseOver={(e) => {
-                              (e.currentTarget as HTMLElement).style.backgroundColor = '#059669';
-                              (e.currentTarget as HTMLElement).style.color = '#ffffff';
-                            }}
-                            onMouseOut={(e) => {
-                              (e.currentTarget as HTMLElement).style.backgroundColor = '#ecfdf5';
-                              (e.currentTarget as HTMLElement).style.color = '#059669';
-                            }}
+                            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = '#059669')}
+                            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#94a3b8')}
                           >
-                            Prontuário
+                            <Pencil size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => handleDelete(e, patient)}
+                            title="Remover paciente"
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#94a3b8',
+                              cursor: 'pointer',
+                              padding: '0.25rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'color 0.15s ease',
+                            }}
+                            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.color = '#ef4444')}
+                            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.color = '#94a3b8')}
+                          >
+                            <Trash2 size={15} />
                           </button>
                         </div>
                       </td>
@@ -439,30 +769,30 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
           </table>
         </div>
 
-        {/* Rodapé de Paginação */}
+        {/* ========================================================
+            5. RODAPÉ DA TABELA: PAGINAÇÃO EXATA
+           ======================================================== */}
         <div
           style={{
-            padding: '1rem 1.5rem',
+            padding: '0.75rem 1.25rem',
             borderTop: '1px solid #f1f5f9',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '1rem',
+            gap: '0.75rem',
+            backgroundColor: '#ffffff',
           }}
         >
-          {/* Contagem */}
-          <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
-            Mostrando <strong>{filteredPatients.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> a{' '}
-            <strong>{Math.min(currentPage * pageSize, filteredPatients.length)}</strong> de{' '}
-            <strong>{filteredPatients.length}</strong> pacientes
-          </div>
+          {/* Lado Esquerdo: Exibindo X-Y de Z registros + Itens por página */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+              Exibindo {filteredPatients.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-
+              {Math.min(currentPage * pageSize, filteredPatients.length)} de {filteredPatients.length} registros
+            </span>
 
-          {/* Controles de Navegação */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {/* Itens por página */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginRight: '0.5rem', fontSize: '0.75rem', color: '#64748b' }}>
-              <span>Exibir:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Itens por página:</span>
               <select
                 value={pageSize}
                 onChange={(e) => {
@@ -470,46 +800,64 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                   setCurrentPage(1);
                 }}
                 style={{
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid #e2e8f0',
                   borderRadius: '0.375rem',
-                  padding: '0.2rem 0.4rem',
+                  padding: '0.2rem 0.5rem',
                   fontSize: '0.75rem',
-                  outline: 'none',
+                  color: '#334155',
                   backgroundColor: '#ffffff',
+                  outline: 'none',
+                  cursor: 'pointer',
                 }}
               >
-                <option value={8}>8</option>
-                <option value={15}>15</option>
-                <option value={30}>30</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
               </select>
             </div>
+          </div>
 
-            {/* Anterior */}
+          {/* Lado Direito: Navegação de Páginas (<<, <, 1, 2, >, >>) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage(1)}
+              title="Primeira página"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.3rem',
+                cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                color: currentPage <= 1 ? '#cbd5e1' : '#64748b',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <ChevronsLeft size={15} />
+            </button>
+
             <button
               type="button"
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              title="Página anterior"
               style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.3rem',
+                cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+                color: currentPage <= 1 ? '#cbd5e1' : '#64748b',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                backgroundColor: '#ffffff',
-                color: currentPage <= 1 ? '#cbd5e1' : '#334155',
-                padding: '0.35rem 0.65rem',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
               }}
             >
-              <ChevronLeft size={14} />
-              <span>Anterior</span>
+              <ChevronLeft size={15} />
             </button>
 
-            {/* Páginas */}
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-              const isCurrent = pageNum === currentPage;
+            {Array.from({ length: totalPages }).map((_, idx) => {
+              const pageNum = idx + 1;
+              const isActive = pageNum === currentPage;
               return (
                 <button
                   key={pageNum}
@@ -519,12 +867,16 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
                     width: '28px',
                     height: '28px',
                     borderRadius: '0.375rem',
-                    border: isCurrent ? `1px solid ${primaryColor}` : '1px solid #e2e8f0',
-                    backgroundColor: isCurrent ? primaryColor : '#ffffff',
-                    color: isCurrent ? '#ffffff' : '#475569',
+                    backgroundColor: isActive ? primaryColor : 'transparent',
+                    color: isActive ? '#ffffff' : '#64748b',
+                    border: 'none',
                     fontSize: '0.75rem',
-                    fontWeight: 700,
+                    fontWeight: isActive ? 700 : 500,
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   {pageNum}
@@ -532,27 +884,40 @@ export const PatientDirectory: React.FC<PatientDirectoryProps> = ({
               );
             })}
 
-            {/* Próxima */}
             <button
               type="button"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              title="Próxima página"
               style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.3rem',
+                cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                color: currentPage >= totalPages ? '#cbd5e1' : '#64748b',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                backgroundColor: '#ffffff',
-                color: currentPage >= totalPages ? '#cbd5e1' : '#334155',
-                padding: '0.35rem 0.65rem',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
               }}
             >
-              <span>Próxima</span>
-              <ChevronRight size={14} />
+              <ChevronRight size={15} />
+            </button>
+
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage(totalPages)}
+              title="Última página"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.3rem',
+                cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                color: currentPage >= totalPages ? '#cbd5e1' : '#64748b',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <ChevronsRight size={15} />
             </button>
           </div>
         </div>

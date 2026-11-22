@@ -6,6 +6,19 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-21
 
 ### Adicionado
+- **Tela de Seleção de Pacientes Idêntica ao Mockup (`PatientDirectory.tsx`)**:
+  - Implementação literal do design: fonte **Plus Jakarta Sans**, tag `ROTINA CLÍNICA`, título `Pacientes`, botão `+ Novo paciente` com ícone `UserPlus`.
+  - 4 Cards de métricas KPI: *Total Pacientes* (verde), *App Conectado* (azul), *Com Convênio* (roxo) e *Particulares* (âmbar).
+  - Barra de pesquisa independente com dropdown de filtro (*Todos os Pacientes*, *Cadastros Ativos*, *Com Convênio*, *Particulares*, *App Ativo*).
+  - Tabela com colunas `PACIENTE`, `CONTATO`, `CPF`, `CONVÊNIO`, `ACESSO APP`, `AÇÕES`.
+  - Ao clicar na linha ou no ícone de lápis de edição, abre a tela de edição do paciente com dados preenchidos.
+  - Paginação com seletor de itens por página e navegação `<<`, `<`, `1`, `>`, `>>`.
+- **Formulário com Modo de Edição e Criação (`NewPatientView.tsx`)**:
+  - Preenchimento reativo para edição a partir de `initialPatient` e submissão via `PUT /api/v1/patients/:id`.
+  - Campos adicionais: *Sexo de referência para cálculos* com nota explicativa, *Sexo atribuído ao nascimento* e *Identidade de gênero (opcional)*.
+  - Alternância de título (`Editar paciente` / `Novo paciente`) e botão (`Salvar alterações` / `Cadastrar`).
+
+### Modificado
 - **Grid Paginado de Pacientes (`PatientDirectory.tsx`)**:
   - Tabela paginada completa sob o menu `Rotina -> Pacientes` com busca por nome/CPF/e-mail, filtro por status (Todos/Ativo/Inativo), paginação customizável e seleção de prontuários.
 - **Tela Integrada de Novo Paciente (`NewPatientView.tsx`)**:

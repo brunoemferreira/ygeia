@@ -9,7 +9,35 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-21
 
-### 📑 Grid Paginado de Pacientes & Tela Integrada de Novo Paciente
+### 📑 Tela de Seleção de Pacientes (100% Fiel à Referência) & Suporte a Edição
+- **Frontend Web (`apps/web`)**:
+  - **Tela de Seleção de Pacientes (`PatientDirectory.tsx`)**:
+    - Tipografia, espaçamentos e hierarquia visual correspondendo estritamente ao mockup fornecido:
+      - Fonte oficial **Plus Jakarta Sans** com pesos e tamanhos milimetricamente alinhados (`11px` para badges e rótulos secundários, `28px` no título `Pacientes`, `13px` no subtítulo, `12px` nos títulos de cards e `26px` nos valores métricos).
+      - Tag superior `ROTINA CLÍNICA` em cápsula com fundo menta (`#ecfdf5`) e texto verde esmeralda (`#059669`).
+      - Botão `+ Novo paciente` com ícone `UserPlus`, cantos arredondados (`0.5rem`) e sombra suave esmeralda.
+      - **4 Cards Resumo KPI**:
+        - `Total Pacientes` com ícone de usuários em verde menta.
+        - `App Conectado` com ícone de smartphone em azul céu.
+        - `Com Convênio` com ícone de escudo em lilás/roxo.
+        - `Particulares` com ícone de cartão/recibo em âmbar.
+      - **Barra de Pesquisa & Filtros**:
+        - Card branco independente com ícone `Search` e placeholder *"Buscar paciente por nome, CPF, e-mail ou telefone..."*.
+        - Filtro dropdown *"Filtrar: Todos os Pacientes ▾"* (com opções de Ativos, Convênios, Particulares e App Ativo).
+      - **Tabela de Dados**:
+        - Colunas: `PACIENTE`, `CONTATO`, `CPF`, `CONVÊNIO`, `ACESSO APP`, `AÇÕES`.
+        - Linha com avatar em círculo com iniciais, nome em destaque, consultório, contatos com ícones de e-mail e telefone, badge de convênio e badge `🟢 App Ativo`.
+        - Coluna de Ações com botão de Lápis (edição) e Lixeira (remoção).
+        - **Abertura para Edição**: Clicar na linha do paciente ou no ícone de lápis carrega diretamente a tela de edição do paciente com todos os dados preenchidos.
+      - **Rodapé de Paginação**:
+        - Exibição de registros *"Exibindo 1-1 de 1 registros"*, seletor de *"Itens por página: 10 ▾"*, e controles de navegação `<<`, `<`, `1`, `>`, `>>`.
+  - **Suporte a Edição de Paciente (`NewPatientView.tsx`)**:
+    - Suporte aos modos `create` e `edit` com preenchimento reativo de todos os campos a partir do paciente selecionado (`initialPatient`).
+    - Campos de sexo de referência para cálculos com nota clínica, sexo atribuído ao nascimento e identidade de gênero opcional.
+    - Botão de ação alternando entre `Cadastrar` e `Salvar alterações`.
+    - Integração de persistência no backend via `PUT /api/v1/patients/:id` e atualização em tempo real no dashboard.
+  - **Higienização de Marca & Identidade Visual**:
+    - Remoção absoluta de referências legadas para a marca oficial **Ygeía (Υγεία)** no cabeçalho, sidebar e fluxos de navegação.
 - **Frontend Web (`apps/web`)**:
   - **Grid Paginado de Pacientes (`PatientDirectory.tsx`)**:
     - Tela principal do menu `Rotina -> Pacientes` contendo cabeçalho com contagem, busca por nome, CPF e e-mail, filtros de status (*Todos*, *Ativo*, *Inativo*) e exportação.

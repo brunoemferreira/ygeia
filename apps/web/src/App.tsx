@@ -63,8 +63,11 @@ const MainAppContent: React.FC = () => {
     return () => window.removeEventListener('ygeia_branding_updated', handleBrandingUpdate);
   }, []);
 
+  const rawName = user?.clinicName || storedBranding.clinicName;
+  const clinicName = (!rawName || rawName.includes('Better Health')) ? 'Ygeía' : rawName;
+
   const clinicBranding = {
-    clinicName: user?.clinicName || storedBranding.clinicName,
+    clinicName,
     primaryColor: storedBranding.primaryColor,
     secondaryColor: storedBranding.secondaryColor,
   };
