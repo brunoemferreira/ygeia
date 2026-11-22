@@ -21,61 +21,11 @@ import {
 import { useToast } from '../../context/ToastContext';
 import { PatientRecord } from './PatientDirectory';
 
-export interface CountryDialCode {
-  code: string;
-  dialCode: string;
-  flag: string;
-  name: string;
-}
-
-// Bandeira SVG nítida do Brasil para consistência em todos os sistemas operacionais
-const BrazilFlagIcon: React.FC = () => (
-  <svg width="20" height="14" viewBox="0 0 20 14" fill="none" style={{ borderRadius: '2px', flexShrink: 0, display: 'inline-block' }}>
-    <rect width="20" height="14" rx="2" fill="#009B3A" />
-    <path d="M10 2L17.5 7L10 12L2.5 7L10 2Z" fill="#FEDF00" />
-    <circle cx="10" cy="7" r="3.2" fill="#002776" />
-  </svg>
-);
-
-export const COUNTRY_DIAL_CODES: CountryDialCode[] = [
-  { code: 'BR', dialCode: '+55', flag: '🇧🇷', name: 'Brasil' },
-  { code: 'US', dialCode: '+1', flag: '🇺🇸', name: 'Estados Unidos / Canadá' },
-  { code: 'PT', dialCode: '+351', flag: '🇵🇹', name: 'Portugal' },
-  { code: 'ES', dialCode: '+34', flag: '🇪🇸', name: 'Espanha' },
-  { code: 'AR', dialCode: '+54', flag: '🇦🇷', name: 'Argentina' },
-  { code: 'GB', dialCode: '+44', flag: '🇬🇧', name: 'Reino Unido' },
-  { code: 'FR', dialCode: '+33', flag: '🇫🇷', name: 'França' },
-  { code: 'DE', dialCode: '+49', flag: '🇩🇪', name: 'Alemanha' },
-  { code: 'IT', dialCode: '+39', flag: '🇮🇹', name: 'Itália' },
-  { code: 'UY', dialCode: '+598', flag: '🇺🇾', name: 'Uruguai' },
-  { code: 'PY', dialCode: '+595', flag: '🇵🇾', name: 'Paraguai' },
-  { code: 'CL', dialCode: '+56', flag: '🇨🇱', name: 'Chile' },
-  { code: 'CO', dialCode: '+57', flag: '🇨🇴', name: 'Colômbia' },
-  { code: 'MX', dialCode: '+52', flag: '🇲🇽', name: 'México' },
-  { code: 'CH', dialCode: '+41', flag: '🇨🇭', name: 'Suíça' },
-  { code: 'IE', dialCode: '+353', flag: '🇮🇪', name: 'Irlanda' },
-  { code: 'AO', dialCode: '+244', flag: '🇦🇴', name: 'Angola' },
-  { code: 'MZ', dialCode: '+258', flag: '🇲🇿', name: 'Moçambique' },
-  { code: 'AU', dialCode: '+61', flag: '🇦🇺', name: 'Austrália' },
-  { code: 'JP', dialCode: '+81', flag: '🇯🇵', name: 'Japão' },
-  { code: 'PE', dialCode: '+51', flag: '🇵🇪', name: 'Peru' },
-  { code: 'BO', dialCode: '+591', flag: '🇧🇴', name: 'Bolívia' },
-  { code: 'EC', dialCode: '+593', flag: '🇪🇨', name: 'Equador' },
-  { code: 'VE', dialCode: '+58', flag: '🇻🇪', name: 'Venezuela' },
-  { code: 'NL', dialCode: '+31', flag: '🇳🇱', name: 'Holanda' },
-  { code: 'BE', dialCode: '+32', flag: '🇧🇪', name: 'Bélgica' },
-  { code: 'SE', dialCode: '+46', flag: '🇸🇪', name: 'Suécia' },
-  { code: 'NO', dialCode: '+47', flag: '🇳🇴', name: 'Noruega' },
-  { code: 'DK', dialCode: '+45', flag: '🇩🇰', name: 'Dinamarca' },
-  { code: 'AE', dialCode: '+971', flag: '🇦🇪', name: 'Emirados Árabes' },
-  { code: 'ZA', dialCode: '+27', flag: '🇿🇦', name: 'África do Sul' },
-  { code: 'IN', dialCode: '+91', flag: '🇮🇳', name: 'Índia' },
-  { code: 'CN', dialCode: '+86', flag: '🇨🇳', name: 'China' },
-  { code: 'KR', dialCode: '+82', flag: '🇰🇷', name: 'Coreia do Sul' },
-  { code: 'NZ', dialCode: '+64', flag: '🇳🇿', name: 'Nova Zelândia' },
-  { code: 'IL', dialCode: '+972', flag: '🇮🇱', name: 'Israel' },
-  { code: 'RU', dialCode: '+7', flag: '🇷🇺', name: 'Rússia' },
-];
+import {
+  COUNTRY_DIAL_CODES,
+  CountryDialCode,
+  CountryFlag,
+} from './countryDialCodes';
 
 export const OBJECTIVE_OPTIONS = [
   'Emagrecimento',
@@ -758,11 +708,7 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                           }}
                           title="Selecione o país do código de área telefônica"
                         >
-                          {selectedCountry.code === 'BR' ? (
-                            <BrazilFlagIcon />
-                          ) : (
-                            <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{selectedCountry.flag}</span>
-                          )}
+                          <CountryFlag code={selectedCountry.code} flag={selectedCountry.flag} width={20} height={14} />
                           <span>{selectedCountry.dialCode}</span>
                           <ChevronDown size={12} color="#94a3b8" strokeWidth={1.75} />
                         </button>
@@ -864,8 +810,8 @@ export const NewPatientView: React.FC<NewPatientViewProps> = ({
                                     }
                                   }}
                                 >
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ fontSize: '1.125rem' }}>{c.flag}</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                                    <CountryFlag code={c.code} flag={c.flag} width={20} height={14} />
                                     <span>{c.name}</span>
                                   </div>
                                   <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{c.dialCode}</span>

@@ -5,6 +5,11 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Adicionado / Corrigido
+- **Bandeiras Gráficas para Todos os Prefixos Internacionais (`countryDialCodes.tsx`, `NewPatientView.tsx`, `NewPatientModal.tsx`)**:
+  - Implementação de renderização gráfica nítida de bandeiras para **todos os prefixos/países** cadastrados (não apenas Brasil), funcionando perfeitamente em Windows e navegadores modernos.
+  - Seletor de DDI com busca instantânea e bandeiras de alta resolução integrado ao modal e à tela completa de cadastro de pacientes.
+
 ### Modificado
 - **Design Unificado do Campo de Telefone (`NewPatientView.tsx`, `NewPatientModal.tsx`)**:
   - Implementação do design unificado `[ 🇧🇷 +55 ⌄ | (00) 00000-0000 ]`:

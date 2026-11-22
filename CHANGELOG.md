@@ -9,6 +9,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🌍 Bandeiras Gráficas em Alta Resolução para Todos os Prefixos Telefônicos Internacionais
+- **Frontend Web (`apps/web`)**:
+  - `countryDialCodes.tsx`: Criação de componente dedicado `CountryFlag` que renderiza bandeiras oficiais e nítidas para **todos os 37 países e prefixos** suportados (Brasil, EUA, Portugal, Espanha, Argentina, Alemanha, França, Itália, Japão, etc.), eliminando problemas de fontes de emojis no Windows.
+  - `NewPatientView.tsx` e `NewPatientModal.tsx`:
+    - Integração de `<CountryFlag />` tanto no seletor de DDI ativo quanto no dropdown pesquisável de países.
+    - Sincronização completa da seleção do DDI com o salvamento do telefone em ambas as telas de cadastro.
+
 ### 📱 Padronização Visual do Campo de Telefone (Design Unificado com Bandeira e DDI)
 - **Frontend Web (`apps/web`)**:
   - `NewPatientView.tsx` e `NewPatientModal.tsx`:
@@ -19,6 +26,29 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### 🧹 Limpeza nos Rodapés de Cadastro de Pacientes
 - **Frontend Web (`apps/web`)**:
   - `NewPatientView.tsx` e `NewPatientModal.tsx`: Remoção completa dos textos e links de rodapé (*"Vindo de outro software? Clique aqui para importar"* e *"Se precisar de ajuda, clique aqui 💬"*), deixando os formulários mais concisos e com foco total nas etapas clínicas.
+
+### 🧹 Limpeza nos Rodapés de Cadastro de Pacientes
+- **Frontend Web (`apps/web`)**:
+  - `NewPatientView.tsx` e `NewPatientModal.tsx`: Remoção completa dos textos e links de rodapé (*"Vindo de outro software? Clique aqui para importar"* e *"Se precisar de ajuda, clique aqui 💬"*), deixando os formulários mais concisos e com foco total nas etapas clínicas.
+
+### 🛠️ Ajuste de Layout Pixel-Perfect da Tela de Configurações (Fidelidade Total à Imagem de Referência)
+- **Frontend Web (`apps/web`)**:
+  - `styles.css`:
+    - Ajustado breakpoint do grid `.ygeia-settings-layout` para manter a estrutura em 2 colunas (`240px 1fr`) em telas a partir de `768px` (prevenindo quebra de layout prematura em resoluções intermediárias).
+  - `SettingsModule.tsx`:
+    - **Cabeçalho**: Removido badge com fundo verde de `CONFIGURAÇÃO`, adotando o texto superior sutil em cinza com tracking espaçado (`0.12em`), idêntico à imagem de referência.
+    - **Sidebar**:
+      - Substituição do ícone de `Idioma` pelo ícone `Languages` (`文A`).
+      - Neutralização visual da cor de `Zona de perigo` para manter a sobriedade idêntica ao design de referência.
+      - Ajuste da cor de destaque do item ativo para pílula suave `#f1f5f9` com texto escuro `#0f172a`.
+    - **Card de Dados Pessoais**:
+      - Botão `Editar` com cantos levemente arredondados (`rounded-md`) e verde esmeralda `#10b981`.
+      - Seção `Foto`: Container tracejado com avatar do profissional Bruno Ferreira (`/bruno-profile.jpg`), subtítulo `PNG, JPEG ou WEBP — máx. 10MB` e botões de ação `Alterar` e `Remover`.
+      - Seções `IDENTIFICAÇÃO` e `ENDEREÇO`: Alinhamento milimétrico das colunas (largura fixa de 220px para rótulos) com traço `—` para campos sem valor cadastrado.
+
+### 🧬 Ajuste em Sexo de Referência para Cálculos
+- **Frontend Web (`apps/web`)**:
+  - `NewPatientView.tsx`: Restrição estrita das opções do campo `Sexo de referência para cálculos *` exclusivamente para **Feminino** e **Masculino**, alinhando com as diretrizes e fórmulas bioenergéticas e de pregas cutâneas do CFN/OMS.
 
 ### 🛠️ Ajuste de Layout Pixel-Perfect da Tela de Configurações (Fidelidade Total à Imagem de Referência)
 - **Frontend Web (`apps/web`)**:

@@ -12,10 +12,16 @@ import {
   Check,
   X,
   Upload,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { getStoredBranding } from '../../utils/branding';
+import {
+  COUNTRY_DIAL_CODES,
+  CountryDialCode,
+  CountryFlag,
+} from './countryDialCodes';
 
 export interface NewPatientModalProps {
   isOpen: boolean;
@@ -54,7 +60,19 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
   const [genderIdentity, setGenderIdentity] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState<CountryDialCode>(COUNTRY_DIAL_CODES[0]);
+  const [isCountryPickerOpen, setIsCountryPickerOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
   const [cpf, setCpf] = useState('');
+
+  const filteredCountries = countrySearch.trim()
+    ? COUNTRY_DIAL_CODES.filter(
+        (c) =>
+          c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+          c.dialCode.includes(countrySearch) ||
+          c.code.toLowerCase().includes(countrySearch.toLowerCase()),
+      )
+    : COUNTRY_DIAL_CODES;
   const [guardianName, setGuardianName] = useState('');
   const [guardianCpf, setGuardianCpf] = useState('');
   const [welcomeEmail, setWelcomeEmail] = useState(true);
@@ -133,7 +151,11 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
           assignedSexAtBirth: assignedSexAtBirth || undefined,
           genderIdentity: genderIdentity || undefined,
           email: email.trim() || undefined,
-          phone: phone.trim() || undefined,
+          phone: phone.trim()
+            ? phone.startsWith('+')
+              ? phone.trim()
+              : `${selectedCountry.dialCode} ${phone.trim()}`
+            : undefined,
           cpf: cpf.trim() || undefined,
           guardianName: guardianName.trim() || undefined,
           guardianCpf: guardianCpf.trim() || undefined,
@@ -550,73 +572,152 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
                       <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.35rem' }}>
                         Telefone
                       </label>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          borderRadius: '0.5rem',
-                          border: '1px solid #cbd5e1',
-                          backgroundColor: '#ffffff',
-                          height: '40px',
-                          transition: 'all 0.15s ease',
-                          overflow: 'hidden',
-                        }}
-                      >
+                      <div style={{ position: 'relative' }}>
                         <div
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '0.35rem',
-                            backgroundColor: 'transparent',
-                            borderRight: '1px solid #cbd5e1',
-                            padding: '0 0.65rem',
-                            height: '100%',
-                            fontSize: '0.8125rem',
-                            color: '#0f172a',
-                            fontWeight: 500,
-                            flexShrink: 0,
+                            borderRadius: '0.5rem',
+                            border: '1px solid #cbd5e1',
+                            backgroundColor: '#ffffff',
+                            height: '40px',
+                            transition: 'all 0.15s ease',
+                            overflow: 'visible',
                           }}
                         >
-                          <svg width="20" height="14" viewBox="0 0 20 14" fill="none" style={{ borderRadius: '2px', flexShrink: 0 }}>
-                            <rect width="20" height="14" rx="2" fill="#009B3A" />
-                            <path d="M10 2L17.5 7L10 12L2.5 7L10 2Z" fill="#FEDF00" />
-                            <circle cx="10" cy="7" r="3.2" fill="#002776" />
-                          </svg>
-                          <span>+55</span>
-                          <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>▾</span>
+                          <button
+                            type="button"
+                            onClick={() => setIsCountryPickerOpen((prev) => !prev)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              borderRight: '1px solid #cbd5e1',
+                              padding: '0 0.65rem',
+                              height: '100%',
+                              fontSize: '0.8125rem',
+                              color: '#0f172a',
+                              fontWeight: 500,
+                              cursor: 'pointer',
+                              outline: 'none',
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0,
+                            }}
+                            title="Selecione o país do código de área telefônica"
+                          >
+                            <CountryFlag code={selectedCountry.code} flag={selectedCountry.flag} width={20} height={14} />
+                            <span>{selectedCountry.dialCode}</span>
+                            <ChevronDown size={12} color="#94a3b8" strokeWidth={1.75} />
+                          </button>
+                          <input
+                            type="text"
+                            placeholder="(00) 00000-0000"
+                            value={phone}
+                            onChange={(e) => setPhone(selectedCountry.code === 'BR' ? formatPhone(e.target.value) : e.target.value)}
+                            style={{
+                              flex: 1,
+                              height: '100%',
+                              border: 'none',
+                              padding: '0 0.75rem',
+                              fontSize: '0.8125rem',
+                              color: '#0f172a',
+                              outline: 'none',
+                              backgroundColor: 'transparent',
+                              boxSizing: 'border-box',
+                              width: '100%',
+                            }}
+                            onFocus={(e) => {
+                              const parent = e.target.parentElement;
+                              if (parent) {
+                                parent.style.borderColor = primaryColor;
+                                parent.style.boxShadow = '0 0 0 2px rgba(16,185,129,0.2)';
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const parent = e.target.parentElement;
+                              if (parent) {
+                                parent.style.borderColor = '#cbd5e1';
+                                parent.style.boxShadow = 'none';
+                              }
+                            }}
+                          />
                         </div>
-                        <input
-                          type="text"
-                          placeholder="(00) 00000-0000"
-                          value={phone}
-                          onChange={(e) => setPhone(formatPhone(e.target.value))}
-                          style={{
-                            flex: 1,
-                            height: '100%',
-                            border: 'none',
-                            padding: '0 0.75rem',
-                            fontSize: '0.8125rem',
-                            color: '#0f172a',
-                            outline: 'none',
-                            backgroundColor: 'transparent',
-                            boxSizing: 'border-box',
-                            width: '100%',
-                          }}
-                          onFocus={(e) => {
-                            const parent = e.target.parentElement;
-                            if (parent) {
-                              parent.style.borderColor = primaryColor;
-                              parent.style.boxShadow = '0 0 0 2px rgba(16,185,129,0.2)';
-                            }
-                          }}
-                          onBlur={(e) => {
-                            const parent = e.target.parentElement;
-                            if (parent) {
-                              parent.style.borderColor = '#cbd5e1';
-                              parent.style.boxShadow = 'none';
-                            }
-                          }}
-                        />
+
+                        {/* Dropdown com Busca de Países e Bandeirinhas */}
+                        {isCountryPickerOpen && (
+                          <>
+                            <div
+                              style={{ position: 'fixed', inset: 0, zIndex: 45 }}
+                              onClick={() => setIsCountryPickerOpen(false)}
+                            />
+                            <div className="ygeia-country-dropdown">
+                              <div style={{ padding: '0.5rem', borderBottom: '1px solid #f1f5f9', position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 2 }}>
+                                <input
+                                  type="text"
+                                  value={countrySearch}
+                                  onChange={(e) => setCountrySearch(e.target.value)}
+                                  placeholder="Pesquisar país ou DDI..."
+                                  autoFocus
+                                  style={{
+                                    width: '100%',
+                                    padding: '0.45rem 0.65rem',
+                                    borderRadius: '0.375rem',
+                                    border: '1px solid #cbd5e1',
+                                    fontSize: '0.8125rem',
+                                    outline: 'none',
+                                    boxSizing: 'border-box',
+                                  }}
+                                />
+                              </div>
+                              <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                                {filteredCountries.map((c) => (
+                                  <button
+                                    key={c.code}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedCountry(c);
+                                      setIsCountryPickerOpen(false);
+                                      setCountrySearch('');
+                                    }}
+                                    style={{
+                                      width: '100%',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      padding: '0.5rem 0.75rem',
+                                      border: 'none',
+                                      background: selectedCountry.code === c.code ? 'var(--primary-light, #ecfdf5)' : 'transparent',
+                                      color: selectedCountry.code === c.code ? primaryColor : '#1e293b',
+                                      fontSize: '0.8125rem',
+                                      fontWeight: selectedCountry.code === c.code ? 700 : 500,
+                                      cursor: 'pointer',
+                                      textAlign: 'left',
+                                      transition: 'background 0.15s ease',
+                                    }}
+                                    onMouseOver={(e) => {
+                                      if (selectedCountry.code !== c.code) {
+                                        (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
+                                      }
+                                    }}
+                                    onMouseOut={(e) => {
+                                      if (selectedCountry.code !== c.code) {
+                                        (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                                      }
+                                    }}
+                                  >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                                      <CountryFlag code={c.code} flag={c.flag} width={20} height={14} />
+                                      <span>{c.name}</span>
+                                    </div>
+                                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{c.dialCode}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
