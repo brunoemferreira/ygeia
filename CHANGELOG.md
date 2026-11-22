@@ -9,6 +9,24 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 📱 Conclusão da Fase 4: Ativação do Aplicativo Mobile React Native (`apps/mobile`)
+- **Portal Completo do Paciente e Atleta em React Native**:
+  - **Experiência Dual Adaptativa**:
+    - Alternância em 1 toque entre o **🍏 Modo Clínico Geral** (foco em adesão sustentável, déficit moderado e hábitos saudáveis) e o **⚡ Modo Esportivo & Alta Performance** (recomposição corporal, distribuição em g/kg, nutrient timing peri-treino e suplementação ergogênica).
+  - **Diário de Refeições Cronológico & Substituições em 1 Toque**:
+    - Listagem de refeições com horários programados, macros individuais e checkbox de refeição realizada com recálculo instantâneo do balanço do dia.
+    - Modal interativo de equivalência nutricional: permite ao paciente substituir itens prescritos (ex: 180g de arroz branco ↔ 260g de batata inglesa ou 160g de mandioca) sem desequilibrar o plano dietético.
+  - **Meta de Hidratação Tátil**:
+    - Acompanhamento de ingestão de água com barra de progresso e atalhos rápidos (+200ml copo, +350ml e +500ml garrafa).
+  - **Periodização e Peri-Treino Adaptativo**:
+    - Banner motivacional de Dia de Treino (ON) vs. Dia de Descanso (OFF) com modulação programada de carboidratos.
+  - **Acompanhamento de Suplementação Diária**:
+    - Controle de creatina monohidratada, whey protein, ômega-3 e micronutrientes com confirmação de ingestão.
+  - **Navegação por Abas Nativas**:
+    - Abas: *Hoje*, *Plano Alimentar Completo*, *Evolução Antropométrica* (peso, % de gordura, metas) e *Nutricionista* (com canal direto via WhatsApp da clínica).
+  - **Suíte de Testes Unitários Mobile**:
+    - 4 testes unitários automatizados cobrindo a lógica de nutrição esportiva e cálculo de substitutos, integrados ao Turbo (`turbo run test`).
+
 ### 🥗🏋️‍♂️ Conclusão da Fase 3: Nutrição Clínica Geral & Esportiva Balanceada (Abordagem Dual Adaptativa)
 - **Ergonomia & Acesso Imediato ao Plano Alimentar (`apps/web`)**:
   - Inclusão de botão de atalho em destaque **"Plano alimentar"** no cabeçalho superior do paciente, possibilitando acesso em 1 clique direto.

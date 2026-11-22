@@ -187,6 +187,10 @@ Desenvolvido em React Native com Expo Bare Workflow, implementando as melhores p
 ### 4.5. Autenticação Biométrica com Fallback Criptográfico
 - Suporte a **Biometria Nativa** (Face ID, Touch ID e Android BiometricPrompt). A chave criptográfica só é liberada pelo hardware após sucesso na verificação biométrica do paciente.
 
+### 4.6. Isolamento e Sanitização de Deep Links e Canais de Comunicação
+- **Sanitização de Esquemas URI (WhatsApp & Suporte)**: Comunicação externa com o nutricionista e clínica passa por encoding estrito de parâmetros (`encodeURIComponent`), impedindo ataques de injeção de esquema URI ou vazamento inadvertido de dados clínicos na URL.
+- **Isolamento de Dados em Cache Local (Offline-First)**: Dados de refeições e metas armazenados em cache utilizam namespaces estritos por paciente e são higienizados na desconexão da conta.
+
 ---
 
 ## 📋 5. Tabela de Riscos Anti-Invasão & Controles Implementados

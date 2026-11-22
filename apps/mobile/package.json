@@ -5,6 +5,7 @@
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start --port 8095",
+    "test": "tsx --test src/**/*.spec.ts",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "clean": "rimraf .expo"
