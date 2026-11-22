@@ -392,7 +392,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     onClick={() => {
                       setSelectedPatientForView(patient);
                       setPatientViewMode('view');
-                      if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                      if (onNavigateToItem) onNavigateToItem('cadastros_pacientes');
                     }}
                   >
                     {/* Avatar em Círculo com Iniciais */}
@@ -438,7 +438,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           e.stopPropagation();
                           setSelectedPatientForView(patient);
                           setPatientViewMode('view');
-                          if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                          if (onNavigateToItem) onNavigateToItem('cadastros_pacientes');
                         }}
                         title="Visualizar anamnese e prontuário"
                         style={{
@@ -473,7 +473,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           e.stopPropagation();
                           setSelectedPatientForEdit(patient);
                           setPatientViewMode('edit');
-                          if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                          if (onNavigateToItem) onNavigateToItem('cadastros_pacientes');
                         }}
                         title="Editar cadastro do paciente"
                         style={{
@@ -526,7 +526,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                    if (onNavigateToItem) onNavigateToItem('cadastros_pacientes');
                     setPatientViewMode('grid');
                   }}
                   style={{
@@ -549,7 +549,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    if (onNavigateToItem) onNavigateToItem('rotina_pacientes');
+                    if (onNavigateToItem) onNavigateToItem('cadastros_pacientes');
                     setPatientViewMode('create');
                   }}
                   style={{

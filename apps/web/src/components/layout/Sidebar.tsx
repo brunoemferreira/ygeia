@@ -2,19 +2,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   LayoutGrid,
-  Calendar,
   Users,
-  CheckSquare,
   TrendingUp,
-  MessageSquare,
-  ListTodo,
-  FileText,
-  FileCheck,
-  CreditCard,
-  Sparkles,
   Dumbbell,
   Settings,
-  UserCheck,
   ChevronDown,
   ChevronRight,
   ChevronLeft,
@@ -73,8 +64,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [expandedCadastros, setExpandedCadastros] = useState(true);
   const [expandedNutricao, setExpandedNutricao] = useState(true);
   const [expandedTreinamento, setExpandedTreinamento] = useState(true);
-  const [expandedRotina, setExpandedRotina] = useState(true);
-  const [expandedAtendimento, setExpandedAtendimento] = useState(false);
 
   const primaryColor = clinicBranding.primaryColor || '#059669';
 
@@ -95,16 +84,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const sidebarWidth = collapsed ? '72px' : '260px';
 
-  // Submenus de Cadastros (Novo Módulo Principal)
+  // Submenus de Cadastros (Apenas Pacientes conforme solicitado)
   const cadastrosItems = [
     { id: 'cadastros_pacientes', label: 'Pacientes', icon: Users },
-    { id: 'cadastros_alimentos', label: 'Alimentos (TACO)', icon: Utensils },
-    { id: 'cadastros_suplementos', label: 'Suplementos & Doses', icon: Pill },
-    { id: 'cadastros_modelos', label: 'Modelos de Prescrição', icon: FileText },
-    { id: 'cadastros_locais', label: 'Locais de Atendimento', icon: Sparkles },
   ];
 
-  // Submenus de Nutrição (Novo Módulo Principal)
+  // Submenus de Nutrição
   const nutricaoItems = [
     { id: 'nutricao_tmb', label: 'Cálculo TMB / GET', icon: Flame },
     { id: 'nutricao_cardapio', label: 'Planejador de Cardápios', icon: Apple },
@@ -112,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'nutricao_exames', label: 'Exames Laboratoriais', icon: Lock },
   ];
 
-  // Submenus de Treinamento (Novo Módulo Principal)
+  // Submenus de Treinamento
   const treinamentoItems = [
     { id: 'treino_prescricao', label: 'Prescrição de Treinos', icon: Dumbbell },
     { id: 'treino_exercicios', label: 'Exercícios & Bi-Sets', icon: Layers },
@@ -120,28 +105,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'treino_volume', label: 'Volume & Sobrecarga', icon: Award },
   ];
 
-  // Submenus de Rotina
-  const rotinaItems = [
-    { id: 'rotina_agenda', label: 'Agenda', icon: Calendar },
-    { id: 'rotina_pacientes', label: 'Pacientes', icon: Users },
-    { id: 'rotina_daily', label: 'Daily', icon: CheckSquare },
-    { id: 'rotina_acompanhamentos', label: 'Acompanhamentos', icon: TrendingUp },
-    { id: 'rotina_chat', label: 'Chat com pacientes', icon: MessageSquare },
-    { id: 'rotina_tarefas', label: 'Tarefas', icon: ListTodo },
-  ];
-
-  // Submenus de Atendimento
-  const atendimentoItems = [
-    { id: 'atendimento_pre', label: 'Formulário pré-consulta', icon: FileText },
-    { id: 'atendimento_pos', label: 'Formulário pós-consulta', icon: FileCheck },
-  ];
-
-  // Itens Diretos
+  // Itens Diretos (Apenas Configurações mantido)
   const directItems = [
-    { id: 'gestao_contas', label: 'Gestão de Contas', icon: CreditCard },
-    { id: 'clube_vantagens', label: 'Clube de Vantagens', icon: Sparkles },
     { id: 'configuracoes', label: 'Configurações', icon: Settings },
-    { id: 'minha_conta', label: 'Minha Conta Admin', icon: UserCheck },
   ];
 
   // Itens do Paciente
@@ -524,28 +490,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               treinamentoItems,
             )}
 
-            {/* Accordion Vertical: Rotina */}
-            {renderAccordionGroup(
-              'Rotina',
-              Calendar,
-              expandedRotina,
-              () => setExpandedRotina(!expandedRotina),
-              rotinaItems,
-            )}
-
-            {/* Accordion Vertical: Atendimento */}
-            {renderAccordionGroup(
-              'Atendimento',
-              FileText,
-              expandedAtendimento,
-              () => setExpandedAtendimento(!expandedAtendimento),
-              atendimentoItems,
-            )}
-
             {/* Linha Divisória */}
             <div style={{ height: '1px', backgroundColor: '#f1f5f9', margin: '0.5rem 0.25rem' }} />
 
-            {/* Itens Diretos (Gestão de Contas, Clube, Configurações, Minha Conta) */}
+            {/* Itens Diretos (Configurações) */}
             {directItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeItem === item.id;

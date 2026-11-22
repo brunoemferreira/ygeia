@@ -5,6 +5,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Removido
+- **Itens e Módulos do Menu Principal (`Sidebar.tsx`, `AdminDashboard.tsx`)**:
+  - Remoção dos módulos diretos: *Clube de Vantagens*, *Minha Conta Admin* e *Gestão de Contas*.
+  - Remoção dos grupos verticais: *Atendimento* (Formulário pré-consulta e pós-consulta) e *Rotina* (Agenda, Daily, Acompanhamentos, Chat com pacientes, Tarefas).
+  - Remoção dos subitens de *Cadastros*: *Alimentos (TACO)*, *Suplementos & Doses*, *Modelos de Prescrição* e *Locais de Atendimento*.
+  - O menu principal agora fica focado e enxuto com: *Dashboard de Pacientes*, *Cadastros (Pacientes)*, *Nutrição*, *Treinamento* e *Configurações*.
+
 ### Corrigido
 - **Carregamento, Sincronização e Persistência de Anamneses (`AnamneseEditor.tsx`, `PatientProfileView.tsx`, `AdminDashboard.tsx`)**:
   - Correção no carregamento dos dados da anamnese no editor: agora o `AnamneseEditor` sincroniza reativamente via `useEffect` sempre que uma anamnese for aberta para edição ou quando uma nova for iniciada.

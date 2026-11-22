@@ -9,6 +9,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🧹 Limpeza e Simplificação do Menu Principal
+- **Frontend Web (`apps/web`)**:
+  - `Sidebar.tsx`:
+    - Removidos do menu principal os módulos e itens solicitados:
+      - *Clube de Vantagens*, *Minha Conta Admin* e *Gestão de Contas*.
+      - Grupos de accordion *Atendimento* (pré e pós-consulta) e *Rotina* (agenda, daily, acompanhamentos, chat, tarefas).
+      - Submenus de *Cadastros*: *Alimentos (TACO)*, *Suplementos & Doses*, *Modelos de Prescrição* e *Locais de Atendimento*.
+    - Mantidos no menu de navegação: *Dashboard de Pacientes*, *Cadastros (Pacientes)*, *Nutrição* (TMB/GET, Cardápios, Antropometria, Exames), *Treinamento* e *Configurações*.
+  - `AdminDashboard.tsx`:
+    - Atualizados redirecionamentos rápidos do painel para o submenu ativo de pacientes (`cadastros_pacientes`).
+
 ### 🩹 Correção no Carregamento, Persistência e Sincronização de Anamneses
 - **Frontend Web (`apps/web`)**:
   - `AnamneseEditor.tsx`:
