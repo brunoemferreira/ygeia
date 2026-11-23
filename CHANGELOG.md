@@ -10,6 +10,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased] - 2026-11-22
 
 ### 📱 Conclusão da Fase 4: Ativação do Aplicativo Mobile React Native (`apps/mobile`)
+- **Suporte Nativo a Expo Web & Resolução de Erro 500 no Browser**:
+  - Instalação e configuração de `@expo/metro-runtime` e `react-native-web`, permitindo renderização imediata do app do paciente diretamente pelo Google Chrome / navegador em `http://localhost:8095` sem necessidade de emuladores pesados.
 - **Portal Completo do Paciente e Atleta em React Native**:
   - **Experiência Dual Adaptativa**:
     - Alternância em 1 toque entre o **🍏 Modo Clínico Geral** (foco em adesão sustentável, déficit moderado e hábitos saudáveis) e o **⚡ Modo Esportivo & Alta Performance** (recomposição corporal, distribuição em g/kg, nutrient timing peri-treino e suplementação ergogênica).

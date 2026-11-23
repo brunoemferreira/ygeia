@@ -6,6 +6,8 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 ## [Unreleased] - 2026-11-22
 
 ### Adicionado
+- **Suporte a Expo Web para Visualização no Navegador (`package.json`, `@expo/metro-runtime`, `react-native-web`)**:
+  - Adicionado suporte completo para execução direta no navegador via `expo start --web`, resolvendo o erro 500 retornado pelo Metro Bundler ao ser acessado via browser sem o adaptador web.
 - **📱 Conclusão da Fase 4: Portal do Paciente & Atleta em React Native (`App.tsx`, `screens/`, `components/`)**:
   - **Abordagem Dual Adaptativa**: Alternância fluida entre o **🍏 Modo Clínico Geral** (emagrecimento saudável, hábitos e reeducação) e o **⚡ Modo Esportivo & Alta Performance** (recomposição corporal, g/kg/dia, nutrient timing e suplementação).
   - **Visualização das Refeições por Horários (`MealItemCard.tsx`, `TodayScreen.tsx`)**:
