@@ -5,6 +5,13 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Resolução de Ponto de Entrada e Bundling Android no PNPM Monorepo (`index.js`, `metro.config.js`, `app.json`, `package.json`)**:
+  - Criado `index.js` na raiz do projeto mobile chamando `registerRootComponent(App)` e atualizado `"main": "index.js"`, eliminando a falha de resolução do symlink `expo/AppEntry.js` em monorepos PNPM.
+  - Criado e configurado `metro.config.js` com `watchFolders`, `extraNodeModules` e `disableHierarchicalLookup: false` para resolução automática de dependências do monorepo e do runtime do Babel.
+  - Limpeza de referências a assets ausentes em `app.json`.
+  - Android Bundling validado com compilação de 667 módulos e retorno HTTP 200 com sucesso no Metro Bundler.
+
 ### Adicionado
 - **Suporte a Expo Web para Visualização no Navegador (`package.json`, `@expo/metro-runtime`, `react-native-web`)**:
   - Adicionado suporte completo para execução direta no navegador via `expo start --web`, resolvendo o erro 500 retornado pelo Metro Bundler ao ser acessado via browser sem o adaptador web.

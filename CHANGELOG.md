@@ -10,6 +10,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased] - 2026-11-22
 
 ### 📱 Conclusão da Fase 4: Ativação do Aplicativo Mobile React Native (`apps/mobile`)
+- **Correção da Resolução de Bundling Android no PNPM Monorepo**:
+  - Implementação do entry point nativo explícito `index.js` substituindo o symlink incompatível `expo/AppEntry.js`.
+  - Configuração do `metro.config.js` com `watchFolders`, `extraNodeModules` e `disableHierarchicalLookup: false` para mapeamento correto do Babel Runtime e pacotes internos do monorepo, validando o bundling Android com sucesso (667 módulos compilados com HTTP 200).
 - **Suporte Nativo a Expo Web & Resolução de Erro 500 no Browser**:
   - Instalação e configuração de `@expo/metro-runtime` e `react-native-web`, permitindo renderização imediata do app do paciente diretamente pelo Google Chrome / navegador em `http://localhost:8095` sem necessidade de emuladores pesados.
 - **Portal Completo do Paciente e Atleta em React Native**:
