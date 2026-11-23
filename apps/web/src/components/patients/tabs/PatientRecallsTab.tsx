@@ -108,6 +108,7 @@ export const PatientRecallsTab: React.FC<PatientRecallsTabProps> = ({
         subtitle="Inquéritos alimentares de 24h, hábitos e questionários de consumo do paciente"
         items={clinicalItems}
         itemLabel="recordatórios"
+        newButtonText="Adicionar recordatório"
         templates={['Recordatório 24 Horas', 'Registro Habitual', 'Registro de 3 Dias', 'QFA - Frequência']}
         onNew={handleOpenNewModal}
         onEdit={(item) => handleEditItem(item.raw || item)}

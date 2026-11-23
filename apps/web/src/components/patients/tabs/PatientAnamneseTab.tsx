@@ -148,6 +148,7 @@ export const PatientAnamneseTab: React.FC<PatientAnamneseTabProps> = ({
       subtitle="Registro de consultas, queixas e evolução clínica do paciente"
       items={clinicalAnamnesesItems}
       itemLabel="anamneses"
+      newButtonText="Adicionar anamnese"
       templates={['Seções padrão', 'Anamnese Esportiva', 'Anamnese Infantil', 'Saúde Gastrointestinal', 'Anamnese em Branco']}
       onNew={() => onStartNewAnamnese('Seções padrão')}
       onEdit={(item) => onOpenAnamneseForEdit(item.raw || item)}

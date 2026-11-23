@@ -108,6 +108,7 @@ export const PatientMedicalRecordsTab: React.FC<PatientMedicalRecordsTabProps> =
         subtitle="Histórico longitudinal de condutas, anotações de evolução e intercorrências"
         items={clinicalItems}
         itemLabel="evoluções"
+        newButtonText="Adicionar evolução"
         templates={['Evolução Clínica', 'Consulta de Retorno', 'Ajuste de Conduta', 'Intercorrência']}
         onNew={handleOpenNewModal}
         onEdit={(item) => handleEditItem(item.raw || item)}

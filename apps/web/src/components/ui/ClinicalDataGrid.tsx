@@ -38,6 +38,7 @@ export interface ClinicalDataGridProps<T extends ClinicalRecordItem> {
   subtitle?: string;
   items: T[];
   itemLabel?: string;
+  newButtonText?: string;
   onNew: () => void;
   onEdit: (item: T) => void;
   onDelete: (item: T) => void;
@@ -54,6 +55,7 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
   subtitle,
   items,
   itemLabel = 'registros',
+  newButtonText,
   onNew,
   onEdit,
   onDelete,
@@ -64,6 +66,13 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
   emptyStateTitle = 'Nenhum registro encontrado',
   emptyStateDescription = 'Comece criando o primeiro registro clínico para este paciente.',
 }: ClinicalDataGridProps<T>) {
+  const singularLabel = itemLabel.endsWith('es')
+    ? itemLabel.slice(0, -2)
+    : itemLabel.endsWith('s')
+    ? itemLabel.slice(0, -1)
+    : itemLabel;
+
+  const computedNewText = newButtonText || `Adicionar ${singularLabel}`;
   // Estados de visualização e filtros
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [searchQuery, setSearchQuery] = useState('');
@@ -254,7 +263,7 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
             onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'var(--primary)')}
           >
             <Plus size={16} />
-            <span>Adicionar anamnese</span>
+            <span>{computedNewText}</span>
           </button>
         </div>
       </div>
@@ -723,7 +732,7 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
                             <button
                               type="button"
                               onClick={() => onPrint(item)}
-                              title="Imprimir ou baixar PDF desta anamnese"
+                              title={`Imprimir ou baixar PDF deste ${singularLabel}`}
                               style={actionIconBtnStyle}
                               onMouseOver={(e) => {
                                 (e.currentTarget as HTMLElement).style.backgroundColor = '#f8fafc';
@@ -760,7 +769,7 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
                           <button
                             type="button"
                             onClick={() => setItemToDelete(item)}
-                            title="Excluir anamnese"
+                            title={`Excluir ${singularLabel}`}
                             style={actionIconBtnStyle}
                             onMouseOver={(e) => {
                               (e.currentTarget as HTMLElement).style.backgroundColor = '#fff1f2';
@@ -933,7 +942,7 @@ export function ClinicalDataGrid<T extends ClinicalRecordItem>({
                       <button
                         type="button"
                         onClick={() => setItemToDelete(item)}
-                        title="Excluir anamnese"
+                        title={`Excluir ${singularLabel}`}
                         style={actionIconBtnStyle}
                       >
                         <Trash2 size={14} />

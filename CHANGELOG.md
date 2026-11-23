@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased] - 2026-11-22
 
+### 🩹 Correções de UI/UX Clínico & Front-End (`apps/web`)
+- **Dinamização do Botão de Adição no `ClinicalDataGrid`**:
+  - Eliminação do rótulo estático `"Adicionar anamnese"` que era exibido erroneamente em outras seções do prontuário do paciente.
+  - O botão agora reflete dinamicamente a área selecionada pelo nutricionista:
+    - **"Adicionar anamnese"** na aba de Anamnese;
+    - **"Adicionar recordatório"** na aba de Recordatório Alimentar;
+    - **"Adicionar evolução"** na aba de Prontuário / Linha do Tempo.
+  - Normalização dos rótulos de exclusão e impressão de relatórios em PDF.
+
 ### 📱 Conclusão da Fase 4: Ativação do Aplicativo Mobile React Native (`apps/mobile`)
 - **Correção da Resolução de Bundling Android no PNPM Monorepo**:
   - Implementação do entry point nativo explícito `index.js` substituindo o symlink incompatível `expo/AppEntry.js`.

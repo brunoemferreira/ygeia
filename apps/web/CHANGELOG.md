@@ -5,6 +5,15 @@ Este projeto segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Unreleased] - 2026-11-22
 
+### Corrigido
+- **Dinamização do Rótulo do Botão de Adição no `ClinicalDataGrid` (`ClinicalDataGrid.tsx`, `tabs/`)**:
+  - Correção do rótulo estático "Adicionar anamnese" que aparecia indevidamente em todas as telas clínicas que utilizam o grid genérico.
+  - Implementada a prop `newButtonText` e computação contextual automática:
+    - Na aba de Anamnese: **"Adicionar anamnese"**
+    - Na aba de Recordatório Alimentar: **"Adicionar recordatório"**
+    - Na aba de Prontuário / Linha do Tempo: **"Adicionar evolução"**
+  - Ajustados os títulos e tooltips contextuais de impressão e exclusão por registro clínico.
+
 ### Modificado
 - **Ergonomia e Acesso Imediato ao Plano Alimentar (`PatientHeaderCard.tsx`, `PatientSidebarNav.tsx`, `PatientProfileView.tsx`)**:
   - Inclusão do botão de ação rápida destacado **"Plano alimentar"** no topo superior do prontuário (ao lado de Financeiro e Linha do Tempo), permitindo acesso em 1 clique direto.
